@@ -1,12 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { TuvBadge } from '@/components/TuvBadge'
 import NewEntryForm from '@/components/NewEntryForm'
 import { convertImageFileToWebpDataUrl, estimateDataUrlBytes } from '@/lib/client-image'
+import ImageLightbox from '@/components/ImageLightbox'
 
 type LogEntry = {
   id: string
@@ -81,6 +82,37 @@ const typeColors = {
   DYNO: 'bg-orange-500',
 } as const
 
+const projectGoalLabels: Record<Car['projectGoal'], string> = {
+  DAILY: 'Alltag',
+  TRACK: 'Track',
+  SHOW: 'Show',
+  RESTORATION: 'Restauration',
+}
+
+const buildStatusLabels: Record<Car['buildStatus'], string> = {
+  IN_PROGRESS: 'In Arbeit',
+  TUV_READY: 'TUEV bereit',
+  TRACK_READY: 'Track bereit',
+  DAILY_READY: 'Alltag bereit',
+}
+
+function QuickActionTile(props: { href: string; label: string; icon: ReactNode; iconToneClass: string }) {
+  return (
+    <Link
+      href={props.href}
+      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/40 px-5 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] transition-all hover:-translate-y-0.5 hover:border-white/20"
+    >
+      <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border ${props.iconToneClass}`}>
+        {props.icon}
+      </div>
+      <div className="mt-4 text-center text-[11px] font-semibold tracking-[0.22em] text-zinc-200">
+        {props.label}
+      </div>
+      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100 [background:radial-gradient(60%_60%_at_50%_20%,rgba(255,255,255,0.06),transparent_60%)]" />
+    </Link>
+  )
+}
+
 export default function CarPage() {
   const routeParams = useParams<{ id?: string | string[] }>()
   const carId = Array.isArray(routeParams?.id) ? routeParams.id[0] : routeParams?.id
@@ -119,6 +151,7 @@ export default function CarPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [heroUploading, setHeroUploading] = useState(false)
   const [heroError, setHeroError] = useState<string | null>(null)
+  const [heroPreviewOpen, setHeroPreviewOpen] = useState(false)
 
   const HERO_MAX_INPUT_BYTES = 12 * 1024 * 1024
   const HERO_MAX_OUTPUT_BYTES = 900 * 1024
@@ -549,54 +582,196 @@ export default function CarPage() {
   const totalSpent = car.logEntries.reduce((acc, e) => acc + (Number(e.totalCostImpact) || 0), 0)
 
   return (
-    <div className="space-y-8">
-      {/* Hero Section */}
-      <div className="relative h-80 rounded-xl overflow-hidden bg-zinc-800 flex items-center justify-center">
-        {car.heroImage ? (
-          <Image
-            src={car.heroImage}
-            alt={car.make}
-            fill
-            sizes="(max-width: 768px) 100vw, 1200px"
-            className="object-cover"
-            unoptimized={typeof car.heroImage === 'string' && car.heroImage.startsWith('data:')}
-            priority
-          />
-        ) : (
-          <div className="text-center">
-            <span className="text-zinc-500 text-lg">Hero-Bild Platzhalter</span>
-            <p className="text-zinc-600 text-sm mt-2">800×400</p>
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/90 via-zinc-900/20 to-transparent" />
-        <div className="absolute bottom-6 left-6 right-6">
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold text-white">
-              {car.make} {car.model} {car.generation}
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-0 -z-10 opacity-60 [background:radial-gradient(70%_55%_at_15%_10%,rgba(56,189,248,0.18),transparent_60%),radial-gradient(55%_40%_at_90%_15%,rgba(16,185,129,0.12),transparent_60%),radial-gradient(60%_50%_at_50%_100%,rgba(59,130,246,0.10),transparent_55%)]" />
+      <div className="max-w-6xl mx-auto space-y-8">
+        <ImageLightbox
+          open={heroPreviewOpen}
+          images={car.heroImage ? [car.heroImage] : []}
+          initialIndex={0}
+          alt={`${car.make} ${car.model}`}
+          onClose={() => setHeroPreviewOpen(false)}
+        />
+
+        <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white">
+              {car.make} {car.model} {car.generation || ''}
             </h1>
-            <span className="px-3 py-1 bg-sky-500/20 text-sky-400 border border-sky-500/50 text-sm font-medium rounded-full">
-              {car.projectGoal}
-            </span>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-400">
+              <span>{car.year ? `${car.year}` : '—'}</span>
+              <span className="text-zinc-700">•</span>
+              <span>{car.currentMileage != null ? `${car.currentMileage.toLocaleString()} km` : '— km'}</span>
+              <span className="text-zinc-700">•</span>
+              <span>{totalMods} Modifikationen</span>
+              <span className="text-zinc-700">•</span>
+              <span>{totalTrackDays} Trackdays</span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="inline-flex items-center rounded-full border border-sky-500/25 bg-sky-500/15 px-3 py-1 text-xs font-semibold text-sky-300">
+                {projectGoalLabels[car.projectGoal]}
+              </span>
+              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-zinc-200">
+                {buildStatusLabels[buildStatus]}
+              </span>
+              {forSale ? (
+                <span className="inline-flex items-center rounded-full border border-emerald-500/25 bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
+                  Zu verkaufen
+                </span>
+              ) : null}
+            </div>
           </div>
-          <p className="text-zinc-300">{car.currentMileage?.toLocaleString() || '—'} km</p>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => setShowNewEntry((v) => !v)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-sky-400"
+            >
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-white/15">+</span>
+              {showNewEntry ? 'Abbrechen' : 'Eintrag hinzufuegen'}
+            </button>
+            <Link
+              href="/garage"
+              className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              Zurueck zur Garage
+            </Link>
+            <a
+              href={`/api/cars/${carId}/export/pdf`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              PDF exportieren
+            </a>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <QuickActionTile
+            href={`/market/new?carId=${carId}`}
+            label="TEIL VERKAUFEN"
+            iconToneClass="border-rose-500/25 bg-rose-500/10 text-rose-300"
+            icon={
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.59 13.41 13.41 20.6a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z" />
+                <path d="M7 7h.01" />
+              </svg>
+            }
+          />
+          <QuickActionTile
+            href={`/events/new?carId=${carId}`}
+            label="TRACKDAYS"
+            iconToneClass="border-amber-500/25 bg-amber-500/10 text-amber-300"
+            icon={
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 22V4a2 2 0 0 1 2-2h12l-2 6 2 6H6" />
+              </svg>
+            }
+          />
+          <QuickActionTile
+            href="#settings"
+            label="EINSTELLUNGEN"
+            iconToneClass="border-emerald-500/25 bg-emerald-500/10 text-emerald-300"
+            icon={
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 21v-7" />
+                <path d="M4 10V3" />
+                <path d="M12 21v-9" />
+                <path d="M12 8V3" />
+                <path d="M20 21v-5" />
+                <path d="M20 12V3" />
+                <path d="M2 14h4" />
+                <path d="M10 8h4" />
+                <path d="M18 16h4" />
+              </svg>
+            }
+          />
+          <QuickActionTile
+            href="#stats"
+            label="STATISTIK"
+            iconToneClass="border-sky-500/25 bg-sky-500/10 text-sky-300"
+            icon={
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 3v18h18" />
+                <path d="M7 15v-6" />
+                <path d="M12 15V6" />
+                <path d="M17 15v-9" />
+              </svg>
+            }
+          />
         </div>
-      </div>
+
+        {showNewEntry ? (
+          <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] animate-in fade-in slide-in-from-top-4 duration-300">
+            <NewEntryForm
+              carId={carId || ''}
+              onSubmitSuccess={async () => {
+                setShowNewEntry(false)
+                await loadCar()
+                await loadDocuments()
+              }}
+            />
+          </div>
+        ) : null}
+
+      {/* Hero Section */}
+        <div className="relative h-72 sm:h-80 rounded-2xl overflow-hidden border border-white/10 bg-zinc-950/40 flex items-center justify-center">
+          {car.heroImage ? (
+            <button
+              type="button"
+              onClick={() => setHeroPreviewOpen(true)}
+              className="group absolute inset-0 cursor-zoom-in"
+              title="In voller Groesse ansehen"
+            >
+              <Image
+                src={car.heroImage}
+                alt={car.make}
+                fill
+                sizes="(max-width: 768px) 100vw, 1200px"
+                className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                unoptimized={typeof car.heroImage === 'string' && car.heroImage.startsWith('data:')}
+                priority
+              />
+            </button>
+          ) : (
+            <div className="text-center">
+              <span className="text-zinc-500 text-lg">Hero-Bild</span>
+              <p className="text-zinc-600 text-sm mt-2">800×400</p>
+            </div>
+          )}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+          <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-full border border-sky-500/25 bg-sky-500/15 px-3 py-1 text-xs font-semibold text-sky-300">
+                {projectGoalLabels[car.projectGoal]}
+              </span>
+              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-zinc-200">
+                {buildStatusLabels[car.buildStatus]}
+              </span>
+            </div>
+            <div className="text-sm text-zinc-200/90">
+              {car.currentMileage != null ? `${car.currentMileage.toLocaleString()} km` : '— km'}
+            </div>
+          </div>
+        </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-zinc-800 rounded-xl p-4 border border-zinc-700">
+        <div id="stats" className="grid grid-cols-2 sm:grid-cols-4 gap-4 scroll-mt-24">
+          <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
           <p className="text-sm text-zinc-400">Modifikationen</p>
           <p className="text-2xl font-bold text-white">{totalMods}</p>
         </div>
-        <div className="bg-zinc-800 rounded-xl p-4 border border-zinc-700">
+          <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
           <p className="text-sm text-zinc-400">Trackdays</p>
           <p className="text-2xl font-bold text-white">{totalTrackDays}</p>
         </div>
-        <div className="bg-zinc-800 rounded-xl p-4 border border-zinc-700">
+          <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
           <p className="text-sm text-zinc-400">Gesamt</p>
           <p className="text-2xl font-bold text-white">€{totalSpent.toLocaleString()}</p>
         </div>
-        <div className="bg-zinc-800 rounded-xl p-4 border border-zinc-700">
+          <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
           <p className="text-sm text-zinc-400">Leistung</p>
           <p className="text-2xl font-bold text-white">{car.factoryHp || '—'} hp</p>
         </div>
@@ -604,7 +779,7 @@ export default function CarPage() {
 
       {/* Car Details Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+        <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
           <h3 className="text-lg font-semibold text-white mb-4">Technische Details</h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
@@ -634,7 +809,7 @@ export default function CarPage() {
           </div>
         </div>
 
-        <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+        <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
           <h3 className="text-lg font-semibold text-white mb-4">Status</h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -662,26 +837,18 @@ export default function CarPage() {
       </div>
 
       {/* Owner Actions */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+      <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
         <h3 className="text-lg font-semibold text-white mb-4">Aktionen</h3>
         <div className="flex flex-wrap gap-4">
-          <a
-            href={`/api/cars/${carId}/export/pdf`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
-          >
-            📄 PDF exportieren
-          </a>
           <label
-            className={`px-4 py-2 font-semibold rounded-lg transition-colors flex items-center gap-2 ${
+            className={`px-4 py-2 font-semibold rounded-lg transition-colors flex items-center gap-2 border border-white/10 ${
               heroUploading
-                ? 'bg-zinc-700/60 text-zinc-400 cursor-not-allowed'
-                : 'bg-zinc-700 hover:bg-zinc-600 text-white cursor-pointer'
+                ? 'bg-white/5 text-zinc-400 cursor-not-allowed'
+                : 'bg-white/5 hover:bg-white/10 text-white cursor-pointer'
             }`}
             title={heroUploading ? 'Wird hochgeladen...' : 'Hero-Bild hochladen (automatisch optimiert)'}
           >
-            📷 {car.heroImage ? 'Hero aendern' : 'Hero hochladen'}
+            {car.heroImage ? 'Hero aendern' : 'Hero hochladen'}
             <input
               type="file"
               accept="image/*"
@@ -700,38 +867,26 @@ export default function CarPage() {
               type="button"
               onClick={removeHeroImage}
               disabled={heroUploading}
-              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 disabled:bg-red-500/10 text-red-200 font-semibold rounded-lg transition-colors flex items-center gap-2"
+              className="px-4 py-2 border border-red-500/25 bg-red-500/15 hover:bg-red-500/20 disabled:bg-red-500/10 text-red-200 font-semibold rounded-lg transition-colors flex items-center gap-2"
               title="Hero-Bild entfernen"
             >
-              🗑️ Hero entfernen
+              Hero entfernen
             </button>
           ) : null}
-          <Link
-            href={`/market/new?carId=${carId}`}
-            className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
-          >
-            🚗 Teile verkaufen
-          </Link>
-          <Link
-            href={`/events/new?carId=${carId}`}
-            className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
-          >
-            🏁 Trackday
-          </Link>
           <button
             onClick={createShareLink}
             disabled={shareLoading || visibility === 'PRIVATE'}
-            className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 disabled:bg-zinc-700/60 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+            className="px-4 py-2 border border-white/10 bg-white/5 hover:bg-white/10 disabled:bg-white/5 disabled:opacity-60 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
             title={visibility === 'PRIVATE' ? 'Private Builds koennen nicht geteilt werden' : 'Erstellt einen schreibgeschuetzten Link zu deinem Build Passport'}
           >
-            {shareLoading ? 'Link wird erstellt...' : '🔗 Build teilen'}
+            {shareLoading ? 'Link wird erstellt...' : 'Build teilen'}
           </button>
           <div className="flex items-center gap-2">
             <span className="text-sm text-zinc-400">Ablauf</span>
             <select
               value={shareExpiresInDays}
               onChange={(e) => setShareExpiresInDays(Number(e.target.value) as any)}
-              className="px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+              className="px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
               title="Wie lange dieser Share-Link gueltig bleibt"
             >
               <option value={7}>7 Tage</option>
@@ -749,7 +904,7 @@ export default function CarPage() {
           )}
         </div>
         {shareUrl && (
-          <div className="mt-4 pt-4 border-t border-zinc-700">
+          <div className="mt-4 pt-4 border-t border-white/10">
             <p className="text-sm text-zinc-400">Share-Link (in die Zwischenablage kopiert)</p>
             <a className="text-sky-400 hover:text-sky-300 break-all" href={shareUrl} target="_blank" rel="noreferrer">
               {shareUrl}
@@ -757,11 +912,11 @@ export default function CarPage() {
           </div>
         )}
         {shareLinks.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-zinc-700 space-y-2">
+          <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
             <p className="text-sm text-zinc-400">Aktive Links</p>
             <div className="space-y-2">
               {shareLinks.map((l) => (
-                <div key={l.id} className="flex flex-wrap items-center gap-2 bg-zinc-900/40 border border-zinc-700 rounded-lg p-3">
+                <div key={l.id} className="flex flex-wrap items-center gap-2 bg-zinc-950/30 border border-white/10 rounded-lg p-3">
                   <span className={`text-xs px-2 py-0.5 rounded ${l.revokedAt ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'}`}>
                     {l.revokedAt ? 'Widerrufen' : 'Aktiv'}
                   </span>
@@ -803,7 +958,7 @@ export default function CarPage() {
         )}
         {heroError && <p className="text-red-400 text-sm mt-2">{heroError}</p>}
         {shareError && <p className="text-red-400 text-sm mt-2">{shareError}</p>}
-        <div className="mt-4 pt-4 border-t border-zinc-700">
+        <div id="settings" className="mt-4 pt-4 border-t border-white/10 scroll-mt-24">
           <p className="text-sm text-zinc-400 mb-2">Build-Passport Einstellungen</p>
           <div className="flex flex-wrap gap-3 items-end">
             <div>
@@ -811,7 +966,7 @@ export default function CarPage() {
               <select
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as Car['visibility'])}
-                className="px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+                className="px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
               >
                 <option value="PUBLIC">Oeffentlich</option>
                 <option value="UNLISTED">Nicht gelistet (Link)</option>
@@ -823,7 +978,7 @@ export default function CarPage() {
               <select
                 value={buildStatus}
                 onChange={(e) => setBuildStatus(e.target.value as Car['buildStatus'])}
-                className="px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+                className="px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
               >
                 <option value="IN_PROGRESS">In Arbeit</option>
                 <option value="TUV_READY">TUEV bereit</option>
@@ -841,14 +996,14 @@ export default function CarPage() {
           </div>
           {metaError && <p className="text-red-400 text-sm mt-2">{metaError}</p>}
         </div>
-        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-zinc-700">
+        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/10">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
               id="forSale"
               checked={forSale}
               onChange={(e) => setForSale(e.target.checked)}
-              className="w-5 h-5 rounded bg-zinc-700 border-zinc-600"
+              className="w-5 h-5 rounded bg-zinc-900/60 border-white/10"
             />
             <label htmlFor="forSale" className="text-zinc-300">Zum Verkauf anbieten</label>
           </div>
@@ -860,7 +1015,7 @@ export default function CarPage() {
                 value={askingPrice}
                 onChange={(e) => setAskingPrice(e.target.value)}
                 placeholder="Preis"
-                className="w-40 px-3 py-1 bg-zinc-700 border border-zinc-600 rounded text-white"
+                className="w-40 px-3 py-1 bg-zinc-900/60 border border-white/10 rounded text-white"
               />
             </div>
           )}
@@ -879,34 +1034,15 @@ export default function CarPage() {
 
       {/* Journal Section */}
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div id="journal" className="flex justify-between items-center scroll-mt-24">
           <h2 className="text-2xl font-bold text-white">Journal</h2>
-          <button
-            onClick={() => setShowNewEntry(!showNewEntry)}
-            className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-lg transition-colors"
-          >
-            {showNewEntry ? 'Abbrechen' : '+ Neuer Eintrag'}
-          </button>
         </div>
-
-        {showNewEntry && (
-          <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-            <NewEntryForm
-              carId={carId || ''}
-              onSubmitSuccess={async () => {
-                setShowNewEntry(false)
-                await loadCar()
-                await loadDocuments()
-              }}
-            />
-          </div>
-        )}
 
         <div className="space-y-4">
           {car.logEntries.map((entry) => (
             <div
               key={entry.id}
-              className="bg-zinc-800 rounded-xl p-4 border border-zinc-700 hover:border-sky-500/50 transition-colors"
+              className="rounded-2xl bg-zinc-950/40 p-4 border border-white/10 hover:border-white/20 transition-colors shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
             >
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-20 text-center">
@@ -948,13 +1084,13 @@ export default function CarPage() {
       </div>
 
       {/* Work Plan */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+      <div id="work-plan" className="rounded-2xl border border-white/10 bg-zinc-950/40 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] scroll-mt-24">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <h3 className="text-lg font-semibold text-white">Arbeitsplan</h3>
           <button
             onClick={loadTasks}
             disabled={tasksLoading}
-            className="px-3 py-2 bg-zinc-700 hover:bg-zinc-600 disabled:bg-zinc-700/60 text-white text-sm rounded"
+            className="px-3 py-2 border border-white/10 bg-white/5 hover:bg-white/10 disabled:bg-white/5 disabled:opacity-60 text-white text-sm rounded"
           >
             {tasksLoading ? 'Lade...' : 'Aktualisieren'}
           </button>
@@ -967,7 +1103,7 @@ export default function CarPage() {
               value={taskTitle}
               onChange={(e) => setTaskTitle(e.target.value)}
               placeholder="z.B. Raeder fuer TUEV"
-              className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+              className="w-full px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
             />
           </div>
           <div>
@@ -976,7 +1112,7 @@ export default function CarPage() {
               type="date"
               value={taskDueAt}
               onChange={(e) => setTaskDueAt(e.target.value)}
-              className="px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+              className="px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
             />
           </div>
           <button
@@ -995,7 +1131,7 @@ export default function CarPage() {
             <p className="text-zinc-400 text-sm">Noch keine Aufgaben.</p>
           )}
           {tasks.map((t) => (
-            <div key={t.id} className="flex flex-wrap items-center gap-2 bg-zinc-900/40 border border-zinc-700 rounded-lg p-3">
+            <div key={t.id} className="flex flex-wrap items-center gap-2 bg-zinc-950/30 border border-white/10 rounded-lg p-3">
               <span className="text-xs px-2 py-0.5 rounded bg-zinc-700 text-zinc-200">
                 {t.status}
               </span>
@@ -1041,13 +1177,13 @@ export default function CarPage() {
       </div>
 
       {/* Documents */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+      <div id="documents" className="rounded-2xl border border-white/10 bg-zinc-950/40 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] scroll-mt-24">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <h3 className="text-lg font-semibold text-white">Dokumente</h3>
           <button
             onClick={loadDocuments}
             disabled={docsLoading}
-            className="px-3 py-2 bg-zinc-700 hover:bg-zinc-600 disabled:bg-zinc-700/60 text-white text-sm rounded"
+            className="px-3 py-2 border border-white/10 bg-white/5 hover:bg-white/10 disabled:bg-white/5 disabled:opacity-60 text-white text-sm rounded"
           >
             {docsLoading ? 'Lade...' : 'Aktualisieren'}
           </button>
@@ -1059,7 +1195,7 @@ export default function CarPage() {
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+              className="w-full px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
             >
               <option value="ABE">ABE</option>
               <option value="EINTRAGUNG">Eintragung</option>
@@ -1073,7 +1209,7 @@ export default function CarPage() {
             <select
               value={docVisibility}
               onChange={(e) => setDocVisibility(e.target.value as Document['visibility'])}
-              className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+              className="w-full px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
             >
               <option value="SELF">Nur ich</option>
               <option value="LINK">Link</option>
@@ -1086,7 +1222,7 @@ export default function CarPage() {
             <input
               value={docTitle}
               onChange={(e) => setDocTitle(e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+              className="w-full px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
               placeholder="z.B. ABE-741163"
             />
           </div>
@@ -1095,7 +1231,7 @@ export default function CarPage() {
             <input
               value={docIssuer}
               onChange={(e) => setDocIssuer(e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+              className="w-full px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
               placeholder="z.B. KBA / TUEV"
             />
           </div>
@@ -1104,7 +1240,7 @@ export default function CarPage() {
             <input
               value={docNumber}
               onChange={(e) => setDocNumber(e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+              className="w-full px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
               placeholder="z.B. ABE-123456"
             />
           </div>
@@ -1113,7 +1249,7 @@ export default function CarPage() {
             <input
               value={docUrl}
               onChange={(e) => setDocUrl(e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+              className="w-full px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
               placeholder="https://... oder /pfad"
             />
           </div>
@@ -1123,7 +1259,7 @@ export default function CarPage() {
               type="file"
               accept="application/pdf,image/*"
               onChange={(e) => setDocFile(e.target.files?.[0] || null)}
-              className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+              className="w-full px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white"
             />
             <p className="mt-1 text-xs text-zinc-500">Wenn eine Datei ausgewaehlt ist, wird sie hochgeladen und als Dokument-URL verwendet.</p>
           </div>
@@ -1145,13 +1281,13 @@ export default function CarPage() {
             <p className="text-zinc-400 text-sm">Noch keine Dokumente.</p>
           )}
           {documents.map((d) => (
-            <div key={d.id} className="flex flex-wrap items-center gap-2 bg-zinc-900/40 border border-zinc-700 rounded-lg p-3">
+            <div key={d.id} className="flex flex-wrap items-center gap-2 bg-zinc-950/30 border border-white/10 rounded-lg p-3">
               <span className="text-xs px-2 py-0.5 rounded bg-zinc-700 text-zinc-200">{d.type}</span>
               <select
                 value={d.visibility}
                 onChange={(e) => setDocumentVisibility(d.id, e.target.value as Document['visibility'])}
                 disabled={docsLoading}
-                className="px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-100"
+                className="px-2 py-1 bg-zinc-900/60 border border-white/10 rounded text-xs text-zinc-100"
                 aria-label="Dokument-Sichtbarkeit"
                 title="Dokument-Sichtbarkeit"
               >
@@ -1183,6 +1319,7 @@ export default function CarPage() {
       <Link href="/garage" className="text-zinc-400 hover:text-white transition-colors">
         ← Zurueck zur Garage
       </Link>
+    </div>
     </div>
   )
 }
