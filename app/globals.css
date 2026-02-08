@@ -58,10 +58,13 @@ body {
 
   @keyframes dt-rotate-y {
     0% {
-      transform: rotateX(2deg) rotateY(0deg);
+      transform: rotateX(3deg) rotateY(-16deg);
+    }
+    50% {
+      transform: rotateX(3deg) rotateY(16deg);
     }
     100% {
-      transform: rotateX(2deg) rotateY(360deg);
+      transform: rotateX(3deg) rotateY(-16deg);
     }
   }
 
@@ -98,7 +101,7 @@ body {
   .dt-rotator {
     transform-style: preserve-3d;
     will-change: transform;
-    animation: dt-rotate-y 20s linear infinite;
+    animation: dt-rotate-y 18s ease-in-out infinite;
   }
 
   .dt-stripes {

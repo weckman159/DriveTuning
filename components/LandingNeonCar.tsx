@@ -52,7 +52,7 @@ function Callout(props: CalloutProps) {
           textAnchor="middle"
           fontSize="12"
           fontWeight="700"
-          letterSpacing="0.14em"
+          letterSpacing="0.10em"
           fill={tone.text}
         >
           {props.label}
@@ -236,9 +236,9 @@ export default function LandingNeonCar() {
               </g>
 
               {/* Callouts */}
-              <Callout x={485} y={304} toX={690} toY={240} label="ЛЕГАЛЬНО" tone="legal" />
+              <Callout x={485} y={304} toX={690} toY={240} label="Легально" tone="legal" />
               <Callout x={590} y={402} toX={790} toY={370} label="НЕЛЕГАЛЬНО" tone="illegal" />
-              <Callout x={720} y={420} toX={835} toY={450} label="ЛЕГАЛЬНО" tone="legal" />
+              <Callout x={720} y={420} toX={835} toY={450} label="Легально" tone="legal" />
               <Callout x={295} y={420} toX={120} toY={450} label="НЕЛЕГАЛЬНО" tone="illegal" />
 
               {/* Subtle scan line */}
@@ -258,4 +258,3 @@ export default function LandingNeonCar() {
     </div>
   )
 }
-

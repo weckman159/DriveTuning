@@ -7,7 +7,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'DRIVETUNING - Build Passport',
-  description: 'Builds dokumentieren. TÜV nachweisen. Mit Historie verkaufen.',
+  description: 'Builds dokumentieren. TUEV nachweisen. Mit Historie verkaufen.',
 }
 
 export default function RootLayout({
