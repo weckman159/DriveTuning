@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import MarketSoonBanner from '@/components/MarketSoonBanner'
+import ImageLightbox from '@/components/ImageLightbox'
 import { convertImageFileToWebpDataUrl, estimateDataUrlBytes } from '@/lib/client-image'
 
 interface ModificationData {
@@ -36,6 +37,8 @@ function NewListingContent() {
   const [success, setSuccess] = useState(false)
   const [images, setImages] = useState<string[]>([])
   const [processingImages, setProcessingImages] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
 
   const MAX_IMAGES = 4
   const MAX_INPUT_IMAGE_BYTES = 12 * 1024 * 1024
@@ -174,6 +177,13 @@ function NewListingContent() {
   return (
     <div className="max-w-2xl mx-auto">
       <MarketSoonBanner />
+      <ImageLightbox
+        open={lightboxOpen}
+        images={images}
+        initialIndex={lightboxIndex}
+        alt="Angebotsfoto"
+        onClose={() => setLightboxOpen(false)}
+      />
       <h1 className="text-3xl font-bold text-white mb-8">Angebot erstellen</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-800 p-6 rounded-xl border border-zinc-700">
@@ -262,13 +272,15 @@ function NewListingContent() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {images.map((img, index) => (
                   <div key={index} className="relative">
-                  <a
-                    href={img}
-                     target="_blank"
-                     rel="noreferrer"
-                     title="In voller Groesse oeffnen"
-                     className="group block rounded-lg border border-zinc-700 overflow-hidden cursor-zoom-in transition-all hover:border-sky-400 hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_22px_rgba(56,189,248,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
-                   >
+                  <button
+                    type="button"
+                    title="Bilder ansehen"
+                    onClick={() => {
+                      setLightboxIndex(index)
+                      setLightboxOpen(true)
+                    }}
+                    className="group block w-full rounded-lg border border-zinc-700 overflow-hidden cursor-zoom-in transition-all hover:border-sky-400 hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_22px_rgba(56,189,248,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                  >
                      <Image
                        src={img}
                        alt={`Angebotsfoto ${index + 1}`}
@@ -277,7 +289,7 @@ function NewListingContent() {
                        className="w-full h-24 object-cover"
                        unoptimized={typeof img === 'string' && img.startsWith('data:')}
                      />
-                   </a>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setImages((prev) => prev.filter((_, i) => i !== index))}

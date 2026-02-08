@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import MarketSoonBanner from '@/components/MarketSoonBanner'
+import ImageLightbox from '@/components/ImageLightbox'
 import { convertImageFileToWebpDataUrl, estimateDataUrlBytes } from '@/lib/client-image'
 
 type Listing = {
@@ -38,6 +39,8 @@ export default function EditListingPage() {
   const [error, setError] = useState<string | null>(null)
   const [images, setImages] = useState<string[]>([])
   const [processingImages, setProcessingImages] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
 
   const MAX_IMAGES = 4
   const MAX_INPUT_IMAGE_BYTES = 12 * 1024 * 1024
@@ -169,6 +172,13 @@ export default function EditListingPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <MarketSoonBanner />
+      <ImageLightbox
+        open={lightboxOpen}
+        images={images}
+        initialIndex={lightboxIndex}
+        alt="Angebotsfoto"
+        onClose={() => setLightboxOpen(false)}
+      />
       <nav className="text-sm text-zinc-400">
         <Link href={`/market/${listing.id}`} className="hover:text-white transition-colors">
           Angebot
@@ -266,12 +276,14 @@ export default function EditListingPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {images.map((img, index) => (
                 <div key={index} className="relative">
-                  <a
-                    href={img}
-                    target="_blank"
-                    rel="noreferrer"
-                    title="In voller Groesse oeffnen"
-                    className="group block rounded-lg border border-zinc-700 overflow-hidden cursor-zoom-in transition-all hover:border-sky-400 hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_22px_rgba(56,189,248,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                  <button
+                    type="button"
+                    title="Bilder ansehen"
+                    onClick={() => {
+                      setLightboxIndex(index)
+                      setLightboxOpen(true)
+                    }}
+                    className="group block w-full rounded-lg border border-zinc-700 overflow-hidden cursor-zoom-in transition-all hover:border-sky-400 hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_22px_rgba(56,189,248,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   >
                     <Image
                       src={img}
@@ -281,7 +293,7 @@ export default function EditListingPage() {
                       className="w-full h-24 object-cover"
                       unoptimized={typeof img === 'string' && img.startsWith('data:')}
                     />
-                  </a>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setImages((prev) => prev.filter((_, i) => i !== index))}

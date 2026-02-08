@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { TuvBadge } from '@/components/TuvBadge'
 import MarketSoonBanner from '@/components/MarketSoonBanner'
+import ImageLightbox from '@/components/ImageLightbox'
 
 type Listing = {
   id: string
@@ -48,6 +49,10 @@ export default function MarketPage() {
   const [sortBy, setSortBy] = useState<'newest' | 'price_asc' | 'price_desc'>('newest')
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxImages, setLightboxImages] = useState<string[]>([])
+  const [lightboxIndex, setLightboxIndex] = useState(0)
+  const [lightboxAlt, setLightboxAlt] = useState('')
 
   useEffect(() => {
     async function loadListings() {
@@ -79,6 +84,13 @@ export default function MarketPage() {
 
   return (
     <div className="space-y-6">
+      <ImageLightbox
+        open={lightboxOpen}
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        alt={lightboxAlt || 'Angebot'}
+        onClose={() => setLightboxOpen(false)}
+      />
       <MarketSoonBanner />
       <div className="flex gap-8">
         {/* Sidebar Filters */}
@@ -242,11 +254,14 @@ export default function MarketPage() {
                    {listing.images?.[0] ? (
                     <div
                        className="group absolute inset-0 cursor-zoom-in border border-transparent hover:border-sky-400 transition-all hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_28px_rgba(56,189,248,0.18)] relative"
-                      title="In voller Groesse oeffnen"
+                      title="Bilder ansehen"
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        window.open(listing.images![0], '_blank', 'noopener,noreferrer')
+                        setLightboxImages(listing.images || [])
+                        setLightboxIndex(0)
+                        setLightboxAlt(listing.title)
+                        setLightboxOpen(true)
                       }}
                       role="button"
                       tabIndex={0}
@@ -254,7 +269,10 @@ export default function MarketPage() {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault()
                           e.stopPropagation()
-                          window.open(listing.images![0], '_blank', 'noopener,noreferrer')
+                          setLightboxImages(listing.images || [])
+                          setLightboxIndex(0)
+                          setLightboxAlt(listing.title)
+                          setLightboxOpen(true)
                         }
                       }}
                     >

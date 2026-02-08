@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation'
 import { TuvBadge } from '@/components/TuvBadge'
 import { useSession } from 'next-auth/react'
 import MarketSoonBanner from '@/components/MarketSoonBanner'
+import ImageLightbox from '@/components/ImageLightbox'
 
 type Message = {
   id: string
@@ -81,6 +82,8 @@ export default function MarketListingPage() {
   const [offerAmount, setOfferAmount] = useState('')
   const [buying, setBuying] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
 
   async function ensureConversation(): Promise<string> {
     if (!session?.user?.id) throw new Error('Bitte anmelden, um den Verkaeufer zu kontaktieren.')
@@ -216,9 +219,17 @@ export default function MarketListingPage() {
   }
 
   const isSeller = session?.user?.id === listing.seller.id
+  const images = listing.images || []
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
+      <ImageLightbox
+        open={lightboxOpen}
+        images={images}
+        initialIndex={lightboxIndex}
+        alt={listing.title}
+        onClose={() => setLightboxOpen(false)}
+      />
       <MarketSoonBanner />
       {/* Breadcrumb */}
       <nav className="text-sm text-zinc-400">
@@ -234,12 +245,14 @@ export default function MarketListingPage() {
         <div className="lg:col-span-2 space-y-4">
           <div className="aspect-[4/3] bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700">
             {listing.images && listing.images.length > 0 ? (
-              <a
-                href={listing.images[0]}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
                 className="group block w-full h-full cursor-zoom-in border border-transparent hover:border-sky-400 transition-all hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_28px_rgba(56,189,248,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 relative"
-                title="In voller Groesse oeffnen"
+                title="Bilder ansehen"
+                onClick={() => {
+                  setLightboxIndex(0)
+                  setLightboxOpen(true)
+                }}
               >
                 <Image
                   src={listing.images[0]}
@@ -249,7 +262,7 @@ export default function MarketListingPage() {
                   className="object-cover"
                   unoptimized={typeof listing.images?.[0] === 'string' && listing.images[0].startsWith('data:')}
                 />
-              </a>
+              </button>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <div className="text-center">
@@ -266,12 +279,14 @@ export default function MarketListingPage() {
                 className="aspect-square bg-zinc-800 rounded-lg border border-zinc-700 flex items-center justify-center overflow-hidden"
               >
                 {img ? (
-                  <a
-                    href={img}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
                     className="group block w-full h-full cursor-zoom-in border border-transparent hover:border-sky-400 transition-all hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_22px_rgba(56,189,248,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 relative"
-                    title="In voller Groesse oeffnen"
+                    title="Bilder ansehen"
+                    onClick={() => {
+                      setLightboxIndex(i)
+                      setLightboxOpen(true)
+                    }}
                   >
                     <Image
                       src={img}
@@ -281,7 +296,7 @@ export default function MarketListingPage() {
                       className="object-cover"
                       unoptimized={typeof img === 'string' && img.startsWith('data:')}
                     />
-                  </a>
+                  </button>
                 ) : (
                   <span className="text-zinc-500 text-sm">{i + 1}</span>
                 )}
