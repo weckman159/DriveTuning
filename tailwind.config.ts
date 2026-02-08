@@ -10,9 +10,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        orange: {
-          500: '#FF6B35',
-          400: '#FF8C42',
+        sky: {
+          500: '#0EA5E9',
+          400: '#38BDF8',
         },
       },
       fontFamily: {
@@ -23,3 +23,4 @@ const config: Config = {
   plugins: [],
 }
 export default config
+

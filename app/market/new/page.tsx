@@ -1,7 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
+import MarketSoonBanner from '@/components/MarketSoonBanner'
+import { convertImageFileToWebpDataUrl, estimateDataUrlBytes } from '@/lib/client-image'
 
 interface ModificationData {
   partName: string
@@ -16,7 +19,7 @@ interface ModificationData {
   tuvStatus: string
 }
 
-export default function NewListingPage() {
+function NewListingContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const modificationId = searchParams.get('modificationId')
@@ -31,24 +34,85 @@ export default function NewListingPage() {
   const [mileageOnCar, setMileageOnCar] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [images, setImages] = useState<string[]>([])
+  const [processingImages, setProcessingImages] = useState(false)
+
+  const MAX_IMAGES = 4
+  const MAX_INPUT_IMAGE_BYTES = 12 * 1024 * 1024
+  const MAX_OUTPUT_WEBP_BYTES = 700 * 1024
+  const MAX_DIMENSION = 1600
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.currentTarget
+    const files = Array.from(input.files || [])
+    if (!files.length) return
+
+    if (images.length + files.length > MAX_IMAGES) {
+      setError(`Du kannst bis zu ${MAX_IMAGES} Fotos hochladen.`)
+      input.value = ''
+      return
+    }
+
+    try {
+      setProcessingImages(true)
+      const converted: string[] = []
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) {
+          throw new Error('Nur Bilddateien sind erlaubt.')
+        }
+        if (file.size > MAX_INPUT_IMAGE_BYTES) {
+          throw new Error('Jedes Foto muss 12MB oder kleiner sein.')
+        }
+        try {
+          const webpDataUrl = await convertImageFileToWebpDataUrl(file, {
+            maxBytes: MAX_OUTPUT_WEBP_BYTES,
+            maxDimension: MAX_DIMENSION,
+          })
+          converted.push(webpDataUrl)
+        } catch {
+          // Fallback: keep original if WebP encoding isn't supported in the browser.
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(String(reader.result))
+            reader.onerror = () => reject(new Error('Bilddatei konnte nicht gelesen werden.'))
+            reader.readAsDataURL(file)
+          })
+          if (estimateDataUrlBytes(dataUrl) > MAX_OUTPUT_WEBP_BYTES) {
+            throw new Error('Bild konnte nicht optimiert werden. Bitte ein kleineres Foto oder einen anderen Browser verwenden.')
+          }
+          converted.push(dataUrl)
+        }
+      }
+      setImages((prev) => [...prev, ...converted])
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bild konnte nicht verarbeitet werden.')
+    } finally {
+      setProcessingImages(false)
+      input.value = ''
+    }
+  }
 
   // Fetch modification data if provided
   useEffect(() => {
-    if (modificationId) {
-      // In real app: fetch from API
-      // Mock data for demo
-      setTimeout(() => {
-        setModification({
-          partName: 'KW V3 coilovers',
-          brand: 'KW',
-          category: 'SUSPENSION',
-          car: { make: 'BMW', model: 'M4', generation: 'G82' },
-          mileageOnCar: 65230,
-          tuvStatus: 'YELLOW_ABE',
-        })
+    async function loadModification() {
+      if (!modificationId) return
+      setLoading(true)
+      try {
+        const res = await fetch(`/api/modifications/${modificationId}`)
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          throw new Error(data.error || 'Modifikation konnte nicht geladen werden.')
+        }
+        const data = await res.json()
+        setModification(data.modification || null)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Etwas ist schiefgelaufen.')
+      } finally {
         setLoading(false)
-      }, 500)
+      }
     }
+    loadModification()
   }, [modificationId])
 
   // Auto-populate fields when modification data is loaded
@@ -57,7 +121,7 @@ export default function NewListingPage() {
       setTitle(`${modification.brand || ''} ${modification.partName}`.trim())
       setMileageOnCar(modification.mileageOnCar?.toString() || '')
       setDescription(
-        `Used on ${modification.car?.make} ${modification.car?.model} ${modification.car?.generation || ''} for ${modification.mileageOnCar?.toLocaleString() || 0} km. ${modification.tuvStatus === 'YELLOW_ABE' ? 'ABE available.' : ''}`
+        `Verwendet auf ${modification.car?.make} ${modification.car?.model} ${modification.car?.generation || ''} fuer ${modification.mileageOnCar?.toLocaleString() || 0} km. ${modification.tuvStatus === 'YELLOW_ABE' ? 'ABE vorhanden.' : ''}`.trim()
       )
     }
   }, [modification])
@@ -79,12 +143,13 @@ export default function NewListingPage() {
           condition,
           mileageOnCar: mileageOnCar ? parseInt(mileageOnCar) : null,
           modificationId,
+          images,
         }),
       })
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to create listing')
+        throw new Error(data.error || 'Angebot konnte nicht erstellt werden.')
       }
 
       setSuccess(true)
@@ -92,7 +157,7 @@ export default function NewListingPage() {
         router.push('/market')
       }, 1500)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setError(err instanceof Error ? err.message : 'Etwas ist schiefgelaufen.')
     } finally {
       setLoading(false)
     }
@@ -101,43 +166,44 @@ export default function NewListingPage() {
   if (loading && modificationId) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
       </div>
     )
   }
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-white mb-8">Create Listing</h1>
+      <MarketSoonBanner />
+      <h1 className="text-3xl font-bold text-white mb-8">Angebot erstellen</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-800 p-6 rounded-xl border border-zinc-700">
         {/* Title */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Title</label>
+          <label className="block text-sm font-medium text-zinc-300">Titel</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g., KW V3 coilovers"
+            placeholder="z.B. KW V3 Gewindefahrwerk"
             required
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
+            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
           />
         </div>
 
         {/* Description */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Description</label>
+          <label className="block text-sm font-medium text-zinc-300">Beschreibung</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 resize-none"
+            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500 resize-none"
           />
         </div>
 
         {/* Price */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Price (€)</label>
+          <label className="block text-sm font-medium text-zinc-300">Preis (EUR)</label>
           <input
             type="number"
             value={price}
@@ -146,50 +212,111 @@ export default function NewListingPage() {
             step="0.01"
             min="0"
             required
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
+            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
           />
         </div>
 
         {/* Condition */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Condition</label>
+          <label className="block text-sm font-medium text-zinc-300">Zustand</label>
           <select
             value={condition}
             onChange={(e) => setCondition(e.target.value as typeof condition)}
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:border-orange-500"
+            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:border-sky-500"
           >
-            <option value="USED">Used</option>
-            <option value="LIKE_NEW">Like New</option>
-            <option value="NEW">New</option>
+            <option value="USED">Gebraucht</option>
+            <option value="LIKE_NEW">Wie neu</option>
+            <option value="NEW">Neu</option>
           </select>
         </div>
 
         {/* Mileage on Car */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-300">Mileage on Car (km)</label>
+          <label className="block text-sm font-medium text-zinc-300">Laufleistung am Fahrzeug (km)</label>
           <input
             type="number"
             value={mileageOnCar}
             onChange={(e) => setMileageOnCar(e.target.value)}
             placeholder="0"
             min="0"
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
+            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
           />
+        </div>
+
+        {/* Photos */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-zinc-300">Fotos</label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageChange}
+            disabled={processingImages}
+            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white file:mr-4 file:rounded file:border-0 file:bg-sky-500 file:px-3 file:py-1.5 file:text-white hover:file:bg-sky-400"
+          />
+          <p className="text-xs text-zinc-500">
+            Bis zu {MAX_IMAGES} Fotos. Bilder werden automatisch (WebP) optimiert (Ziel: {Math.round(MAX_OUTPUT_WEBP_BYTES / 1024)}KB).
+          </p>
+          {processingImages && <p className="text-xs text-sky-300">Optimiere Bilder...</p>}
+           {images.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {images.map((img, index) => (
+                  <div key={index} className="relative">
+                  <a
+                    href={img}
+                     target="_blank"
+                     rel="noreferrer"
+                     title="In voller Groesse oeffnen"
+                     className="group block rounded-lg border border-zinc-700 overflow-hidden cursor-zoom-in transition-all hover:border-sky-400 hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_22px_rgba(56,189,248,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                   >
+                     <Image
+                       src={img}
+                       alt={`Angebotsfoto ${index + 1}`}
+                       width={480}
+                       height={96}
+                       className="w-full h-24 object-cover"
+                       unoptimized={typeof img === 'string' && img.startsWith('data:')}
+                     />
+                   </a>
+                  <button
+                    type="button"
+                    onClick={() => setImages((prev) => prev.filter((_, i) => i !== index))}
+                    className="absolute top-1 right-1 px-1.5 py-0.5 text-xs bg-black/70 text-white rounded"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Submit */}
         <div className="space-y-2">
           {error && <p className="text-red-400 text-sm">{error}</p>}
-          {success && <p className="text-green-400 text-sm">Listing created! Redirecting...</p>}
+          {success && <p className="text-green-400 text-sm">Angebot erstellt. Weiterleitung...</p>}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-2 bg-orange-500 hover:bg-orange-400 disabled:bg-orange-500/50 text-white font-semibold rounded-lg transition-colors"
+            disabled={loading || processingImages}
+            className="w-full py-2 bg-sky-500 hover:bg-sky-400 disabled:bg-sky-500/50 text-white font-semibold rounded-lg transition-colors"
           >
-            {loading ? 'Creating...' : 'Create Listing'}
+            {loading ? 'Erstelle...' : 'Angebot erstellen'}
           </button>
         </div>
       </form>
     </div>
   )
 }
+
+export default function NewListingPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
+      </div>
+    }>
+      <NewListingContent />
+    </Suspense>
+  )
+}
+

@@ -11,10 +11,15 @@ async function main() {
   
   const user = await prisma.user.upsert({
     where: { email: 'demo@drivetuning.de' },
-    update: {},
+    update: {
+      name: 'Max Mustermann',
+      password: hashedPassword,
+      image: '/api/placeholder/150/150',
+    },
     create: {
       email: 'demo@drivetuning.de',
       name: 'Max Mustermann',
+      password: hashedPassword,
       image: '/api/placeholder/150/150',
     }
   })
@@ -36,9 +41,15 @@ async function main() {
 
   // Garage
   const garage = await prisma.garage.upsert({
-    where: { name: 'M-Power Lab' },
-    update: {},
+    where: { id: 'm-power-lab' },
+    update: {
+      userId: user.id,
+      name: 'M-Power Lab',
+      region: 'Schleswig-Holstein',
+      isDefault: true,
+    },
     create: {
+      id: 'm-power-lab',
       userId: user.id,
       name: 'M-Power Lab',
       region: 'Schleswig-Holstein',
@@ -53,6 +64,7 @@ async function main() {
     update: {},
     create: {
       id: 'm4-g82',
+      slug: 'bmw-m4-g82-g82-2023',
       garageId: garage.id,
       make: 'BMW',
       model: 'M4 G82',
@@ -70,61 +82,108 @@ async function main() {
   console.log('✅ Created car:', m4.make, m4.model)
 
   // Journal entries
-  await prisma.logEntry.createMany({
-    data: [
-      {
-        id: 'kw-v3',
-        carId: m4.id,
-        type: 'MODIFICATION',
-        title: 'KW V3 coilovers installed',
-        description: 'Full track setup with top mounts',
-        date: new Date('2025-12-15'),
-        totalCostImpact: 2800
-      },
-      {
-        id: 'akrapovic',
-        carId: m4.id,
-        type: 'MODIFICATION',
-        title: 'Akrapovič titanium exhaust',
-        description: 'Titanium Evolution system with race downpipes',
-        date: new Date('2025-11-01'),
-        totalCostImpact: 4200
-      },
-      {
-        id: 'oil-service',
-        carId: m4.id,
-        type: 'MAINTENANCE',
-        title: 'Oil service & inspection',
-        description: 'OEM BMW oil, filters, and inspection',
-        date: new Date('2025-10-15'),
-        totalCostImpact: 350
-      }
-    ]
+  await prisma.logEntry.upsert({
+    where: { id: 'kw-v3' },
+    update: {
+      carId: m4.id,
+      type: 'MODIFICATION',
+      title: 'KW V3 coilovers installed',
+      description: 'Full track setup with top mounts',
+      date: new Date('2025-12-15'),
+      totalCostImpact: 2800,
+    },
+    create: {
+      id: 'kw-v3',
+      carId: m4.id,
+      type: 'MODIFICATION',
+      title: 'KW V3 coilovers installed',
+      description: 'Full track setup with top mounts',
+      date: new Date('2025-12-15'),
+      totalCostImpact: 2800,
+    },
+  })
+  await prisma.logEntry.upsert({
+    where: { id: 'akrapovic' },
+    update: {
+      carId: m4.id,
+      type: 'MODIFICATION',
+      title: 'Akrapovič titanium exhaust',
+      description: 'Titanium Evolution system with race downpipes',
+      date: new Date('2025-11-01'),
+      totalCostImpact: 4200,
+    },
+    create: {
+      id: 'akrapovic',
+      carId: m4.id,
+      type: 'MODIFICATION',
+      title: 'Akrapovič titanium exhaust',
+      description: 'Titanium Evolution system with race downpipes',
+      date: new Date('2025-11-01'),
+      totalCostImpact: 4200,
+    },
+  })
+  await prisma.logEntry.upsert({
+    where: { id: 'oil-service' },
+    update: {
+      carId: m4.id,
+      type: 'MAINTENANCE',
+      title: 'Oil service & inspection',
+      description: 'OEM BMW oil, filters, and inspection',
+      date: new Date('2025-10-15'),
+      totalCostImpact: 350,
+    },
+    create: {
+      id: 'oil-service',
+      carId: m4.id,
+      type: 'MAINTENANCE',
+      title: 'Oil service & inspection',
+      description: 'OEM BMW oil, filters, and inspection',
+      date: new Date('2025-10-15'),
+      totalCostImpact: 350,
+    },
   })
   console.log('✅ Created journal entries')
 
   // Modifications
-  await prisma.modification.createMany({
-    data: [
-      {
-        id: 'kw-v3-mod',
-        logEntryId: 'kw-v3',
-        partName: 'KW V3 Coilover Kit',
-        brand: 'KW Suspensions',
-        category: 'SUSPENSION',
-        price: 2800,
-        tuvStatus: 'YELLOW_ABE'
-      },
-      {
-        id: 'akrapovic-mod',
-        logEntryId: 'akrapovic',
-        partName: 'Titanium Evolution Exhaust',
-        brand: 'Akrapovič',
-        category: 'EXHAUST',
-        price: 4200,
-        tuvStatus: 'RED_RACING'
-      }
-    ]
+  await prisma.modification.upsert({
+    where: { id: 'kw-v3-mod' },
+    update: {
+      logEntryId: 'kw-v3',
+      partName: 'KW V3 Coilover Kit',
+      brand: 'KW Suspensions',
+      category: 'SUSPENSION',
+      price: 2800,
+      tuvStatus: 'YELLOW_ABE',
+    },
+    create: {
+      id: 'kw-v3-mod',
+      logEntryId: 'kw-v3',
+      partName: 'KW V3 Coilover Kit',
+      brand: 'KW Suspensions',
+      category: 'SUSPENSION',
+      price: 2800,
+      tuvStatus: 'YELLOW_ABE',
+    },
+  })
+  await prisma.modification.upsert({
+    where: { id: 'akrapovic-mod' },
+    update: {
+      logEntryId: 'akrapovic',
+      partName: 'Titanium Evolution Exhaust',
+      brand: 'Akrapovič',
+      category: 'EXHAUST',
+      price: 4200,
+      tuvStatus: 'RED_RACING',
+    },
+    create: {
+      id: 'akrapovic-mod',
+      logEntryId: 'akrapovic',
+      partName: 'Titanium Evolution Exhaust',
+      brand: 'Akrapovič',
+      category: 'EXHAUST',
+      price: 4200,
+      tuvStatus: 'RED_RACING',
+    },
   })
   console.log('✅ Created modifications')
 
@@ -143,3 +202,4 @@ main()
     await prisma.$disconnect()
     process.exit(1)
   })
+

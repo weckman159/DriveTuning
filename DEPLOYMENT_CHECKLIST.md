@@ -45,11 +45,11 @@ npm run build
 
 ### 2.3 Initialize Database
 ```bash
-# Generate Prisma client
-npx prisma generate
+# Generate Prisma client using PostgreSQL schema
+PRISMA_SCHEMA=prisma/schema.postgres.prisma npm run prisma:generate
 
 # Push schema (first time only)
-npx prisma db push
+PRISMA_SCHEMA=prisma/schema.postgres.prisma npx prisma db push --schema prisma/schema.postgres.prisma
 
 # Seed demo data (optional)
 npx prisma db seed
@@ -74,14 +74,22 @@ nano .env
 POSTGRES_PRISMA_URL="postgres://xxx:xxx@ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require"
 POSTGRES_URL_NON_POOLING="postgres://xxx:xxx@ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require&pool=false"
 DATABASE_URL="${POSTGRES_PRISMA_URL}"
+DIRECT_URL="${POSTGRES_URL_NON_POOLING}"
+PRISMA_SCHEMA="prisma/schema.postgres.prisma"
 
 # Auth (generate secure secret)
 NEXTAUTH_SECRET="$(openssl rand -base64 32)"
 NEXTAUTH_URL="https://drivetuning.vercel.app"
 
-# Vercel Blob (optional, for images)
-BLOB_READ_WRITE_TOKEN="vercel_blob_rw_xxx"
-```
+ # Vercel Blob (optional, for images)
+ BLOB_READ_WRITE_TOKEN="vercel_blob_rw_xxx"
+
+ # Marketplace commerce (optional; keep disabled for public launch)
+ NEXT_PUBLIC_MARKET_COMMERCE_ENABLED="false"
+ MARKET_COMMERCE_ENABLED="false"
+ # Optional: protect internal cleanup endpoints called from cron
+ CRON_SECRET="change-me"
+ ```
 
 ### 3.3 Generate NEXTAUTH_SECRET (Alternative)
 ```bash
@@ -172,7 +180,7 @@ npx prisma db ping
 ### "Prisma Client not initialized"
 ```bash
 # Regenerate client
-npx prisma generate
+PRISMA_SCHEMA=prisma/schema.postgres.prisma npm run prisma:generate
 
 # Re-deploy
 vercel --prod --force
@@ -232,3 +240,4 @@ vercel --prod
 - **Neon**: https://neon.tech/docs
 - **Prisma**: https://www.prisma.io/docs
 - **NextAuth**: https://next-auth.js.org/providers/github
+

@@ -1,127 +1,232 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 
-// MOCK DATA - NO DATABASE
-const mockEvents = [
-  {
-    id: '1',
-    title: 'BMW Track Day Nürburgring',
-    dateStart: new Date('2024-04-15'),
-    locationRegion: 'Nürburgring',
-    locationName: 'Nürburgring GP',
-    brandFilter: 'BMW',
-    status: 'UPCOMING' as const,
-    attendeeCount: 20,
-  },
-  {
-    id: '2',
-    title: 'Schleswig Car Meet',
-    dateStart: new Date('2024-05-01'),
-    locationRegion: 'Schleswig-Holstein',
-    locationName: 'Schleswig Park',
-    brandFilter: null,
-    status: 'UPCOMING' as const,
-    attendeeCount: 8,
-  },
-  {
-    id: '3',
-    title: 'Audi Sport Treffen',
-    dateStart: new Date('2024-05-20'),
-    locationRegion: 'NRW',
-    locationName: 'Hockenheimring',
-    brandFilter: 'Audi',
-    status: 'UPCOMING' as const,
-    attendeeCount: 35,
-  },
-  {
-    id: '4',
-    title: 'Porsche Club Germany',
-    dateStart: new Date('2024-06-10'),
-    locationRegion: 'Baden-Württemberg',
-    locationName: 'Stuttgart',
-    brandFilter: 'Porsche',
-    status: 'UPCOMING' as const,
-    attendeeCount: 50,
-  },
-]
-
-const regions = ['Nürburgring', 'Schleswig-Holstein', 'NRW', 'Baden-Württemberg']
-const brands = ['BMW', 'Audi', 'Porsche', 'Mercedes', null]
+type EventItem = {
+  id: string
+  title: string
+  description: string | null
+  dateStart: string
+  dateEnd: string | null
+  locationRegion: string
+  locationName: string
+  brandFilter: string | null
+  status: 'UPCOMING' | 'ACTIVE' | 'PAST'
+}
 
 export default function EventsPage() {
+  const [selectedRegion, setSelectedRegion] = useState('All')
+  const [selectedBrand, setSelectedBrand] = useState('All')
+  const [selectedLocation, setSelectedLocation] = useState('All')
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
+  const [events, setEvents] = useState<EventItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        setLoading(true)
+        const res = await fetch('/api/events')
+        const data = await res.json()
+        setEvents(data.events || [])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadEvents()
+  }, [])
+
+  const regions = useMemo(() => {
+    const values = Array.from(new Set(events.map(e => e.locationRegion))).sort()
+    return ['All', ...values]
+  }, [events])
+
+  const brands = useMemo(() => {
+    const values = Array.from(new Set(events.map(e => e.brandFilter).filter(Boolean) as string[])).sort()
+    return ['All', ...values, 'All Brands']
+  }, [events])
+
+  const locations = useMemo(() => {
+    const values = Array.from(new Set(events.map(e => e.locationName))).sort()
+    return ['All', ...values]
+  }, [events])
+
+  const filteredEvents = events.filter((event) => {
+    if (selectedRegion !== 'All' && event.locationRegion !== selectedRegion) return false
+    if (selectedBrand !== 'All' && selectedBrand !== 'All Brands' && event.brandFilter !== selectedBrand) return false
+    if (selectedLocation !== 'All' && event.locationName !== selectedLocation) return false
+    if (selectedDay !== null) {
+      const day = new Date(event.dateStart).getDate()
+      if (day !== selectedDay) return false
+    }
+    return true
+  })
+
+  const upcomingCount = events.filter((e) => e.status === 'UPCOMING').length
+
   return (
-    <div className="flex gap-8">
-      {/* Sidebar Filters */}
-      <aside className="w-64 flex-shrink-0 space-y-6">
-        <h1 className="text-2xl font-bold text-white">Events</h1>
-
-        {/* Brand Filter */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-zinc-300">Brand</label>
-          <select className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white">
-            <option value="">All Brands</option>
-            {brands.filter(b => b).map((brand) => (
-              <option key={brand} value={brand}>{brand}</option>
-            ))}
-          </select>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Events</h1>
+          <p className="text-zinc-400 mt-1">
+            {upcomingCount} kommende {upcomingCount === 1 ? 'Veranstaltung' : 'Veranstaltungen'}
+          </p>
         </div>
+        <Link
+          href="/events/new"
+          className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-lg transition-colors"
+        >
+          + Event erstellen
+        </Link>
+      </div>
 
-        {/* Region Filter */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-zinc-300">Region</label>
-          <select className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white">
-            <option value="">All Regions</option>
-            {regions.map((region) => (
-              <option key={region} value={region}>{region}</option>
-            ))}
-          </select>
-        </div>
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4">
+        <select
+          value={selectedRegion}
+          onChange={(e) => setSelectedRegion(e.target.value)}
+          className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
+        >
+          {regions.map((region) => (
+            <option key={region} value={region}>
+              {region === 'All' ? 'Alle Regionen' : region}
+            </option>
+          ))}
+        </select>
+        <select
+          value={selectedBrand}
+          onChange={(e) => setSelectedBrand(e.target.value)}
+          className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
+        >
+          {brands.map((brand) => (
+            <option key={brand} value={brand}>
+              {brand === 'All' || brand === 'All Brands' ? 'Alle Marken' : brand}
+            </option>
+          ))}
+        </select>
+        <select
+          value={selectedLocation}
+          onChange={(e) => setSelectedLocation(e.target.value)}
+          className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
+        >
+          {locations.map((location) => (
+            <option key={location} value={location}>
+              {location === 'All' ? 'Alle Orte' : location}
+            </option>
+          ))}
+        </select>
+      </div>
 
-        {/* Date Range */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-zinc-300">Date</label>
-          <input
-            type="date"
-            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
-          />
-        </div>
-      </aside>
-
-      {/* Events List */}
-      <div className="flex-1">
-        <p className="text-zinc-400 mb-4">{mockEvents.length} events found</p>
-
-        <div className="space-y-4">
-          {mockEvents.map((event) => (
+      {/* Events Grid */}
+      {loading ? (
+        <div className="text-center text-zinc-400">Events werden geladen...</div>
+      ) : filteredEvents.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredEvents.map((event) => (
             <Link
               key={event.id}
               href={`/events/${event.id}`}
-              className="block bg-zinc-800 rounded-xl p-6 border border-zinc-700 hover:border-orange-500 transition-colors"
+              className="group bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700 hover:border-sky-500 transition-all hover:scale-[1.02]"
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    {event.brandFilter && (
-                      <span className="px-2 py-0.5 bg-zinc-700 text-zinc-300 text-xs rounded">
-                        {event.brandFilter}
-                      </span>
-                    )}
-                    <span className="text-xs text-zinc-500">
-                      {event.dateStart.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}
+              <div className="aspect-[2/1] bg-zinc-700 flex items-center justify-center relative">
+                <span className="text-zinc-500">Event-Banner</span>
+                {event.brandFilter && (
+                  <div className="absolute top-3 left-3">
+                    <span className="px-3 py-1 bg-sky-500/20 text-sky-400 border border-sky-500/50 text-sm font-medium rounded-full">
+                      {event.brandFilter}
                     </span>
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-1">{event.title}</h3>
-                  <p className="text-zinc-400">
-                    {event.locationName} • {event.locationRegion}
-                  </p>
+                )}
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-zinc-400">
+                  <span>
+                    📅 {new Date(event.dateStart).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })}
+                  </span>
+                  <span>•</span>
+                  <span>{event.locationRegion}</span>
                 </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-orange-500">{event.attendeeCount}</p>
-                  <p className="text-sm text-zinc-400">going</p>
+                <h3 className="font-semibold text-white group-hover:text-sky-400 transition-colors line-clamp-1">
+                  {event.title}
+                </h3>
+                <p className="text-sm text-zinc-400 line-clamp-2">
+                  {event.description || 'Keine Beschreibung vorhanden.'}
+                </p>
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-1 text-zinc-500 text-sm">
+                    <span>🏁</span>
+                    <span>Offen</span>
+                  </div>
+                  <span className="text-sky-400 text-sm group-hover:underline">
+                    Details ansehen →
+                  </span>
                 </div>
               </div>
             </Link>
           ))}
         </div>
+      ) : (
+        <div className="text-center py-12">
+          <div className="text-4xl mb-4">🏁</div>
+          <h3 className="text-xl font-semibold text-white mb-2">Keine Events gefunden</h3>
+          <p className="text-zinc-400 mb-4">
+            Passe deine Filter an oder erstelle dein eigenes Event.
+          </p>
+          <Link
+            href="/events/new"
+            className="inline-block px-6 py-2 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-lg transition-colors"
+          >
+            Event erstellen
+          </Link>
+        </div>
+      )}
+
+      {/* Calendar Preview */}
+      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+        <h2 className="text-xl font-bold text-white mb-4">Diesen Monat</h2>
+        <div className="grid grid-cols-7 gap-2 text-center">
+          {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((day) => (
+            <div key={day} className="p-2 text-zinc-500 text-sm font-medium">
+              {day}
+            </div>
+          ))}
+          {[...Array(31)].map((_, i) => {
+            const day = i + 1
+            const hasEvent = events.some((event) => new Date(event.dateStart).getDate() === day)
+            const isSelected = selectedDay === day
+            return (
+              <button
+                key={day}
+                type="button"
+                onClick={() => setSelectedDay(isSelected ? null : day)}
+                className={`p-2 text-sm rounded-lg transition-colors ${
+                  isSelected
+                    ? 'bg-sky-500 text-white font-semibold'
+                    : hasEvent
+                      ? 'bg-sky-500/20 text-sky-400 font-semibold hover:bg-sky-500/30'
+                      : 'text-zinc-400 hover:bg-zinc-700'
+                }`}
+              >
+                {day}
+              </button>
+            )
+          })}
+        </div>
+        {selectedDay !== null && (
+          <div className="mt-4 flex items-center justify-between text-sm text-zinc-400">
+            <span>Gefiltert nach Tag: {selectedDay}</span>
+            <button
+              type="button"
+              onClick={() => setSelectedDay(null)}
+              className="text-sky-400 hover:text-sky-300"
+            >
+              Tag-Filter entfernen
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

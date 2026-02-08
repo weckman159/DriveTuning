@@ -103,8 +103,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <ClerkProvider
       appearance={{
         elements: {
-          formButtonPrimary: 'bg-orange-500 hover:bg-orange-400',
-          footerActionLink: 'text-orange-500 hover:text-orange-400',
+          formButtonPrimary: 'bg-sky-500 hover:bg-sky-400',
+          footerActionLink: 'text-sky-500 hover:text-sky-400',
         },
       }}
     >
@@ -132,7 +132,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="border-b border-zinc-800">
               <div className="max-w-7xl mx-auto px-4">
                 <div className="flex justify-between h-16 items-center">
-                  <a href="/" className="text-xl font-bold text-orange-500">
+                  <a href="/" className="text-xl font-bold text-sky-500">
                     DRIVETUNING
                   </a>
                   <div className="flex items-center space-x-4">
@@ -204,7 +204,7 @@ export function UserMenu() {
     return (
       <Link
         href="/sign-in"
-        className="px-4 py-2 bg-orange-500 hover:bg-orange-400 text-white rounded-lg"
+        className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-lg"
       >
         Sign In
       </Link>
@@ -592,3 +592,4 @@ Add to Vercel:
 - Clerk Docs: https://clerk.com/docs
 - Clerk Discord: https://clerk.com/discord
 - Clerk Support: support@clerk.com
+

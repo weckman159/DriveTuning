@@ -1,0 +1,11 @@
+# Prevent leaking local secrets and build outputs into deployments
+.env
+.env.*
+!.env.example
+
+.next/
+node_modules/
+.vercel/
+logs/
+
+prisma/dev.db
