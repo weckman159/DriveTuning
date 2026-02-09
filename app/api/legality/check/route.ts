@@ -217,7 +217,7 @@ export async function GET(req: Request) {
   })
 
   const bestMatch = filtered[0] || suggestions[0] || null
-  const approvalType = bestMatch?.item?.approvalType
+  const dictionaryApprovalType = bestMatch?.item?.approvalType
 
   let dbMatches: any[] = []
   try {
@@ -272,6 +272,9 @@ export async function GET(req: Request) {
     dbMatches = []
   }
 
+  const dbApprovalType = dbMatches[0]?.approvalType as ApprovalType | undefined
+  const effectiveApprovalType: ApprovalType | undefined = dictionaryApprovalType ?? dbApprovalType
+
   let violations: Violation[] = []
   if (Object.keys(userParameters).length) {
     // Prefer DB criticalParameters if present (seed), otherwise fallback to dictionary parameters.
@@ -303,11 +306,14 @@ export async function GET(req: Request) {
     | 'INSPECTION_REQUIRED'
     | 'ILLEGAL' = violations.some((v) => v.severity === 'critical')
     ? 'ILLEGAL'
-    : approvalType === 'TEILEGUTACHTEN'
+    : effectiveApprovalType === 'TEILEGUTACHTEN'
       ? 'REGISTRATION_REQUIRED'
-      : approvalType === 'EINZELABNAHME_21' || approvalType === 'EINTRAGUNGSPFLICHTIG'
+      : effectiveApprovalType === 'EINZELABNAHME_21' || effectiveApprovalType === 'EINTRAGUNGSPFLICHTIG'
         ? 'INSPECTION_REQUIRED'
-        : approvalType === 'ABE' || approvalType === 'ABG' || approvalType === 'ECE' || approvalType === 'EBE'
+        : effectiveApprovalType === 'ABE' ||
+            effectiveApprovalType === 'ABG' ||
+            effectiveApprovalType === 'ECE' ||
+            effectiveApprovalType === 'EBE'
           ? 'FULLY_LEGAL'
           : 'UNKNOWN'
 
@@ -372,15 +378,15 @@ export async function GET(req: Request) {
     communityProofs = []
   }
 
-  const nextSteps = computeNextSteps(approvalType)
+  const nextSteps = computeNextSteps(effectiveApprovalType)
 
-  if (approvalType === 'ABG') {
+  if (effectiveApprovalType === 'ABG') {
     warnings.push('ABG ist oft fahrzeug-/scheinwerferspezifisch: vor Einbau Anlage/Fahrzeugliste pruefen.')
   }
-  if (approvalType === 'TEILEGUTACHTEN') {
+  if (effectiveApprovalType === 'TEILEGUTACHTEN') {
     warnings.push('Teilegutachten bedeutet in der Praxis meist Abnahme/Eintragung. Plane Termin/Kosten ein.')
   }
-  if (approvalType === 'EINZELABNAHME_21') {
+  if (effectiveApprovalType === 'EINZELABNAHME_21') {
     warnings.push('§21 Einzelabnahme kann komplex sein (Kombinationswirkung, Messungen). Vorab abstimmen.')
   }
 
@@ -403,7 +409,7 @@ export async function GET(req: Request) {
       updatedAt: r.updatedAt,
     })),
     communityProofs,
-    approvalType: approvalType || 'NONE',
+    approvalType: effectiveApprovalType || 'NONE',
     legalityStatus,
     violations,
     userParameters: Object.keys(userParameters).length ? userParameters : null,
