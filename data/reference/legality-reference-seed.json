@@ -1,0 +1,255 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "generatedAt": "2026-02-09",
+    "note": "UNVERIFIED demo seed. Do not treat approval numbers/claims as authoritative until backed by primary source documents (manufacturer PDF / official publication).",
+    "verificationPolicy": "PRIMARY_SOURCE_REQUIRED",
+    "categories": ["wheels", "suspension", "exhaust", "brakes", "aero", "lighting", "ecu"]
+  },
+  "cars": [
+    { "id": "bmw-3er-f30", "make": "BMW", "model": "3er", "generation": "F30", "years": "2012-2019" },
+    { "id": "vw-golf-7", "make": "Volkswagen", "model": "Golf", "generation": "VII", "years": "2012-2020" },
+    { "id": "audi-a4-b9", "make": "Audi", "model": "A4", "generation": "B9", "years": "2015-2023" },
+    { "id": "mercedes-c-w205", "make": "Mercedes-Benz", "model": "C-Klasse", "generation": "W205", "years": "2014-2021" },
+    { "id": "bmw-3er-g20", "make": "BMW", "model": "3er", "generation": "G20", "years": "2019-" },
+    { "id": "bmw-5er-g30", "make": "BMW", "model": "5er", "generation": "G30", "years": "2017-" },
+    { "id": "audi-a3-8v", "make": "Audi", "model": "A3", "generation": "8V", "years": "2012-2020" },
+    { "id": "vw-tiguan-ad", "make": "Volkswagen", "model": "Tiguan", "generation": "AD", "years": "2016-" },
+    { "id": "opel-astra-k", "make": "Opel", "model": "Astra", "generation": "K", "years": "2015-2021" },
+    { "id": "ford-focus-mk4", "make": "Ford", "model": "Focus", "generation": "Mk4", "years": "2018-" }
+  ],
+  "items": [
+    {
+      "id": "bbs-ch-r-f30",
+      "brand": "BBS",
+      "partName": "CH-R 8.5Jx19 ET35",
+      "category": "wheels",
+      "subcategory": "alloy_wheels",
+      "vehicleCompatibility": "BMW F30 3er (2012-2019)",
+      "approvalType": "ABE",
+      "approvalNumber": "KBA 43234",
+      "restrictions": [
+        "Max. Reifengroesse: 255/35 R19",
+        "Nur fuer Fahrzeuge mit serienmaessiger Radarchitektur",
+        "Keine Aenderung der Spurweite > +20mm ohne Eintragung"
+      ],
+      "criticalParameters": {
+        "etRange": [30, 45],
+        "maxWheelWidth": 10,
+        "minClearanceLoaded": 100,
+        "pcd": "5x120"
+      },
+      "sourceId": "manufacturer",
+      "sourceUrl": "https://www.bbs-wheels.com/de/abe-dokumente/bmw-f30",
+      "validFrom": "2020-01-01",
+      "validUntil": null,
+      "verification": { "status": "UNVERIFIED", "note": "Needs primary source PDF/page that explicitly contains the approval number and fitment restrictions." }
+    },
+    {
+      "id": "oz-ultraleggera-f30",
+      "brand": "OZ Racing",
+      "partName": "Ultraleggera 8Jx18 ET38",
+      "category": "wheels",
+      "subcategory": "alloy_wheels",
+      "vehicleCompatibility": "BMW F30 3er (2012-2019)",
+      "approvalType": "ABE",
+      "approvalNumber": "KBA 43567",
+      "restrictions": [
+        "Max. Reifengroesse: 245/40 R18",
+        "Nur mit serienmaessiger Karosserie",
+        "Radlast max. 750 kg"
+      ],
+      "criticalParameters": {
+        "etRange": [35, 42],
+        "maxWheelWidth": 9,
+        "minClearanceLoaded": 100,
+        "pcd": "5x120"
+      },
+      "sourceId": "manufacturer",
+      "sourceUrl": "https://www.ozracing.com/de/abe/bmw-f30",
+      "validFrom": "2019-06-15",
+      "validUntil": null,
+      "verification": { "status": "UNVERIFIED", "note": "Needs primary source PDF/page that explicitly contains the approval number and fitment restrictions." }
+    },
+    {
+      "id": "kw-variant3-f30",
+      "brand": "KW Automotive",
+      "partName": "Variant 3 Gewindefahrwerk",
+      "category": "suspension",
+      "subcategory": "coilovers",
+      "vehicleCompatibility": "BMW F30 3er (2012-2019)",
+      "approvalType": "ABE",
+      "approvalNumber": "KBA 52345",
+      "restrictions": [
+        "Mindestbodenfreiheit 100mm im beladenen Zustand",
+        "Max. Tieferlegung: -40mm vorne / -35mm hinten",
+        "Rad-/Radkastenberuehrung verboten",
+        "Federweg min. 50% des Serienfederwegs"
+      ],
+      "criticalParameters": {
+        "maxLoweringFront": -40,
+        "maxLoweringRear": -35,
+        "minClearanceLoaded": 100,
+        "minSuspensionTravel": 50
+      },
+      "sourceId": "manufacturer",
+      "sourceUrl": "https://www.kw-automotive.com/de/abe/f30",
+      "validFrom": "2018-05-20",
+      "validUntil": null,
+      "verification": { "status": "UNVERIFIED", "note": "Needs primary source PDF/page that explicitly contains the approval number and fitment restrictions." }
+    },
+    {
+      "id": "hr-tieferlegung-f30",
+      "brand": "H&R",
+      "partName": "Tieferlegungsfedern",
+      "category": "suspension",
+      "subcategory": "springs",
+      "vehicleCompatibility": "BMW F30 3er (2012-2019)",
+      "approvalType": "ABE",
+      "approvalNumber": "KBA 51234",
+      "restrictions": [
+        "Nur in Kombination mit serienmaessigen Daempfern",
+        "Max. Tieferlegung: -30mm",
+        "Keine Aenderung der Radlast > +/-5%"
+      ],
+      "criticalParameters": {
+        "maxLoweringFront": -30,
+        "maxLoweringRear": -30,
+        "minClearanceLoaded": 100
+      },
+      "sourceId": "manufacturer",
+      "sourceUrl": "https://www.h-r.com/de/produkte/tieferlegungsfedern/bmw-f30",
+      "validFrom": "2017-02-15",
+      "validUntil": null,
+      "verification": { "status": "UNVERIFIED", "note": "Needs primary source PDF/page that explicitly contains the approval number and fitment restrictions." }
+    },
+    {
+      "id": "akrapovic-f30",
+      "brand": "Akrapovic",
+      "partName": "Evolution Line Titanium (Cat-back)",
+      "category": "exhaust",
+      "subcategory": "catback",
+      "vehicleCompatibility": "BMW F30 3er (2012-2019)",
+      "approvalType": "ABE",
+      "approvalNumber": "KBA 61234",
+      "restrictions": [
+        "Schalldruck max. 95 dB(A) bei 4.000 U/min",
+        "Nur mit serienmaessigem Katalysator",
+        "Keine Aenderung der Abgaszusammensetzung"
+      ],
+      "criticalParameters": {
+        "maxNoiseLevel": 95,
+        "requiresStockCatalyst": true
+      },
+      "sourceId": "manufacturer",
+      "sourceUrl": "https://www.akrapovic.com/de/abe-dokumente/bmw-f30",
+      "validFrom": "2017-08-01",
+      "validUntil": null,
+      "verification": { "status": "UNVERIFIED", "note": "Needs primary source PDF/page that explicitly contains the approval number and fitment restrictions." }
+    },
+    {
+      "id": "remus-f30",
+      "brand": "Remus",
+      "partName": "Hypercone Endschalldaempfer",
+      "category": "exhaust",
+      "subcategory": "catback",
+      "vehicleCompatibility": "BMW F30 3er (2012-2019)",
+      "approvalType": "TEILEGUTACHTEN",
+      "approvalNumber": "TUEV Sued SX E1 123456",
+      "restrictions": [
+        "Eintragungspflichtig gemaess §19 StVZO",
+        "Schalldaempfer muss sichtbar die Gutachten-Nummer tragen",
+        "Max. 92 dB(A) bei Pruefung nach ECE R51"
+      ],
+      "criticalParameters": {
+        "maxNoiseLevel": 92,
+        "requiresRegistration": true
+      },
+      "sourceId": "tuev_sued_info",
+      "sourceUrl": "https://www.tuev-sued.de/de",
+      "validFrom": "2019-11-10",
+      "validUntil": null,
+      "verification": { "status": "UNVERIFIED", "note": "Do not use a guessed Gutachten URL. Replace with a primary source certificate PDF or official listing." }
+    },
+    {
+      "id": "brembo-f30",
+      "brand": "Brembo",
+      "partName": "GT Big Brake Kit 365mm",
+      "category": "brakes",
+      "subcategory": "big_brake_kit",
+      "vehicleCompatibility": "BMW F30 3er (2012-2019)",
+      "approvalType": "ABE",
+      "approvalNumber": "KBA 53789",
+      "restrictions": [
+        "Nur mit serienmaessigen oder ABE-zugelassenen Raedern >= 18 Zoll",
+        "Bremskraftverteilung muss im serienmaessigen Bereich bleiben",
+        "Min. Radfreigang: 3mm bei vollem Lenkeinschlag",
+        "Darf Radlast nicht um >5% veraendern"
+      ],
+      "criticalParameters": {
+        "minWheelSize": 18,
+        "minWheelClearance": 3,
+        "maxLoadChange": 5
+      },
+      "sourceId": "manufacturer",
+      "sourceUrl": "https://www.brembo.com/de/aftermarket/abe-dokumente/bmw-f30",
+      "validFrom": "2021-01-10",
+      "validUntil": null,
+      "verification": { "status": "UNVERIFIED", "note": "Needs primary source PDF/page that explicitly contains the approval number and fitment restrictions." }
+    },
+    {
+      "id": "racechip-f30",
+      "brand": "RaceChip",
+      "partName": "GTS Black (N20 2.0L Turbo)",
+      "category": "ecu",
+      "subcategory": "power_box",
+      "vehicleCompatibility": "BMW F30 3er N20 2.0L (2012-2016)",
+      "approvalType": "ABE",
+      "approvalNumber": "KBA 54321",
+      "restrictions": [
+        "Nur fuer Fahrzeuge mit serienmaessigem Partikelfilter (DPF), falls zutreffend",
+        "Abgasemissionen muessen im Rahmen der jeweiligen Norm bleiben",
+        "Darf keine Fehlercodes im Motorsteuergeraet erzeugen",
+        "Keine Verwendung mit deaktiviertem EGR/AGR erlaubt"
+      ],
+      "criticalParameters": {
+        "maxPowerIncrease": 25,
+        "maxTorqueIncrease": 30,
+        "requiresDPF": true,
+        "requiresEGR": true
+      },
+      "sourceId": "manufacturer",
+      "sourceUrl": "https://www.racechip.com/de",
+      "validFrom": "2022-03-01",
+      "validUntil": null,
+      "verification": { "status": "UNVERIFIED", "note": "Needs a primary source ABE document / listing with the exact KBA number and applicability." }
+    },
+    {
+      "id": "m-performance-front-lip-f30",
+      "brand": "BMW",
+      "partName": "M Performance Front Lip",
+      "category": "aero",
+      "subcategory": "front_lip",
+      "vehicleCompatibility": "BMW F30 3er (2012-2019)",
+      "approvalType": "ABE",
+      "approvalNumber": "KBA 61456",
+      "restrictions": [
+        "Max. Vorstand: 50mm ueber Serienstossstange",
+        "Mindestbodenfreiheit beladen: 100mm",
+        "Keine scharfen Kanten (Kantenradius >= 5mm)",
+        "Darf Airbag-Funktionalitaet nicht beeintraechtigen"
+      ],
+      "criticalParameters": {
+        "maxFrontExtension": 50,
+        "minClearanceLoaded": 100,
+        "minEdgeRadius": 5
+      },
+      "sourceId": "kba_downloads",
+      "sourceUrl": "https://www.kba.de/DE/Themen/Typgenehmigung/Zum_Herunterladen/zum_Herunterladen_node.html",
+      "validFrom": "2020-03-15",
+      "validUntil": null,
+      "verification": { "status": "UNVERIFIED", "note": "This is a placeholder until the exact ABE/approval document is linked." }
+    }
+  ]
+}
+

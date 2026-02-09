@@ -1,0 +1,110 @@
+{
+  "metadata": {
+    "version": "2026-02-09",
+    "country": "DE",
+    "status": "CANDIDATE_NOT_AUDITED",
+    "note": "User-provided 'verified' approvals. Do not treat as authoritative until audited against primary source documents (PDF/page) and/or official publication.",
+    "verificationPolicy": "PRIMARY_SOURCE_REQUIRED"
+  },
+  "verifiedApprovals": [
+    {
+      "brand": "BBS",
+      "model": "CH-R",
+      "sizes": ["8.5Jx18 ET35", "9Jx19 ET32", "9.5Jx20 ET30"],
+      "approvalNumber": "KBA 43234",
+      "approvalType": "ABE",
+      "validFrom": "2020-01-15",
+      "vehicles": [
+        "BMW F30/F31/F34 3er (2012-2019)",
+        "BMW F20/F21 1er (2011-2019)",
+        "BMW F22/F23 2er (2014-2021)"
+      ],
+      "restrictions": [
+        "Max. Reifengroesse: 255/35 R19 / 275/30 R20",
+        "Nur fuer Fahrzeuge mit serienmaessiger Radarchitektur",
+        "Spurverbreiterung max. +20mm pro Achse ohne Eintragung",
+        "Mindestbodenfreiheit beladen: 100mm",
+        "Radlast max. 750 kg pro Rad"
+      ],
+      "sourceUrl": "https://www.bbs-wheels.com/de/abe-dokumente/bmw-f30",
+      "documentUrl": "https://www.bbs-wheels.com/media/abe/kba_43234_bmw_f30.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "OZ Racing",
+      "model": "Ultraleggera",
+      "sizes": ["8Jx18 ET38", "8.5Jx19 ET35", "9Jx20 ET32"],
+      "approvalNumber": "KBA 43567",
+      "approvalType": "ABE",
+      "validFrom": "2019-06-20",
+      "vehicles": ["BMW F30/F31/F34 3er (2012-2019)", "Audi B9 A4 (2016-2023)", "VW Golf VII (2013-2020)"],
+      "restrictions": [
+        "Max. Reifengroesse: 245/40 R18 / 255/35 R19",
+        "Nur mit serienmaessiger Karosserie",
+        "Radlast max. 720 kg",
+        "Keine Aenderung der Spurweite > +/-15mm ohne Eintragung"
+      ],
+      "sourceUrl": "https://www.ozracing.com/de/produkte/alufelgen/ultraleggera",
+      "documentUrl": "https://www.ozracing.com/media/abe/kba_43567.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "HRE",
+      "model": "P101",
+      "sizes": ["9Jx19 ET35", "9.5Jx20 ET32", "10Jx21 ET30"],
+      "approvalNumber": "KBA 48765",
+      "approvalType": "ABE",
+      "validFrom": "2021-05-10",
+      "vehicles": ["BMW G20/G21 3er (2019-2025)", "BMW G22/G23 4er (2020-2025)", "Mercedes W205 C-Klasse (2014-2021)"],
+      "restrictions": [
+        "Max. Reifengroesse: 275/30 R20 / 285/25 R21",
+        "Nur fuer Fahrzeuge mit M Sport Fahrwerk oder Tieferlegung <= -15mm",
+        "Spurverbreiterung max. +15mm pro Seite ohne Eintragung",
+        "Mindestbodenfreiheit beladen: 105mm",
+        "Radlast max. 800 kg"
+      ],
+      "sourceUrl": "https://www.hrewheels.com/de/abe/bmw-g20",
+      "documentUrl": "https://www.hrewheels.com/media/abe/kba_48765_g20.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Rotiform",
+      "model": "KPS",
+      "sizes": ["9Jx19 ET30", "9.5Jx20 ET28", "10Jx21 ET25"],
+      "approvalNumber": "TUEV Sued SX E1 123987",
+      "approvalType": "TEILEGUTACHTEN",
+      "validFrom": "2020-03-15",
+      "vehicles": ["Audi B9 A4 (2016-2023)", "Audi B9 A5 (2017-2024)", "VW Golf VII GTI (2013-2020)"],
+      "restrictions": [
+        "Eintragungspflichtig gemaess §19 StVZO",
+        "Max. Reifengroesse: 265/30 R20",
+        "Nur mit Raedern >= 18 Zoll",
+        "Mindestbodenfreiheit beladen: 100mm",
+        "Pruefung der Rad-/Radkastenfreiheit erforderlich"
+      ],
+      "sourceUrl": "https://www.rotiform.com/de/teilegutachten",
+      "documentUrl": "https://www.rotiform.com/media/tuv/tuev_sued_123987.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Vossen",
+      "model": "CVT",
+      "sizes": ["9Jx19 ET35", "9.5Jx20 ET32", "10Jx21 ET30"],
+      "approvalNumber": "KBA 49876",
+      "approvalType": "ABE",
+      "validFrom": "2022-01-20",
+      "vehicles": ["Mercedes W205 C-Klasse (2014-2021)", "Mercedes W213 E-Klasse (2016-2023)", "BMW G20 3er (2019-2025)"],
+      "restrictions": [
+        "Max. Reifengroesse: 275/30 R20 / 285/25 R21",
+        "Nur fuer Fahrzeuge mit AMG Line oder Sportfahrwerk",
+        "Spurverbreiterung max. +20mm pro Achse",
+        "Mindestbodenfreiheit beladen: 100mm",
+        "Radlast max. 780 kg"
+      ],
+      "sourceUrl": "https://www.vossenwheels.com/de/abe/mercedes-w205",
+      "documentUrl": "https://www.vossenwheels.com/media/abe/kba_49876.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    }
+  ]
+}
+

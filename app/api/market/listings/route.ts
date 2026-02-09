@@ -9,8 +9,41 @@ import { consumeRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 import { readJson } from '@/lib/validation'
 
-const APPROVAL_TYPES = new Set(['ABE', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'])
+const APPROVAL_TYPES = new Set(['ABE', 'ABG', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'])
 const TRUSTED_APPROVAL_TYPES = new Set(['EINTRAGUNG', 'EINZELABNAHME'])
+const LEGALITY_STATUSES = new Set([
+  'UNKNOWN',
+  'FULLY_LEGAL',
+  'REGISTRATION_REQUIRED',
+  'INSPECTION_REQUIRED',
+  'ILLEGAL',
+  'LEGAL_WITH_RESTRICTIONS',
+])
+
+function deriveListingLegalityFromModification(mod: {
+  legalityStatus?: string | null
+  legalityApprovalType?: string | null
+  legalityApprovalNumber?: string | null
+  legalitySourceId?: string | null
+  legalitySourceUrl?: string | null
+  legalityNotes?: string | null
+  legalityLastCheckedAt?: Date | null
+} | null) {
+  const statusRaw = String(mod?.legalityStatus || 'UNKNOWN').trim().toUpperCase()
+  const legalityStatus = LEGALITY_STATUSES.has(statusRaw) ? statusRaw : 'UNKNOWN'
+  return {
+    legalityStatus,
+    legalityApprovalType: mod?.legalityApprovalType ?? null,
+    legalityApprovalNumber: mod?.legalityApprovalNumber ?? null,
+    legalitySourceId: mod?.legalitySourceId ?? null,
+    legalitySourceUrl: mod?.legalitySourceUrl ?? null,
+    legalityNotes: mod?.legalityNotes ?? null,
+    legalityLastCheckedAt: mod?.legalityLastCheckedAt ?? null,
+    isFullyLegal: legalityStatus === 'FULLY_LEGAL' || legalityStatus === 'LEGAL_WITH_RESTRICTIONS',
+    requiresRegistration: legalityStatus === 'REGISTRATION_REQUIRED',
+    requiresInspection: legalityStatus === 'INSPECTION_REQUIRED',
+  }
+}
 
 function buildEvidence(listing: {
   media: { url: string }[]
@@ -113,6 +146,9 @@ export async function POST(req: Request) {
 
   let modificationId: string | null = null
   let carId: string | null = null
+  let legalitySnapshot:
+    | ReturnType<typeof deriveListingLegalityFromModification>
+    | null = null
   if (typeof modificationIdRaw === 'string' && modificationIdRaw.trim()) {
     modificationId = modificationIdRaw.trim()
     const mod = await prisma.modification.findFirst({
@@ -120,7 +156,17 @@ export async function POST(req: Request) {
         id: modificationId,
         logEntry: { car: { garage: { userId: session.user.id } } },
       },
-      select: { id: true, logEntry: { select: { carId: true } } },
+      select: {
+        id: true,
+        legalityStatus: true,
+        legalityApprovalType: true,
+        legalityApprovalNumber: true,
+        legalitySourceId: true,
+        legalitySourceUrl: true,
+        legalityNotes: true,
+        legalityLastCheckedAt: true,
+        logEntry: { select: { carId: true } },
+      },
     })
 
     if (!mod) {
@@ -128,6 +174,7 @@ export async function POST(req: Request) {
     }
 
     carId = mod.logEntry.carId
+    legalitySnapshot = deriveListingLegalityFromModification(mod)
   }
 
   try {
@@ -143,6 +190,7 @@ export async function POST(req: Request) {
         mileageOnCar: mileageOnCar === null ? null : Math.floor(mileageOnCar),
         carId,
         modificationId,
+        ...(legalitySnapshot || deriveListingLegalityFromModification(null)),
         media: persistedImages.length > 0
           ? {
               create: persistedImages.map((url) => ({
@@ -201,8 +249,42 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const legalityStatus = (searchParams.get('legalityStatus') || '')
+    .split(',')
+    .map((s) => s.trim().toUpperCase())
+    .filter((s) => LEGALITY_STATUSES.has(s))
+  const minPriceRaw = searchParams.get('minPrice')
+  const maxPriceRaw = searchParams.get('maxPrice')
+  const conditionsRaw = (searchParams.get('condition') || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  const brands = (searchParams.get('brands') || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+
+  const minPrice = minPriceRaw ? Number(minPriceRaw) : null
+  const maxPrice = maxPriceRaw ? Number(maxPriceRaw) : null
+  type ParsedCondition = Exclude<ReturnType<typeof parseListingCondition>, null>
+  const conditions = conditionsRaw
+    .map((c) => parseListingCondition(c))
+    .filter((c): c is ParsedCondition => Boolean(c))
+
+  const where: any = {}
+  if (legalityStatus.length) where.legalityStatus = { in: legalityStatus }
+  if (Number.isFinite(minPrice) || Number.isFinite(maxPrice)) {
+    where.price = {}
+    if (Number.isFinite(minPrice)) where.price.gte = minPrice
+    if (Number.isFinite(maxPrice)) where.price.lte = maxPrice
+  }
+  if (conditions.length) where.condition = { in: conditions }
+  if (brands.length) where.modification = { is: { brand: { in: brands } } }
+
   const listings = await prisma.partListing.findMany({
+    where,
     orderBy: { createdAt: 'desc' },
     include: {
       seller: { select: { id: true, name: true } },

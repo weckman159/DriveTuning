@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { TuvBadge } from '@/components/TuvBadge'
+import { LegalityBadge } from '@/components/LegalityBadge'
 import MarketSoonBanner from '@/components/MarketSoonBanner'
 import ImageLightbox from '@/components/ImageLightbox'
 
@@ -19,6 +20,9 @@ type Listing = {
   images?: string[]
   evidenceScore?: number
   evidenceTier?: 'GOLD' | 'SILVER' | 'BRONZE' | 'NONE'
+  legalityStatus?: 'UNKNOWN' | 'FULLY_LEGAL' | 'REGISTRATION_REQUIRED' | 'INSPECTION_REQUIRED' | 'ILLEGAL' | string
+  legalityApprovalType?: string | null
+  legalityApprovalNumber?: string | null
   seller: { id: string; name: string | null }
   modification?: {
     category?: string
@@ -47,6 +51,7 @@ export default function MarketPage() {
   const [selectedMake, setSelectedMake] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedCondition, setSelectedCondition] = useState('')
+  const [selectedLegality, setSelectedLegality] = useState<string[]>([])
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
   const [sortBy, setSortBy] = useState<'newest' | 'price_asc' | 'price_desc'>('newest')
   const [verifiedOnly, setVerifiedOnly] = useState(false)
@@ -75,6 +80,10 @@ export default function MarketPage() {
     if (selectedMake && listing.car?.make !== selectedMake) return false
     if (selectedCategory && listing.modification?.category !== selectedCategory) return false
     if (selectedCondition && listing.condition !== selectedCondition) return false
+    if (selectedLegality.length) {
+      const status = String(listing.legalityStatus || 'UNKNOWN').toUpperCase()
+      if (!selectedLegality.includes(status)) return false
+    }
     if (listing.price < priceRange[0] || listing.price > priceRange[1]) return false
     if (verifiedOnly && (listing.evidenceScore || 0) < 70) return false
     return true
@@ -129,6 +138,36 @@ export default function MarketPage() {
             />
             Nur bestaetigt (&gt;= 70%)
           </label>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-zinc-300">Legalitaet</label>
+          <div className="space-y-1 text-sm text-zinc-300">
+            {[
+              { id: 'FULLY_LEGAL', label: 'OK (ABE/ECE/ABG/EBE)' },
+              { id: 'REGISTRATION_REQUIRED', label: 'Eintragung noetig' },
+              { id: 'INSPECTION_REQUIRED', label: 'Einzelabnahme (21)' },
+              { id: 'ILLEGAL', label: 'Nicht zulaessig' },
+              { id: 'UNKNOWN', label: 'Ungeprueft' },
+            ].map((opt) => (
+              <label key={opt.id} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedLegality.includes(opt.id)}
+                  onChange={(e) => {
+                    setSelectedLegality((prev) => {
+                      if (e.target.checked) return [...prev, opt.id]
+                      return prev.filter((x) => x !== opt.id)
+                    })
+                  }}
+                />
+                <span>{opt.label}</span>
+              </label>
+            ))}
+          </div>
+          <div className="text-xs text-zinc-500">
+            Hinweis: Status ist eine Hilfe, keine Rechtsberatung.
+          </div>
         </div>
 
         {/* Make Filter */}
@@ -223,12 +262,13 @@ export default function MarketPage() {
         </div>
 
         {/* Clear Filters */}
-        {(selectedMake || selectedCategory || selectedCondition) && (
+        {(selectedMake || selectedCategory || selectedCondition || selectedLegality.length) && (
           <button
             onClick={() => {
               setSelectedMake('')
               setSelectedCategory('')
               setSelectedCondition('')
+              setSelectedLegality([])
               setPriceRange([0, 10000])
             }}
             className="w-full px-4 py-2 btn-secondary"
@@ -346,15 +386,25 @@ export default function MarketPage() {
                        <span>• {listing.mileageOnCar.toLocaleString()} km</span>
                      )}
                    </div>
-                   <div className="flex items-center justify-between pt-2">
-                     <div className="flex items-center gap-1 text-zinc-500 text-sm">
-                      <span>@{listing.seller.name || 'Verkaeufer'}</span>
-                     </div>
-                     {listing.modification?.tuvStatus && (
-                       <TuvBadge status={listing.modification.tuvStatus} className="text-xs px-2 py-0.5" />
-                     )}
-                  </div>
-                </div>
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center gap-1 text-zinc-500 text-sm">
+                       <span>@{listing.seller.name || 'Verkaeufer'}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {listing.legalityStatus && (
+                          <LegalityBadge
+                            status={listing.legalityStatus}
+                            approvalType={listing.legalityApprovalType || null}
+                            approvalNumber={listing.legalityApprovalNumber || null}
+                            className="text-xs px-2 py-0.5"
+                          />
+                        )}
+                        {listing.modification?.tuvStatus && (
+                          <TuvBadge status={listing.modification.tuvStatus} className="text-xs px-2 py-0.5" />
+                        )}
+                      </div>
+                   </div>
+                 </div>
               </Link>
                 )
               })()

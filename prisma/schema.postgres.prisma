@@ -18,6 +18,7 @@ model User {
   accounts         Account[]
   sessions         Session[]
   privacySettings  UserPrivacySettings?
+  profile          UserProfile?
   garages          Garage[]
   partListings     PartListing[]
   marketBuyerConversations MarketConversation[] @relation("MarketConversationBuyer")
@@ -29,6 +30,7 @@ model User {
   stripeConnectAccount StripeConnectAccount?
   eventAttendances EventAttendance[]
   documents        Document[]
+  legalityContributions LegalityContribution[]
   shareLinks       ShareLink[]
   passwordResets   PasswordResetToken[]
   createdAt        DateTime             @default(now())
@@ -106,6 +108,27 @@ model UserPrivacySettings {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model UserProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  username          String?  @unique
+  usernameChangedAt DateTime?
+
+  bio       String?
+  location  String?
+  website   String?
+  instagram String?
+  twitter   String?
+  youtube   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([username])
+}
+
 model Brand {
   id        String   @id @default(cuid())
   name      String   @unique
@@ -169,6 +192,8 @@ model Car {
   tsn            String?
   carVariantId   String?
   year           Int?
+  stateId        String?
+  registrationPlate String?
   transmission   String?
   engineCode     String?
   factoryHp      Int?
@@ -194,6 +219,8 @@ model Car {
   documents        Document[]
   shareLinks       ShareLink[]
   tasks            BuildTask[]
+
+  @@index([stateId])
 }
 
 model BuildTask {
@@ -249,16 +276,90 @@ model Modification {
   category     String
   price        Float?
   tuvStatus    String
+  userParametersJson String?
   installedAt      DateTime?
   installedMileage Int?
   removedAt        DateTime?
   removedMileage   Int?
   evidenceScore    Int @default(0)
+
+  // Legality snapshot (DE/EU). Stored as hints/status, not as legal advice.
+  legalityStatus         String   @default("UNKNOWN")
+  legalityApprovalType   String?
+  legalityApprovalNumber String?
+  legalitySourceId       String?
+  legalitySourceUrl      String?
+  legalityNotes          String?
+  legalityLastCheckedAt  DateTime?
+  legalityReferenceId    String?
   partListings PartListing[]
   documents    Document[]
   approvalDocuments ApprovalDocument[]
+  legalityContributions LegalityContribution[]
 
   logEntry LogEntry @relation(fields: [logEntryId], references: [id], onDelete: Cascade)
+  legalityReference LegalityReference? @relation(fields: [legalityReferenceId], references: [id], onDelete: SetNull)
+
+  @@index([legalityStatus])
+  @@index([legalityApprovalType])
+  @@index([legalityApprovalNumber])
+  @@index([legalityReferenceId])
+}
+
+model LegalityReference {
+  id                  String   @id @default(cuid())
+  fingerprint          String   @unique
+  brand               String
+  partName             String
+  category             String
+  subcategory          String?
+  vehicleCompatibility String?
+  approvalType         String
+  approvalNumber       String?
+  sourceId             String
+  sourceUrl            String?
+  restrictionsJson     String?
+  notesDe              String?
+  notesEn              String?
+  validFrom            DateTime?
+  validUntil           DateTime?
+  isSynthetic          Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  modifications Modification[]
+
+  @@index([brand])
+  @@index([category])
+  @@index([subcategory])
+  @@index([approvalType])
+  @@index([approvalNumber])
+}
+
+model LegalityContribution {
+  id             String   @id @default(cuid())
+  userId         String
+  modificationId String
+  approvalType   String
+  approvalNumber String?
+  inspectionOrg  String
+  inspectionDate DateTime
+  notes          String?
+  status         String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  isAnonymous    Boolean  @default(true)
+  hasDocuments   Boolean  @default(false)
+  reviewedAt     DateTime?
+  reviewedBy     String?
+  rejectionReason String?
+  createdAt      DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  modification Modification @relation(fields: [modificationId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([modificationId])
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model PartListing {
@@ -271,6 +372,17 @@ model PartListing {
   price          Float
   condition      String
   mileageOnCar   Int?
+  // Legality snapshot (DE/EU) for marketplace listing. Copied from linked Modification.
+  legalityStatus         String   @default("UNKNOWN")
+  legalityApprovalType   String?
+  legalityApprovalNumber String?
+  legalitySourceId       String?
+  legalitySourceUrl      String?
+  legalityNotes          String?
+  legalityLastCheckedAt  DateTime?
+  isFullyLegal           Boolean  @default(false)
+  requiresRegistration   Boolean  @default(false)
+  requiresInspection     Boolean  @default(false)
   status         String   @default("ACTIVE")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -282,6 +394,13 @@ model PartListing {
   shareLinks   ShareLink[]
   marketConversations MarketConversation[]
   orders      MarketOrder[]
+
+  @@index([legalityStatus])
+  @@index([legalityApprovalType])
+  @@index([legalityApprovalNumber])
+  @@index([isFullyLegal])
+  @@index([requiresRegistration])
+  @@index([requiresInspection])
 }
 
 model PartListingMedia {
@@ -477,11 +596,17 @@ model Event {
   dateEnd        DateTime?
   locationRegion String
   locationName   String
+  stateId        String?
+  visibility     String   @default("PUBLIC") // PUBLIC | UNLISTED
   brandFilter    String?
   status         String   @default("UPCOMING")
   createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   attendances EventAttendance[]
+
+  @@index([stateId])
+  @@index([visibility])
 }
 
 model EventAttendance {

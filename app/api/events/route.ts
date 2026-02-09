@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { getStateNameById } from '@/lib/places-dictionary'
 
 export async function GET() {
   const events = await prisma.event.findMany({
@@ -30,6 +31,8 @@ export async function POST(req: Request) {
   const dateEndRaw = (body as any).dateEnd
   const locationRegion = typeof (body as any).locationRegion === 'string' ? (body as any).locationRegion.trim() : ''
   const locationName = typeof (body as any).locationName === 'string' ? (body as any).locationName.trim() : ''
+  const stateIdRaw = (body as any).stateId
+  const visibilityRaw = (body as any).visibility
   const brandFilter =
     (body as any).brandFilter === null || (body as any).brandFilter === undefined
       ? null
@@ -54,6 +57,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Ungueltiges Enddatum' }, { status: 400 })
   }
 
+  const stateId =
+    stateIdRaw === null || stateIdRaw === undefined
+      ? null
+      : typeof stateIdRaw === 'string'
+        ? stateIdRaw.trim().toUpperCase()
+        : ''
+  if (stateId && (!/^[A-Z]{2}$/.test(stateId) || !getStateNameById(stateId))) {
+    return NextResponse.json({ error: 'Ungueltiges Bundesland (stateId)' }, { status: 400 })
+  }
+
+  const visibility =
+    typeof visibilityRaw === 'string' ? visibilityRaw.trim().toUpperCase() : 'PUBLIC'
+  if (visibility !== 'PUBLIC' && visibility !== 'UNLISTED') {
+    return NextResponse.json({ error: 'Ungueltige Sichtbarkeit' }, { status: 400 })
+  }
+
   const event = await prisma.event.create({
     data: {
       title,
@@ -62,6 +81,8 @@ export async function POST(req: Request) {
       dateEnd,
       locationRegion,
       locationName,
+      stateId: stateId || null,
+      visibility,
       brandFilter,
       status: 'UPCOMING',
     },

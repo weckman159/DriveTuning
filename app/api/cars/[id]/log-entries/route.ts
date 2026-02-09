@@ -8,8 +8,9 @@ import { persistImages } from '@/lib/image-storage'
 import { persistDocumentDataUrl } from '@/lib/blob-storage'
 import { z } from 'zod'
 import { readJson } from '@/lib/validation'
+import { recomputeAndPersistModificationLegality } from '@/lib/legality/validator'
 
-const APPROVAL_TYPES = ['ABE', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'] as const
+const APPROVAL_TYPES = ['ABE', 'ABG', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'] as const
 
 const bodySchema = z.object({
   type: z.string(),
@@ -25,6 +26,10 @@ const bodySchema = z.object({
       category: z.string().trim().min(1).max(40),
       price: z.union([z.number(), z.string()]).optional().nullable(),
       tuvStatus: z.string(),
+      userParameters: z
+        .record(z.union([z.string(), z.number(), z.boolean(), z.null()]))
+        .optional()
+        .nullable(),
       installedAt: z.string().trim().optional().nullable(),
       installedMileage: z.union([z.number(), z.string()]).optional().nullable(),
       removedAt: z.string().trim().optional().nullable(),
@@ -62,6 +67,17 @@ function parseOptionalDate(input: unknown): Date | null {
   const d = new Date(raw)
   if (Number.isNaN(d.getTime())) return null
   return d
+}
+
+function safeStringifyUserParameters(input: unknown): string | null {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null
+  try {
+    const json = JSON.stringify(input)
+    if (!json || json.length > 4000) return null
+    return json
+  } catch {
+    return null
+  }
 }
 
 export async function POST(
@@ -232,6 +248,7 @@ export async function POST(
                       ? null
                       : Number(modification.price),
                   tuvStatus: parseTuvStatus(modification.tuvStatus) || 'YELLOW_ABE',
+                  userParametersJson: safeStringifyUserParameters((modification as any).userParameters),
                   installedAt: parseOptionalDate(modification.installedAt),
                   installedMileage:
                     modification.installedMileage === null || modification.installedMileage === undefined || modification.installedMileage === ''
@@ -306,6 +323,42 @@ export async function POST(
 
     return { logEntry, createdDocs }
   })
+
+  // Best-effort legality snapshot for the created modification (if any).
+  const createdModificationId = created.logEntry?.modifications?.[0]?.id
+  if (createdModificationId) {
+    try {
+      const updated = await recomputeAndPersistModificationLegality(createdModificationId)
+      if (updated && (updated.legalityStatus === 'REGISTRATION_REQUIRED' || updated.legalityStatus === 'INSPECTION_REQUIRED')) {
+        const title = `TUEV: Eintragung fuer ${updated.brand ? `${updated.brand} ` : ''}${updated.partName}`.trim()
+        const existing = await prisma.buildTask.findFirst({
+          where: {
+            carId,
+            title,
+            status: { in: ['TODO', 'IN_PROGRESS'] },
+          },
+          select: { id: true },
+        })
+        if (!existing) {
+          await prisma.buildTask.create({
+            data: {
+              carId,
+              title,
+              description:
+                updated.legalityStatus === 'REGISTRATION_REQUIRED'
+                  ? 'Teilegutachten/Eintragung: Termin bei TUEV/DEKRA/GTUE planen und Eintragung dokumentieren.'
+                  : 'Einzelabnahme/Pruefung: Vorab abstimmen, Unterlagen sammeln und Ergebnis dokumentieren.',
+              category: 'LEGAL',
+              status: 'TODO',
+              dueAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            },
+          })
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   return NextResponse.json(
     {

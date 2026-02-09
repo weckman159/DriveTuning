@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { TuvBadge } from '@/components/TuvBadge'
 import NewEntryForm from '@/components/NewEntryForm'
+import PlaceSuggestInput from '@/components/PlaceSuggestInput'
 import { convertImageFileToWebpDataUrl, estimateDataUrlBytes } from '@/lib/client-image'
 import ImageLightbox from '@/components/ImageLightbox'
 
@@ -15,7 +16,12 @@ type LogEntry = {
   title: string
   type: 'MODIFICATION' | 'MAINTENANCE' | 'TRACK_DAY' | 'DYNO'
   totalCostImpact: number | string | null
-  modifications: { id: string; tuvStatus: 'GREEN_REGISTERED' | 'YELLOW_ABE' | 'RED_RACING' }[]
+  modifications: {
+    id: string
+    tuvStatus: 'GREEN_REGISTERED' | 'YELLOW_ABE' | 'RED_RACING'
+    legalityStatus?: 'UNKNOWN' | 'FULLY_LEGAL' | 'REGISTRATION_REQUIRED' | 'INSPECTION_REQUIRED' | 'ILLEGAL' | string
+    legalityApprovalType?: string | null
+  }[]
 }
 
 type Car = {
@@ -25,6 +31,8 @@ type Car = {
   model: string
   generation: string | null
   year: number | null
+  stateId?: string | null
+  registrationPlate?: string | null
   projectGoal: 'DAILY' | 'TRACK' | 'SHOW' | 'RESTORATION'
   visibility: 'PUBLIC' | 'UNLISTED' | 'PRIVATE'
   buildStatus: 'IN_PROGRESS' | 'TUV_READY' | 'TRACK_READY' | 'DAILY_READY'
@@ -126,10 +134,31 @@ const tuvReadinessToneClass: Record<TuvReadiness['status'], string> = {
 
 const documentTypeLabels: Record<string, string> = {
   ABE: 'ABE',
+  ABG: 'ABG',
   EINTRAGUNG: 'Eintragung',
   RECEIPT: 'Beleg',
   SERVICE: 'Service',
   OTHER: 'Sonstiges',
+}
+
+function LegalityBadge(props: { status?: string; approvalType?: string | null }) {
+  const status = String(props.status || 'UNKNOWN').toUpperCase()
+  const approvalType = props.approvalType ? String(props.approvalType) : null
+
+  const base = 'px-2 py-0.5 border text-xs rounded'
+  if (status === 'FULLY_LEGAL') {
+    return <span className={`${base} border-green-400/20 bg-green-500/10 text-green-200`}>{approvalType || 'LEGAL'}</span>
+  }
+  if (status === 'REGISTRATION_REQUIRED') {
+    return <span className={`${base} border-amber-400/20 bg-amber-500/10 text-amber-200`}>{approvalType || 'EINTRAGUNG'}</span>
+  }
+  if (status === 'INSPECTION_REQUIRED') {
+    return <span className={`${base} border-orange-400/20 bg-orange-500/10 text-orange-200`}>{approvalType || 'PRUEFUNG'}</span>
+  }
+  if (status === 'ILLEGAL') {
+    return <span className={`${base} border-red-400/20 bg-red-500/10 text-red-200`}>RISIKO</span>
+  }
+  return <span className={`${base} border-white/10 bg-white/5 text-zinc-200`}>{approvalType || 'CHECK'}</span>
 }
 
 function QuickActionTile(props: { href: string; label: string; icon: ReactNode; iconToneClass: string }) {
@@ -191,6 +220,9 @@ export default function CarPage() {
   const [shareExpiresInDays, setShareExpiresInDays] = useState<0 | 7 | 30>(30)
   const [visibility, setVisibility] = useState<Car['visibility']>('UNLISTED')
   const [buildStatus, setBuildStatus] = useState<Car['buildStatus']>('IN_PROGRESS')
+  const [stateId, setStateId] = useState<string | null>(null)
+  const [stateName, setStateName] = useState('')
+  const [registrationPlate, setRegistrationPlate] = useState('')
   const [savingMeta, setSavingMeta] = useState(false)
   const [metaError, setMetaError] = useState<string | null>(null)
   const [tasks, setTasks] = useState<BuildTask[]>([])
@@ -234,6 +266,21 @@ export default function CarPage() {
       setTuvReadiness(data?.tuvReadiness || null)
       setForSale(!!data.car.forSale)
       setAskingPrice(data.car.askingPrice ? String(data.car.askingPrice) : '')
+
+      const sid = typeof data.car.stateId === 'string' ? String(data.car.stateId).trim().toUpperCase() : null
+      setStateId(sid)
+      setRegistrationPlate(typeof data.car.registrationPlate === 'string' ? String(data.car.registrationPlate) : '')
+      if (sid) {
+        fetch(`/api/dictionary/places?type=state&q=${encodeURIComponent(sid)}&limit=5`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            const list = Array.isArray(d?.suggestions) ? d.suggestions : []
+            const match = list.find((s: any) => String(s?.id || '').toUpperCase() === sid) || list[0]
+            if (match?.value) setStateName((cur) => (cur.trim() ? cur : String(match.value)))
+          })
+          .catch(() => {})
+      }
+
       if (data.car.visibility === 'PUBLIC' || data.car.visibility === 'UNLISTED' || data.car.visibility === 'PRIVATE') {
         setVisibility(data.car.visibility)
       }
@@ -564,7 +611,12 @@ export default function CarPage() {
       const res = await fetch(`/api/cars/${carId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visibility, buildStatus }),
+        body: JSON.stringify({
+          visibility,
+          buildStatus,
+          stateId: stateId || null,
+          registrationPlate: registrationPlate.trim() ? registrationPlate.trim().toUpperCase() : null,
+        }),
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
@@ -1053,11 +1105,11 @@ export default function CarPage() {
         )}
         {heroError && <p className="text-red-400 text-sm mt-2">{heroError}</p>}
         {shareError && <p className="text-red-400 text-sm mt-2">{shareError}</p>}
-        <div id="settings" className="mt-4 pt-4 border-t border-white/10 scroll-mt-24">
-          <p className="text-sm text-zinc-400 mb-2">Build-Passport Einstellungen</p>
-          <div className="flex flex-wrap gap-3 items-end">
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">Sichtbarkeit</label>
+          <div id="settings" className="mt-4 pt-4 border-t border-white/10 scroll-mt-24">
+            <p className="text-sm text-zinc-400 mb-2">Build-Passport Einstellungen</p>
+            <div className="flex flex-wrap gap-3 items-end">
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Sichtbarkeit</label>
               <select
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as Car['visibility'])}
@@ -1066,10 +1118,10 @@ export default function CarPage() {
                 <option value="PUBLIC">Oeffentlich</option>
                 <option value="UNLISTED">Nicht gelistet (Link)</option>
                 <option value="PRIVATE">Privat (nur ich)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">Build-Status</label>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Build-Status</label>
               <select
                 value={buildStatus}
                 onChange={(e) => setBuildStatus(e.target.value as Car['buildStatus'])}
@@ -1079,18 +1131,53 @@ export default function CarPage() {
                 <option value="TUV_READY">TUEV bereit</option>
                 <option value="TRACK_READY">Track bereit</option>
                 <option value="DAILY_READY">Alltag bereit</option>
-              </select>
+                </select>
+              </div>
+              <div className="min-w-[240px]">
+                <PlaceSuggestInput
+                  type="state"
+                  label="Bundesland (optional)"
+                  value={stateName}
+                  onChange={(v) => setStateName(v)}
+                  onSelect={(s) => {
+                    const next = String(s.stateId || s.id || '').trim().toUpperCase()
+                    setStateId(next || null)
+                  }}
+                  placeholder="z.B. Bayern (BY)"
+                  inputClassName="px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white w-full"
+                />
+                {stateId ? <p className="mt-1 text-xs text-zinc-500">Code: {stateId}</p> : null}
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Kennzeichen (Kuerzel)</label>
+                <input
+                  value={registrationPlate}
+                  onChange={(e) => setRegistrationPlate(e.target.value)}
+                  placeholder="z.B. M"
+                  className="px-3 py-2 bg-zinc-900/60 border border-white/10 rounded text-white w-40"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setStateId(null)
+                  setStateName('')
+                }}
+                className="px-3 py-2 btn-secondary text-sm"
+                title="Bundesland leeren"
+              >
+                Reset Region
+              </button>
+              <button
+                onClick={saveVisibilityAndStatus}
+                disabled={savingMeta}
+                className="px-4 py-2 bg-sky-500 hover:bg-sky-400 disabled:bg-sky-500/50 text-white font-semibold rounded-lg transition-colors"
+              >
+                {savingMeta ? 'Speichere...' : 'Einstellungen speichern'}
+              </button>
             </div>
-            <button
-              onClick={saveVisibilityAndStatus}
-              disabled={savingMeta}
-              className="px-4 py-2 bg-sky-500 hover:bg-sky-400 disabled:bg-sky-500/50 text-white font-semibold rounded-lg transition-colors"
-            >
-              {savingMeta ? 'Speichere...' : 'Build-Einstellungen speichern'}
-            </button>
+            {metaError && <p className="text-red-400 text-sm mt-2">{metaError}</p>}
           </div>
-          {metaError && <p className="text-red-400 text-sm mt-2">{metaError}</p>}
-        </div>
         <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/10">
           <div className="flex items-center gap-2">
             <input
@@ -1152,6 +1239,12 @@ export default function CarPage() {
                       {entry.type.replace('_', ' ')}
                     </span>
                     {entry.modifications[0]?.tuvStatus && <TuvBadge status={entry.modifications[0].tuvStatus} />}
+                    {entry.modifications[0]?.id && (
+                      <LegalityBadge
+                        status={entry.modifications[0]?.legalityStatus}
+                        approvalType={entry.modifications[0]?.legalityApprovalType}
+                      />
+                    )}
                     {entry.totalCostImpact && (
                       <span className="px-2 py-0.5 border border-white/10 bg-white/5 text-zinc-200 text-xs rounded">
                         €{Number(entry.totalCostImpact).toLocaleString()}
@@ -1160,16 +1253,26 @@ export default function CarPage() {
                   </div>
                   <h3 className="text-lg font-medium text-white">{entry.title}</h3>
                   {entry.type === 'MODIFICATION' && (
-                    <Link
-                      href={
-                        entry.modifications[0]?.id
-                          ? `/market/new?modificationId=${entry.modifications[0].id}`
-                          : `/market/new?carId=${carId || car.id}`
-                      }
-                      className="inline-block mt-2 text-sm text-sky-400 hover:text-sky-300"
-                    >
-                      Dieses Teil verkaufen →
-                    </Link>
+                    <div className="mt-2 flex flex-wrap gap-4">
+                      <Link
+                        href={
+                          entry.modifications[0]?.id
+                            ? `/market/new?modificationId=${entry.modifications[0].id}`
+                            : `/market/new?carId=${carId || car.id}`
+                        }
+                        className="text-sm text-sky-400 hover:text-sky-300"
+                      >
+                        Dieses Teil verkaufen →
+                      </Link>
+                      {entry.modifications[0]?.id ? (
+                        <Link
+                          href={`/modifications/${entry.modifications[0].id}/contribute`}
+                          className="text-sm text-emerald-300 hover:text-emerald-200"
+                        >
+                          TUEV bestanden? Erfahrung teilen →
+                        </Link>
+                      ) : null}
+                    </div>
                   )}
                 </div>
               </div>

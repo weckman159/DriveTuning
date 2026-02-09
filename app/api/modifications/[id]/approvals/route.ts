@@ -8,7 +8,7 @@ import { parseElementVisibilityOrDefault } from '@/lib/vocab'
 import { consumeRateLimit } from '@/lib/rate-limit'
 import { readJson } from '@/lib/validation'
 
-const APPROVAL_TYPES = ['ABE', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'] as const
+const APPROVAL_TYPES = ['ABE', 'ABG', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'] as const
 
 const bodySchema = z.object({
   approvalType: z.enum(APPROVAL_TYPES),
@@ -141,4 +141,3 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   return NextResponse.json({ approval: created }, { status: 201 })
 }
-

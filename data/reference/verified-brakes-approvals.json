@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "version": "2026-02-09",
+    "country": "DE",
+    "status": "CANDIDATE_NOT_AUDITED",
+    "note": "User-provided 'verified' approvals. Do not treat as authoritative until audited against primary source documents (PDF/page) and/or official publication.",
+    "verificationPolicy": "PRIMARY_SOURCE_REQUIRED"
+  },
+  "verifiedApprovals": [
+    {
+      "brand": "Brembo",
+      "model": "GT Big Brake Kit 365mm",
+      "approvalNumber": "KBA 53789",
+      "approvalType": "ABE",
+      "validFrom": "2021-01-10",
+      "vehicles": ["BMW F30 3er (2012-2019)", "Audi B9 A4 (2016-2023)", "VW Golf VII R (2014-2020)"],
+      "restrictions": [
+        "Nur mit serienmaessigen oder ABE-zugelassenen Raedern >= 18 Zoll",
+        "Bremskraftverteilung muss im serienmaessigen Bereich bleiben",
+        "Min. Radfreigang: 3mm bei vollem Lenkeinschlag",
+        "Darf Radlast nicht um >5% veraendern",
+        "ABS/ESP muss fehlerfrei funktionieren"
+      ],
+      "sourceUrl": "https://www.brembo.com/de/aftermarket/produkte/big-brake-kits",
+      "documentUrl": "https://www.brembo.com/media/abe/kba_53789_f30.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "AP Racing",
+      "model": "Pro5000R 380mm",
+      "approvalNumber": "DEKRA TG 876543",
+      "approvalType": "TEILEGUTACHTEN",
+      "validFrom": "2019-11-30",
+      "vehicles": ["Audi A4 B9 (2016-2023)", "Audi A5 B9 (2017-2024)", "VW Golf VII GTI (2013-2020)"],
+      "restrictions": [
+        "Eintragungspflichtig",
+        "Nur mit Raedern >= 18 Zoll",
+        "Min. Radfreigang: 5mm bei vollem Lenkeinschlag",
+        "ABS/ESP muss fehlerfrei funktionieren",
+        "Bremskraftverteilung muss im serienmaessigen Bereich bleiben",
+        "Darf keine permanenten Fehlercodes erzeugen"
+      ],
+      "sourceUrl": "https://www.apracing.com/de/produkte/pro5000r",
+      "documentUrl": "https://www.apracing.com/media/tuv/dekra_tg_876543.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Alcon",
+      "model": "Sports Brake Kit 355mm",
+      "approvalNumber": "TUEV Nord TG 765432",
+      "approvalType": "TEILEGUTACHTEN",
+      "validFrom": "2020-08-15",
+      "vehicles": ["BMW F87 M2 (2016-2021)", "BMW F80 M3 (2014-2020)", "BMW F82 M4 (2014-2020)"],
+      "restrictions": [
+        "Eintragungspflichtig gemaess §19 StVZO",
+        "Nur mit Raedern >= 19 Zoll",
+        "Min. Radfreigang: 4mm bei vollem Lenkeinschlag",
+        "Bremskraftverteilung muss im serienmaessigen Bereich bleiben",
+        "ABS/ESP/DSC muss fehlerfrei funktionieren",
+        "Nicht zulaessig fuer Fahrzeuge mit serienmaessigem Keramik-Bremssystem"
+      ],
+      "sourceUrl": "https://www.alconcomponents.com/de/produkte/sports-brake-kits",
+      "documentUrl": "https://www.alconcomponents.com/media/tuv/tuev_nord_765432.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "StopTech",
+      "model": "STR4040 Big Brake Kit 355mm",
+      "approvalNumber": "KBA 54567",
+      "approvalType": "ABE",
+      "validFrom": "2022-03-01",
+      "vehicles": ["Porsche 991.2 Carrera (2016-2019)", "Porsche 992 Carrera (2019-2025)", "Audi B9 RS4 (2017-2024)"],
+      "restrictions": [
+        "Nur mit Raedern >= 19 Zoll",
+        "Min. Radfreigang: 5mm bei vollem Lenkeinschlag",
+        "Bremskraftverteilung muss im serienmaessigen Bereich bleiben",
+        "ABS/ESP muss fehlerfrei funktionieren",
+        "Darf Radlast nicht um >5% veraendern"
+      ],
+      "sourceUrl": "https://www.stoptech.com/de/produkte/big-brake-kits",
+      "documentUrl": "https://www.stoptech.com/media/abe/kba_54567_992.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    }
+  ]
+}
+

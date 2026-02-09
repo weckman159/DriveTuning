@@ -34,6 +34,7 @@ export default function EventDetailPage() {
 
   const [selectedCar, setSelectedCar] = useState('')
   const [status, setStatus] = useState<'IDLE' | 'LOADING' | 'SUCCESS'>('IDLE')
+  const [rsvpError, setRsvpError] = useState<string | null>(null)
   const [event, setEvent] = useState<EventItem | null>(null)
   const [cars, setCars] = useState<CarItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -75,6 +76,7 @@ export default function EventDetailPage() {
     if (!eventId) return
 
     setStatus('LOADING')
+    setRsvpError(null)
 
     try {
       const res = await fetch(`/api/events/${eventId}/rsvp`, {
@@ -84,11 +86,12 @@ export default function EventDetailPage() {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Anmeldung fehlgeschlagen')
+        throw new Error(data.message || data.error || 'Anmeldung fehlgeschlagen')
       }
       setStatus('SUCCESS')
     } catch (error) {
       console.error(error)
+      setRsvpError(error instanceof Error ? error.message : 'Anmeldung fehlgeschlagen')
       setStatus('IDLE')
     }
   }
@@ -272,6 +275,8 @@ export default function EventDetailPage() {
                     'Anmelden'
                   )}
                 </button>
+
+                {rsvpError ? <p className="text-sm text-red-400">{rsvpError}</p> : null}
 
                 <p className="text-xs text-zinc-500 text-center">
                   Kostenlose Stornierung bis 48 Stunden vor dem Event

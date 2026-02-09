@@ -15,6 +15,8 @@ export default function NewEventPage() {
     dateEnd: '',
     locationRegion: '',
     locationName: '',
+    stateId: '',
+    visibility: 'PUBLIC',
     brandFilter: '',
   })
   const [selectedStateId, setSelectedStateId] = useState<string | null>(null)
@@ -114,6 +116,7 @@ export default function NewEventPage() {
               }}
               onSelect={(s) => {
                 setSelectedStateId((s.stateId || s.id || '').toString() || null)
+                setFormData((prev) => ({ ...prev, stateId: (s.stateId || s.id || '').toString() || '' }))
                 // Reset dependent fields
                 setCityQuery('')
                 setSelectedCityId(null)
@@ -184,6 +187,20 @@ export default function NewEventPage() {
               <option key={brand} value={brand}>{brand}</option>
             ))}
           </select>
+        </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-zinc-300">Sichtbarkeit</label>
+          <select
+            value={formData.visibility}
+            onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
+            className="select-base"
+          >
+            <option value="PUBLIC">Oeffentlich</option>
+            <option value="UNLISTED">Nicht gelistet</option>
+          </select>
+          <p className="text-xs text-zinc-500">
+            Hinweis: Oeffentliche Events koennen strengere Regeln (z.B. Laermkontrollen) haben.
+          </p>
         </div>
 
         {error && <p className="text-red-400 text-sm">{error}</p>}

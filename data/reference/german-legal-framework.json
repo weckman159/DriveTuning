@@ -1,0 +1,153 @@
+{
+  "metadata": {
+    "country": "DE",
+    "version": "2026-02-09",
+    "lastUpdated": "2026-02-09T00:00:00Z",
+    "disclaimerDe": "Hinweis: Diese Datei dient nur als nicht-verbindliche Orientierung und ist keine Rechtsberatung. Massgeblich sind ausschliesslich die offiziellen Gesetzestexte und Beurteilungen durch Prueforganisationen (TUEV/DEKRA/GTUE) sowie zustaendige Behoerden.",
+    "disclaimerEn": "Note: This file is non-binding guidance only and not legal advice. Only official legal texts and assessments by accredited inspection bodies (TUV/DEKRA/GTU) and competent authorities are authoritative.",
+    "sources": [
+      {
+        "id": "gesetze_im_internet",
+        "name": "Gesetze im Internet (Bundesministerium der Justiz / Bundesamt fuer Justiz)",
+        "url": "https://www.gesetze-im-internet.de/"
+      },
+      {
+        "id": "unece",
+        "name": "UNECE Vehicle Regulations (context index)",
+        "url": "https://unece.org/transport/vehicle-regulations"
+      }
+    ]
+  },
+  "laws": [
+    {
+      "id": "stvzo",
+      "nameDe": "Strassenverkehrs-Zulassungs-Ordnung (StVZO)",
+      "nameEn": "Road Traffic Licensing Regulations (StVZO)",
+      "url": "https://www.gesetze-im-internet.de/stvzo/",
+      "keySections": [
+        {
+          "section": "§19",
+          "topicDe": "Betriebserlaubnis und Auswirkungen von Aenderungen (Kontext)",
+          "relevance": ["all_modifications", "registration", "inspection"]
+        },
+        {
+          "section": "§21",
+          "topicDe": "Einzelbetriebserlaubnis / Einzelabnahme (Kontext)",
+          "relevance": ["custom_parts", "race_parts", "inspection"]
+        },
+        {
+          "section": "§22",
+          "topicDe": "Bauartgenehmigung / Teile mit Genehmigung (Kontext)",
+          "relevance": ["wheels", "suspension", "exhaust", "brakes", "lighting"]
+        },
+        {
+          "section": "§30",
+          "topicDe": "Verkehrssicherheit / Laerm (Kontext)",
+          "relevance": ["exhaust", "engine", "intake"]
+        },
+        {
+          "section": "§32",
+          "topicDe": "Bauart / Abmessungen / Bodenfreiheit (Kontext)",
+          "relevance": ["suspension", "wheels", "aero"]
+        },
+        {
+          "section": "§35a",
+          "topicDe": "FuSSgaengerschutz / Innenausstattung (Kontext)",
+          "relevance": ["aero", "interior", "safety"]
+        }
+      ]
+    },
+    {
+      "id": "bimschg",
+      "nameDe": "Bundes-Immissionsschutzgesetz (BImSchG)",
+      "nameEn": "Federal Immission Control Act (BImSchG)",
+      "url": "https://www.gesetze-im-internet.de/bimschg/",
+      "keySections": [
+        {
+          "section": "(allgemein)",
+          "topicDe": "Immissionsschutz / Emissionen (Kontext)",
+          "relevance": ["exhaust", "ecu", "dpf", "egr"]
+        }
+      ]
+    },
+    {
+      "id": "fzv",
+      "nameDe": "Fahrzeug-Zulassungsverordnung (FZV)",
+      "nameEn": "Vehicle Registration Ordinance (FZV)",
+      "url": "https://www.gesetze-im-internet.de/fzv/",
+      "keySections": [
+        {
+          "section": "(allgemein)",
+          "topicDe": "Zulassungsdokumente / Eintragungen (Kontext)",
+          "relevance": ["registration", "documentation"]
+        }
+      ]
+    }
+  ],
+  "internationalStandards": [
+    {
+      "id": "unece_vehicle_regs",
+      "name": "UNECE Vehicle Regulations (context index)",
+      "url": "https://unece.org/transport/vehicle-regulations",
+      "relevance": ["lighting", "wheels", "noise", "visibility"]
+    }
+  ],
+  "ruleIdReferences": [
+    {
+      "ruleId": "min_clearance",
+      "refs": [
+        {
+          "lawId": "stvzo",
+          "section": "§30 / §32",
+          "notesDe": "Bodenfreiheit/Abmessungen sind in der Praxis eine Verkehrssicherheits- und Bauartfrage; massgeblich sind Auflagen im Gutachten/ABE sowie die Beurteilung durch die Prueforganisation.",
+          "notesEn": "Ground clearance/dimensions are typically treated as a safety/construction topic; always follow certificate restrictions and inspection body assessment."
+        }
+      ]
+    },
+    {
+      "ruleId": "track_width",
+      "refs": [
+        {
+          "lawId": "stvzo",
+          "section": "§19 (Kontext) / §32",
+          "notesDe": "Spur-/Rad-Reifen-Kombinationen koennen Aenderungsabnahmen/Eintragungen ausloesen; beachte Gutachten/ABE-Auflagen.",
+          "notesEn": "Track and wheel/tyre combinations can trigger inspection/registration requirements; follow certificate restrictions."
+        }
+      ]
+    },
+    {
+      "ruleId": "et_range",
+      "refs": [
+        {
+          "lawId": "stvzo",
+          "section": "§19 (Kontext) / §22 / §32",
+          "notesDe": "ET ausserhalb Gutachtenbereich ist typischerweise eine Auflagenabweichung (Kombinationswirkung).",
+          "notesEn": "Offset (ET) outside the certificate range is typically a restriction deviation (combination effects)."
+        }
+      ]
+    },
+    {
+      "ruleId": "noise",
+      "refs": [
+        {
+          "lawId": "stvzo",
+          "section": "§30 (Kontext)",
+          "notesDe": "Laerm/Abgasanlagen werden regelmaessig kontrolliert; Messverfahren und Grenzwerte haengen vom Fahrzeug und Pruefkontext ab.",
+          "notesEn": "Noise/exhaust systems are frequently checked; procedures/limits depend on vehicle and inspection context."
+        }
+      ]
+    },
+    {
+      "ruleId": "regional",
+      "refs": [
+        {
+          "lawId": "stvzo",
+          "section": "(Kontext)",
+          "notesDe": "Regionale Hinweise sind zusaetzliche Vollzugspraxis/Schwerpunkte (z.B. Umweltzonen, Laermkontrollen).",
+          "notesEn": "Regional hints reflect enforcement focus (e.g., low-emission zones, noise controls)."
+        }
+      ]
+    }
+  ]
+}
+

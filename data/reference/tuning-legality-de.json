@@ -1,0 +1,457 @@
+{
+  "country": "DE",
+  "version": "2026-02-09",
+  "lastUpdated": "2026-02-09T12:00:00Z",
+  "disclaimer": {
+    "titleDe": "Hinweis zur StVZO",
+    "bodyDe": "DriveTuning stellt technische Informationen bereit und kann Hinweise zu ABE/Teilegutachten/ECE geben, ersetzt aber nicht die Pruefung durch eine Prueforganisation (TUEV/DEKRA/GTUE) oder die Eintragung bei der Zulassungsstelle. Bei Zweifeln: immer Ruecksprache halten und die Originaldokumente mitfuehren.",
+    "titleEn": "StVZO notice",
+    "bodyEn": "DriveTuning provides technical information and can surface guidance around ABE/Teilegutachten/ECE, but it does not replace an official inspection (TUEV/DEKRA/GTUE) or registration. When in doubt, consult an inspection organization and keep original documents."
+  },
+  "sources": [
+    {
+      "id": "stvzo_gesetze_im_internet",
+      "name": "StVZO (gesetze-im-internet.de)",
+      "url": "https://www.gesetze-im-internet.de/stvzo_2012/BJNR067910012.html",
+      "notes": "Official consolidated StVZO text; use for definitions and section references."
+    },
+    {
+      "id": "stvzo_19",
+      "name": "StVZO §19 (Betriebserlaubnis)",
+      "url": "https://www.gesetze-im-internet.de/stvzo_2012/__19.html",
+      "notes": "Operating permit context (e.g., when it may become invalid after modifications)."
+    },
+    {
+      "id": "stvzo_21",
+      "name": "StVZO §21 Einzelnorm",
+      "url": "https://www.gesetze-im-internet.de/stvzo_2012/__21.html",
+      "notes": "Individual approval / Betriebserlaubnis for single vehicles (context for Einzelabnahme)."
+    },
+    {
+      "id": "stvzo_30c",
+      "name": "StVZO §30c (Vorstehende Außenkanten)",
+      "url": "https://www.gesetze-im-internet.de/stvzo_2012/__30c.html",
+      "notes": "Protruding outer edges/front protection systems; relevant for aero parts and sharp edges."
+    },
+    {
+      "id": "stvzo_47",
+      "name": "StVZO §47 (Abgase)",
+      "url": "https://www.gesetze-im-internet.de/stvzo_2012/__47.html",
+      "notes": "Exhaust emissions requirements and references to EU acts; relevant for ECU/exhaust modifications."
+    },
+    {
+      "id": "stvzo_49a",
+      "name": "StVZO §49a (Lichttechnische Einrichtungen)",
+      "url": "https://www.gesetze-im-internet.de/stvzo_2012/__49a.html",
+      "notes": "Lighting general principles; references UNECE R48 in the text."
+    },
+    {
+      "id": "unece_regulations",
+      "name": "UNECE Vehicle Regulations",
+      "url": "https://unece.org/transport/vehicle-regulations",
+      "notes": "ECE regulations and E-mark context (lighting, exhaust noise, etc.)."
+    },
+    {
+      "id": "kba_online",
+      "name": "KBA-Online services",
+      "url": "https://www.kba-online.de/",
+      "notes": "Official KBA online services (not a bulk public ABE/parts dataset)."
+    },
+    {
+      "id": "kba_downloads",
+      "name": "KBA Downloads (Typgenehmigung)",
+      "url": "https://www.kba.de/DE/Themen/Typgenehmigung/Zum_Herunterladen/zum_Herunterladen_node.html",
+      "notes": "Official KBA publications and guidance PDFs (e.g., notes on UN regulations)."
+    },
+    {
+      "id": "tuev_sued_info",
+      "name": "TUEV SUED (information pages)",
+      "url": "https://www.tuev-sued.de/de",
+      "notes": "Background reading; do not scrape without permission."
+    },
+    {
+      "id": "tuev_nord_info",
+      "name": "TUEV NORD (information pages)",
+      "url": "https://www.tuev-nord.de/",
+      "notes": "Background reading; do not scrape without permission."
+    },
+    {
+      "id": "dekra_info",
+      "name": "DEKRA (information pages)",
+      "url": "https://www.dekra.de/",
+      "notes": "Background reading; do not scrape without permission."
+    },
+    {
+      "id": "osram",
+      "name": "OSRAM Automotive (Night Breaker LED)",
+      "url": "https://www.osram.de/am/night-breaker-led/index.jsp",
+      "notes": "Manufacturer-published ABG certificates and product pages for retrofits (primary source)."
+    },
+    {
+      "id": "manufacturer",
+      "name": "Manufacturer documentation",
+      "url": null,
+      "notes": "Primary source for part approval numbers and PDFs. Store links and metadata; do not rehost copyrighted PDFs unless permitted."
+    }
+  ],
+  "approvalTypeDefinitions": {
+    "NONE": {
+      "nameDe": "Unbekannt/keine Angaben",
+      "nameEn": "Unknown/none",
+      "requiresInspection": null,
+      "requiresRegistration": null
+    },
+    "ABE": {
+      "nameDe": "Allgemeine Betriebserlaubnis",
+      "nameEn": "General Operating Permit",
+      "requiresInspection": false,
+      "requiresRegistration": false,
+      "notesDe": "Kann trotzdem Auflagen enthalten (z.B. Anbauabnahme oder Eintragung in Spezialfaellen). Immer ABE lesen.",
+      "notesEn": "May still contain restrictions (e.g., inspection/registration in special cases). Always read the ABE."
+    },
+    "ABG": {
+      "nameDe": "Allgemeine Bauartgenehmigung (KBA)",
+      "nameEn": "General type approval (KBA)",
+      "requiresInspection": false,
+      "requiresRegistration": false,
+      "notesDe": "Hauefig bei bestimmten Nachruest-Leuchtmitteln. In der Regel muss das ABG-Dokument mitgefuehrt werden und die Fahrzeug-Kompatibilitaet muss passen.",
+      "notesEn": "Often used for specific retrofit lighting. Usually you must carry the ABG document and the vehicle must be listed as compatible."
+    },
+    "EBE": {
+      "nameDe": "Einzelbetriebserlaubnis (Kontext)",
+      "nameEn": "Single vehicle operating permit (context)",
+      "requiresInspection": true,
+      "requiresRegistration": true,
+      "notesDe": "Begriff wird uneinheitlich verwendet. Fuer das Produktmodell: als Dokument/Ergebnis einer Pruefung betrachten und immer mit Originalunterlagen belegen.",
+      "notesEn": "Term usage varies. For product modeling: treat as an inspection outcome backed by original documents."
+    },
+    "TEILEGUTACHTEN": {
+      "nameDe": "Teilegutachten / Teilegenehmigung",
+      "nameEn": "Component certificate",
+      "requiresInspection": true,
+      "requiresRegistration": true,
+      "notesDe": "In der Praxis: Aenderungsabnahme nach §19(3) und anschliessend ggf. Eintragung.",
+      "notesEn": "In practice: modification inspection and then registration if required."
+    },
+    "EINZELABNAHME_21": {
+      "nameDe": "Einzelabnahme nach §21 StVZO",
+      "nameEn": "Individual approval §21 StVZO",
+      "requiresInspection": true,
+      "requiresRegistration": true,
+      "notesDe": "Wenn keine passenden Genehmigungen vorliegen oder Kombinationen/Abweichungen vorliegen.",
+      "notesEn": "Used when no appropriate approvals exist or for complex combinations/deviations."
+    },
+    "ECE": {
+      "nameDe": "ECE-Genehmigung (E-Kennzeichnung)",
+      "nameEn": "ECE approval (E-mark)",
+      "requiresInspection": false,
+      "requiresRegistration": false,
+      "notesDe": "Kommt auf Bauteil/Regelung und Auflagen an; Markierung und Unterlagen relevant.",
+      "notesEn": "Depends on component and conditions; marking and documentation matter."
+    },
+    "EINTRAGUNGSPFLICHTIG": {
+      "nameDe": "Eintragungspflichtig",
+      "nameEn": "Registration required",
+      "requiresInspection": true,
+      "requiresRegistration": true,
+      "notesDe": "Faellt typischerweise unter Aenderungsabnahme/Eintragung, wenn Dokumente oder Voraussetzungen fehlen.",
+      "notesEn": "Typically requires inspection/registration when docs or conditions are missing."
+    }
+  },
+  "approvalNumberPatterns": [
+    {
+      "id": "kba_number",
+      "label": "KBA number",
+      "pattern": "(?:KBA\\s*)?(\\d{4,6})",
+      "examples": ["KBA 12345", "12345"],
+      "notes": "Common for wheels/parts documents; actual formats vary by document type."
+    },
+    {
+      "id": "abg_marker",
+      "label": "ABG marker",
+      "pattern": "\\bABG\\b",
+      "examples": ["ABG"],
+      "notes": "ABG is a document marker, not necessarily a unique number by itself."
+    },
+    {
+      "id": "e_mark",
+      "label": "ECE E-mark",
+      "pattern": "\\bE\\d{1,2}\\b",
+      "examples": ["E1", "E4"],
+      "notes": "E-mark country codes; full approval ids can be longer and component-specific."
+    }
+  ],
+  "criticalRules": [
+    {
+      "id": "rule_stvzo_19",
+      "nameDe": "Erloschen der Betriebserlaubnis (Kontext)",
+      "nameEn": "Operating permit invalidation (context)",
+      "lawRefs": ["StVZO §19", "StVZO §22", "StVZO §22a"],
+      "descriptionDe": "Wenn Aenderungen sicherheits- oder umweltrelevante Eigenschaften beeinflussen und nicht ordnungsgemaess abgenommen/registriert werden, kann die Betriebserlaubnis erloeschen. Details haengen vom Teil und der Dokumentation ab.",
+      "descriptionEn": "If modifications affect safety/emissions and are not properly inspected/registered, the operating permit may become invalid. Details depend on the part and documentation."
+    },
+    {
+      "id": "rule_protruding_edges",
+      "nameDe": "Vorstehende Aussenkanten / scharfe Kanten (Kontext)",
+      "nameEn": "Protruding/sharp outer edges (context)",
+      "lawRefs": ["StVZO §30c", "StVZO §30"],
+      "descriptionDe": "Aerodynamikteile (Frontlippe/Splitter/Fluegel) duerfen keine gefaehrlichen vorstehenden Kanten erzeugen. Pruefe Auflagen (ABE/Teilegutachten) und die Anforderungen zu vorstehenden Aussenkanten.",
+      "descriptionEn": "Aero parts (front lips/splitters/wings) must not create dangerous protruding edges. Check certificate restrictions and rules on protruding outer edges."
+    },
+    {
+      "id": "rule_driver_visibility",
+      "nameDe": "Sichtfeld des Fahrers (Kontext)",
+      "nameEn": "Driver field of view (context)",
+      "lawRefs": ["UN R125 (context)", "StVZO §30"],
+      "descriptionDe": "Umbauten duerfen das Sichtfeld nicht unzulaessig einschraenken (z.B. hohe Spoilerkanten im direkten Sichtbereich). Im Zweifel: Prueforganisation fragen und die konkrete Regelung/Pruefvorgaben anwenden.",
+      "descriptionEn": "Modifications must not restrict the driver's field of view (e.g., tall wing elements in the direct line of sight). When in doubt, consult an inspection organization and apply the concrete test requirements."
+    },
+    {
+      "id": "rule_emissions",
+      "nameDe": "Abgasemissionen (Kontext)",
+      "nameEn": "Exhaust emissions (context)",
+      "lawRefs": ["StVZO §47", "StVZO §19"],
+      "descriptionDe": "Chiptuning/Abgas-Umbauten duerfen Emissionen nicht verschlechtern und muessen die passenden EU/UNECE Vorgaben einhalten. DPF/OPF/AGR-Delete und Abschalteinrichtungen sind in der Praxis ein Hochrisiko-Thema: fuer die Produktlogik immer als 'inspection required / likely illegal' flaggen bis belegte Dokumente vorliegen.",
+      "descriptionEn": "ECU tuning/exhaust changes must not worsen emissions and must comply with applicable EU/UNECE requirements. DPF/GPF/EGR deletes and defeat devices are high-risk: for product logic, flag as 'inspection required / likely illegal' unless backed by concrete documents."
+    },
+    {
+      "id": "rule_combination",
+      "nameDe": "Kombinationswirkung",
+      "nameEn": "Combination effects",
+      "lawRefs": ["StVZO §19", "StVZO §21"],
+      "descriptionDe": "Mehrere Umbauten koennen sich gegenseitig beeinflussen (z.B. Fahrwerk + Raeder). Dann kann statt Teilegutachten eine Einzelabnahme erforderlich werden.",
+      "descriptionEn": "Multiple modifications can interact (e.g., suspension + wheels). This can trigger an individual approval even if single parts have certificates."
+    }
+  ],
+  "categories": [
+    {
+      "id": "wheels",
+      "name": "Колеса и шины",
+      "nameDe": "Räder und Reifen",
+      "subcategories": [
+        {
+          "id": "alloy_wheels",
+          "name": "Диски",
+          "nameDe": "Felgen",
+          "approvalTypes": ["ABE", "TEILEGUTACHTEN", "ECE", "EINTRAGUNGSPFLICHTIG", "EINZELABNAHME_21"],
+          "criticalParameters": ["ET", "PCD", "Reifengroesse", "Radlast", "Spurplatten", "Freigaengigkeit"],
+          "items": [
+            {
+              "brand": "KBA",
+              "model": "Hinweisblatt: Umgang mit Pruefberichten/Typgenehmigungen gemaess UN-Regelung Nr. 124",
+              "approvalType": "ECE",
+              "approvalNumber": null,
+              "sourceId": "kba_downloads",
+              "sourceUrl": "https://www.kba.de/DE/Themen/Typgenehmigung/Zum_Herunterladen/ErteilungTypgenehmigungen/Ergaenzende_Empfehlungen/hinweisblatt_ECE_R124.pdf?__blob=publicationFile&v=2",
+              "vehicleCompatibility": "Guidance for wheel approvals under UN Regulation No. 124 (R124)",
+              "restrictions": [
+                "Guidance document (not a part approval for a specific wheel)",
+                "Always rely on the concrete ABE/Teilegutachten and vehicle fitment requirements for the actual wheel/tyre setup"
+              ],
+              "notesDe": "Offizielles Hinweisblatt des KBA zu UN R124 (Raeder). Nuetzlich als Hintergrundwissen fuer Felgen-Zulassung, ersetzt aber keine konkreten Gutachten fuer ein Felgenmodell.",
+              "notesEn": "Official KBA guidance document on UN R124 (wheels). Useful background, but it does not replace a concrete approval document for a specific wheel model.",
+              "parameters": {
+                "kind": "guidance",
+                "regulation": "UN R124"
+              }
+            }
+          ]
+        },
+        {
+          "id": "tires",
+          "name": "Шины",
+          "nameDe": "Reifen",
+          "approvalTypes": ["ECE", "ABE"],
+          "criticalParameters": ["Geschwindigkeitsindex", "Lastindex", "Dimension", "Tragfaehigkeit"],
+          "items": []
+        }
+      ]
+    },
+    {
+      "id": "suspension",
+      "name": "Подвеска",
+      "nameDe": "Fahrwerk",
+      "subcategories": [
+        {
+          "id": "springs",
+          "name": "Пружины",
+          "nameDe": "Federn",
+          "approvalTypes": ["ABE", "TEILEGUTACHTEN", "EINZELABNAHME_21"],
+          "criticalParameters": ["Tieferlegung", "Federweg", "Radlast", "Mindestbodenfreiheit"],
+          "items": []
+        },
+        {
+          "id": "coilovers",
+          "name": "Винтовая подвеска",
+          "nameDe": "Gewindefahrwerk",
+          "approvalTypes": ["ABE", "TEILEGUTACHTEN", "EINZELABNAHME_21"],
+          "criticalParameters": ["Tieferlegung", "Federweg", "Radlast", "Mindestbodenfreiheit", "SpurSturz"],
+          "items": []
+        }
+      ]
+    },
+    {
+      "id": "exhaust",
+      "name": "Выпуск",
+      "nameDe": "Abgasanlage",
+      "subcategories": [
+        {
+          "id": "catback",
+          "name": "Cat-back",
+          "nameDe": "Endschalldämpfer / Cat-back",
+          "approvalTypes": ["ABE", "TEILEGUTACHTEN", "ECE", "EINZELABNAHME_21"],
+          "criticalParameters": ["Geraeusch", "Markierung", "KatKonfiguration", "Klappensteuerung"],
+          "items": []
+        },
+        {
+          "id": "downpipe",
+          "name": "Даунпайп",
+          "nameDe": "Downpipe",
+          "approvalTypes": ["EINZELABNAHME_21", "EINTRAGUNGSPFLICHTIG"],
+          "criticalParameters": ["Kat", "OPF", "Emission", "OBD"],
+          "items": []
+        }
+      ]
+    },
+    {
+      "id": "lighting",
+      "name": "Свет",
+      "nameDe": "Beleuchtung",
+      "subcategories": [
+        {
+          "id": "bulbs",
+          "name": "Лампы",
+          "nameDe": "Leuchtmittel",
+          "approvalTypes": ["ECE", "ABE", "ABG", "EINTRAGUNGSPFLICHTIG"],
+          "criticalParameters": ["Sockel", "E-Kennzeichnung", "Kompatibilitaet", "Einbauhinweise"],
+          "items": [
+            {
+              "brand": "OSRAM",
+              "model": "NIGHT BREAKER W5W-LED (2825DWNB)",
+              "approvalType": "ABG",
+              "approvalNumber": null,
+              "sourceId": "osram",
+              "sourceUrl": "https://look.ams-osram.com/m/6b7950b5dbb2fe74/original/Certificate-Street-legal-Germany-2825DWNB.pdf",
+              "vehicleCompatibility": "W5W (universal), Germany street-legal per ABG certificate",
+              "restrictions": [
+                "ABG document must be carried (printout) where required",
+                "Follow the installation instructions and compatibility conditions in the ABG"
+              ],
+              "notesDe": "OSRAM stellt fuer dieses Produkt ein ABG-Zertifikat als PDF bereit. Die Zulassung/Kompatibilitaet und Auflagen sind dem ABG zu entnehmen.",
+              "notesEn": "OSRAM publishes an ABG certificate PDF for this product. Vehicle compatibility and restrictions are defined by the ABG."
+            },
+            {
+              "brand": "OSRAM",
+              "model": "NIGHT BREAKER LED H7 (64210DWNB)",
+              "approvalType": "ABG",
+              "approvalNumber": null,
+              "sourceId": "osram",
+              "sourceUrl": "https://look.ams-osram.com/m/1d87739de3e40228/original/Certificate-Street-legal-Germany-ABG-64210DWNB.pdf",
+              "vehicleCompatibility": "H7 retrofit LED, Germany street-legal per ABG certificate (vehicle list applies)",
+              "restrictions": [
+                "ABG document must be carried (printout) where required",
+                "Only for vehicles/headlights included in the ABG vehicle list",
+                "Follow installation instructions (incl. any adapter/cap requirements)"
+              ],
+              "notesDe": "NIGHT BREAKER LED (H7) ist in Deutschland in Abhaengigkeit von ABG und Fahrzeugliste zulaessig. Vor Einbau: Fahrzeug in Anlage 1 pruefen.",
+              "notesEn": "NIGHT BREAKER LED (H7) is street-legal in Germany depending on the ABG and the vehicle list. Check Annex 1 before installation."
+            },
+            {
+              "brand": "OSRAM",
+              "model": "NIGHT BREAKER LED SMART ECE H11",
+              "approvalType": "ECE",
+              "approvalNumber": null,
+              "sourceId": "osram",
+              "sourceUrl": "https://www.osram.de/ecat/de/de/GPS01_33011157/PP_EUROPE_DE_eCat/ZMP_4069360",
+              "vehicleCompatibility": "H11 replacement LED with ECE approval (per OSRAM product page)",
+              "restrictions": [
+                "Install as direct replacement for H11 where applicable",
+                "Follow product markings (E-mark) and instructions"
+              ],
+              "notesDe": "OSRAM bewirbt dieses Produkt als ECE-zugelassenes H11-LED-Leuchtmittel (kein ABG-Download/Vehicle-List laut Produktseite). Markierung am Produkt pruefen.",
+              "notesEn": "OSRAM markets this product as ECE-approved H11 LED replacement (no ABG/vehicle list per product page). Verify markings on the product."
+            }
+          ]
+        },
+        {
+          "id": "headlights",
+          "name": "Фары",
+          "nameDe": "Scheinwerfer",
+          "approvalTypes": ["ECE", "ABE", "EINZELABNAHME_21"],
+          "criticalParameters": ["E-Kennzeichnung", "Lichtverteilung", "DRL", "Niveauregulierung"],
+          "items": []
+        }
+      ]
+    }
+    ,
+    {
+      "id": "aero",
+      "name": "Аэродинамика",
+      "nameDe": "Aerodynamik",
+      "subcategories": [
+        {
+          "id": "front_lip",
+          "name": "Передний лип/сплиттер",
+          "nameDe": "Frontspoiler / Splitter",
+          "approvalTypes": ["ABE", "TEILEGUTACHTEN", "EINTRAGUNGSPFLICHTIG", "EINZELABNAHME_21"],
+          "criticalParameters": ["Vorstand", "Mindestbodenfreiheit", "Kantenradius", "Befestigung"],
+          "items": []
+        },
+        {
+          "id": "rear_wing",
+          "name": "Задний спойлер/крыло",
+          "nameDe": "Heckspoiler / Fluegel",
+          "approvalTypes": ["ABE", "TEILEGUTACHTEN", "EINTRAGUNGSPFLICHTIG", "EINZELABNAHME_21"],
+          "criticalParameters": ["Hoehe", "Breite", "RueckleuchtenSichtbarkeit", "Befestigung"],
+          "items": []
+        }
+      ]
+    },
+    {
+      "id": "brakes",
+      "name": "Тормоза",
+      "nameDe": "Bremsanlage",
+      "subcategories": [
+        {
+          "id": "big_brake_kit",
+          "name": "Big Brake Kit",
+          "nameDe": "Big Brake Kit (BBK)",
+          "approvalTypes": ["ABE", "TEILEGUTACHTEN", "EINTRAGUNGSPFLICHTIG", "EINZELABNAHME_21"],
+          "criticalParameters": ["Radfreigang", "Radgroesse", "Bremskraftverteilung", "ABS_ESP", "Radlast"],
+          "items": []
+        },
+        {
+          "id": "pads_lines_fluids",
+          "name": "Колодки/шланги/жидкость",
+          "nameDe": "Belaege/Leitungen/Fluessigkeit",
+          "approvalTypes": ["ABE", "ECE", "EINTRAGUNGSPFLICHTIG", "EINZELABNAHME_21"],
+          "criticalParameters": ["Zulassung", "Einbauhinweise", "Material", "Druckfestigkeit"],
+          "items": []
+        }
+      ]
+    },
+    {
+      "id": "ecu",
+      "name": "Электроника и чип-тюнинг",
+      "nameDe": "Elektronik & Chiptuning",
+      "subcategories": [
+        {
+          "id": "power_box",
+          "name": "Powerbox",
+          "nameDe": "Leistungsbox / Powerbox",
+          "approvalTypes": ["ABE", "EINTRAGUNGSPFLICHTIG", "EINZELABNAHME_21"],
+          "criticalParameters": ["Abgas", "Geraeusch", "OBD", "DPF_OPF", "AGR", "Thermik"],
+          "items": []
+        },
+        {
+          "id": "software_tune",
+          "name": "Прошивка ECU",
+          "nameDe": "ECU Software (Tuning)",
+          "approvalTypes": ["EINTRAGUNGSPFLICHTIG", "EINZELABNAHME_21"],
+          "criticalParameters": ["Abgas", "Geraeusch", "OBD", "DPF_OPF", "AGR"],
+          "items": []
+        }
+      ]
+    }
+  ]
+}

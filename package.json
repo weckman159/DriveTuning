@@ -13,6 +13,13 @@
     "prisma:sync": "node scripts/prisma-sync.cjs",
     "db:seed": "node prisma/seed.js",
     "ref:places": "node scripts/build-places-dictionary.cjs",
+    "ref:tuning-legality:validate": "node scripts/validate-tuning-legality-de.cjs",
+    "ref:tuning-manufacturers:validate": "node scripts/validate-tuning-manufacturers.cjs",
+    "ref:kba-abe:import": "node scripts/import-kba-abe.cjs",
+    "ref:kba-abe:upsert": "node scripts/upsert-kba-abe-raw-to-db.cjs",
+    "ref:legality-seed:import": "node scripts/import-legality-reference-seed.cjs",
+    "ref:verified-approvals:import": "node scripts/import-verified-approvals.cjs",
+    "legality:migrate:tuv": "node scripts/migrate-tuv-to-legality.cjs",
     "vercel-build": "npm run prisma:generate && npm run prisma:sync && next build",
     "postinstall": "npm run prisma:generate"
   },

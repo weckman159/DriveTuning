@@ -1,0 +1,100 @@
+{
+  "metadata": {
+    "version": "2026-02-09",
+    "country": "DE",
+    "status": "CANDIDATE_NOT_AUDITED",
+    "note": "User-provided 'verified' approvals. Do not treat as authoritative until audited against primary source documents (PDF/page) and/or official publication.",
+    "verificationPolicy": "PRIMARY_SOURCE_REQUIRED"
+  },
+  "verifiedApprovals": [
+    {
+      "brand": "KW Automotive",
+      "model": "Variant 3 Gewindefahrwerk",
+      "approvalNumber": "KBA 52345",
+      "approvalType": "ABE",
+      "validFrom": "2018-05-20",
+      "vehicles": ["BMW F30 3er (2012-2019)", "BMW F20 1er (2011-2019)", "BMW F22 2er (2014-2021)"],
+      "restrictions": [
+        "Mindestbodenfreiheit beladen: 100mm",
+        "Max. Tieferlegung: -40mm vorne / -35mm hinten",
+        "Rad-/Radkastenberuehrung verboten",
+        "Federweg min. 50% des Serienfederwegs",
+        "Nur fuer Fahrzeuge ohne serienmaessiges Adaptivfahrwerk"
+      ],
+      "sourceUrl": "https://www.kw-automotive.com/de/produkte/gewindefahrwerk/variant-3",
+      "documentUrl": "https://www.kw-automotive.com/media/abe/kba_52345_f30.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "H&R",
+      "model": "Tieferlegungsfedern",
+      "approvalNumber": "KBA 51234",
+      "approvalType": "ABE",
+      "validFrom": "2017-02-15",
+      "vehicles": ["BMW F30 3er (2012-2019)", "Mercedes W205 C-Klasse (2014-2021)", "Audi B9 A4 (2016-2023)"],
+      "restrictions": [
+        "Nur in Kombination mit serienmaessigen Daempfern",
+        "Max. Tieferlegung: -30mm vorne / -25mm hinten",
+        "Keine Aenderung der Radlast > +/-5%",
+        "Mindestbodenfreiheit beladen: 100mm"
+      ],
+      "sourceUrl": "https://www.h-r.com/de/produkte/tieferlegungsfedern",
+      "documentUrl": "https://www.h-r.com/media/abe/kba_51234.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Eibach",
+      "model": "Pro-Kit Tieferlegungsfedern",
+      "approvalNumber": "KBA 52987",
+      "approvalType": "ABE",
+      "validFrom": "2016-08-22",
+      "vehicles": ["Mercedes W205 C-Klasse (2014-2021)", "Mercedes W213 E-Klasse (2016-2023)", "VW Golf VII (2013-2020)"],
+      "restrictions": [
+        "Max. Tieferlegung: -30mm vorne / -25mm hinten",
+        "Nur mit serienmaessigen Daempfern oder ABE-zugelassenen Nachruest-Daempfern",
+        "Mindestbodenfreiheit beladen: 100mm",
+        "Keine Aenderung der Radlast > +/-5%"
+      ],
+      "sourceUrl": "https://www.eibach.com/de/produkte/fahrwerke/pro-kit",
+      "documentUrl": "https://www.eibach.com/media/abe/kba_52987_w205.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Bilstein",
+      "model": "B16 PSS9/PSS10 Gewindefahrwerk",
+      "approvalNumber": "KBA 53456",
+      "approvalType": "ABE",
+      "validFrom": "2019-04-10",
+      "vehicles": ["BMW F87 M2 (2016-2021)", "BMW F80 M3 (2014-2020)", "BMW F82 M4 (2014-2020)"],
+      "restrictions": [
+        "Mindestbodenfreiheit beladen: 95mm",
+        "Max. Tieferlegung: -35mm vorne / -30mm hinten",
+        "Federweg min. 45% des Serienfederwegs",
+        "Nur fuer Fahrzeuge ohne serienmaessiges Adaptivfahrwerk",
+        "ABS/ESP muss fehlerfrei funktionieren"
+      ],
+      "sourceUrl": "https://www.bilstein.com/de/produkte/fahrwerke/b16",
+      "documentUrl": "https://www.bilstein.com/media/abe/kba_53456_f87.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "ST Suspension",
+      "model": "XTA Gewindefahrwerk",
+      "approvalNumber": "TUEV Nord TG 876543",
+      "approvalType": "TEILEGUTACHTEN",
+      "validFrom": "2020-09-05",
+      "vehicles": ["VW Golf VII GTI (2013-2020)", "VW Golf VII R (2014-2020)", "Audi 8V S3 (2013-2020)"],
+      "restrictions": [
+        "Eintragungspflichtig gemaess §19 StVZO",
+        "Mindestbodenfreiheit beladen: 100mm",
+        "Max. Tieferlegung: -45mm vorne / -40mm hinten",
+        "Rad-/Radkastenberuehrung verboten",
+        "Federweg min. 50% des Serienfederwegs"
+      ],
+      "sourceUrl": "https://www.st-suspensions.com/de/produkte/xta",
+      "documentUrl": "https://www.st-suspensions.com/media/tuv/tuev_nord_876543.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    }
+  ]
+}
+

@@ -1,0 +1,36 @@
+name: Reference Data
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 1 * *'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Validate tuning legality reference
+        run: npm run ref:tuning-legality:validate
+
+      - name: Validate tuning manufacturers reference
+        run: npm run ref:tuning-manufacturers:validate
+
+      - name: Fetch KBA ABE CSV (optional)
+        run: npm run ref:kba-abe:import
+        env:
+          KBA_ABE_CSV_URL: ${{ secrets.KBA_ABE_CSV_URL }}

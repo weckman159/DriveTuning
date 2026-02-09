@@ -4,6 +4,36 @@ import { prisma } from '@/lib/prisma'
 
 export type HomeFeedFilter = 'all' | 'builds' | 'legal' | 'market' | 'events'
 
+export type HomeStats = {
+  publicBuilds: number
+  legalMods: number
+  activeListings: number
+  upcomingEvents: number
+}
+
+export type HomeFeaturedBuild = {
+  car: {
+    id: string
+    slug: string
+    make: string
+    model: string
+    generation: string | null
+    year: number | null
+    projectGoal: string
+    buildStatus: string
+    heroImage: string | null
+    updatedAt: Date
+  }
+  latestEntry: null | { title: string; type: string; date: Date; modTuvStatus: string | null }
+  highlights: Array<{
+    partName: string
+    brand: string | null
+    category: string
+    tuvStatus: string
+    legalityApprovalNumber: string | null
+  }>
+}
+
 export type HomeFeedItem =
   | {
       kind: 'BUILD_UPDATE'
@@ -104,7 +134,7 @@ export async function getHomeFeed(input?: { filter?: HomeFeedFilter }) {
   const wantsMarket = filter === 'all' || filter === 'market'
   const wantsEvents = filter === 'all' || filter === 'events'
 
-  const [cars, mods, listings, upcomingEvents] = await Promise.all([
+  const [cars, mods, listings, upcomingEvents, stats, featuredBase] = await Promise.all([
     wantsBuilds
       ? prisma.car.findMany({
           where: { visibility: 'PUBLIC' },
@@ -201,6 +231,55 @@ export async function getHomeFeed(input?: { filter?: HomeFeedFilter }) {
           take: 6,
         })
       : Promise.resolve([]),
+    Promise.all([
+      prisma.car.count({ where: { visibility: 'PUBLIC' } }),
+      prisma.modification.count({
+        where: {
+          logEntry: { visibility: 'PUBLIC', car: { visibility: 'PUBLIC' } },
+          OR: [{ tuvStatus: 'GREEN_REGISTERED' }, { tuvStatus: 'YELLOW_ABE' }],
+        },
+      }),
+      prisma.partListing.count({ where: { status: { in: ['ACTIVE', 'RESERVED'] } } }),
+      prisma.event.count({
+        where: {
+          status: { in: ['UPCOMING', 'ACTIVE'] },
+          dateStart: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
+          visibility: 'PUBLIC',
+        },
+      }),
+    ]).then(([publicBuilds, legalMods, activeListings, upcomingEventsCount]) => ({
+      publicBuilds,
+      legalMods,
+      activeListings,
+      upcomingEvents: upcomingEventsCount,
+    })),
+    prisma.car.findFirst({
+      where: { visibility: 'PUBLIC', slug: { not: null }, heroImage: { not: null } },
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        id: true,
+        slug: true,
+        make: true,
+        model: true,
+        generation: true,
+        year: true,
+        projectGoal: true,
+        buildStatus: true,
+        heroImage: true,
+        updatedAt: true,
+        logEntries: {
+          where: { visibility: 'PUBLIC' },
+          orderBy: { date: 'desc' },
+          take: 1,
+          select: {
+            title: true,
+            type: true,
+            date: true,
+            modifications: { take: 1, select: { tuvStatus: true } },
+          },
+        },
+      },
+    }),
   ])
 
   const items: HomeFeedItem[] = []
@@ -296,6 +375,56 @@ export async function getHomeFeed(input?: { filter?: HomeFeedFilter }) {
   // Sort by freshness; upcoming events are rendered separately to avoid mixing future dates with "latest".
   items.sort((a, b) => b.at.getTime() - a.at.getTime())
 
-  return { items, upcomingEvents: upcomingEvents as HomeUpcomingEvent[] }
-}
+  let featuredBuild: HomeFeaturedBuild | null = null
 
+  if (featuredBase?.slug) {
+    const highlights = await prisma.modification.findMany({
+      where: {
+        logEntry: { visibility: 'PUBLIC', carId: featuredBase.id, car: { visibility: 'PUBLIC' } },
+      },
+      orderBy: { logEntry: { date: 'desc' } },
+      take: 3,
+      select: {
+        partName: true,
+        brand: true,
+        category: true,
+        tuvStatus: true,
+        legalityApprovalNumber: true,
+      },
+    })
+
+    const latest = featuredBase.logEntries[0] ?? null
+
+    featuredBuild = {
+      car: {
+        id: featuredBase.id,
+        slug: featuredBase.slug,
+        make: featuredBase.make,
+        model: featuredBase.model,
+        generation: featuredBase.generation ?? null,
+        year: featuredBase.year ?? null,
+        projectGoal: featuredBase.projectGoal,
+        buildStatus: featuredBase.buildStatus,
+        heroImage: featuredBase.heroImage ?? null,
+        updatedAt: featuredBase.updatedAt,
+      },
+      latestEntry: latest
+        ? {
+            title: latest.title,
+            type: latest.type,
+            date: latest.date,
+            modTuvStatus: latest.modifications[0]?.tuvStatus ?? null,
+          }
+        : null,
+      highlights: highlights.map((h) => ({
+        partName: h.partName,
+        brand: h.brand ?? null,
+        category: h.category,
+        tuvStatus: h.tuvStatus,
+        legalityApprovalNumber: h.legalityApprovalNumber ?? null,
+      })),
+    }
+  }
+
+  return { items, upcomingEvents: upcomingEvents as HomeUpcomingEvent[], stats, featuredBuild }
+}

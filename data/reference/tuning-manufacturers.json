@@ -1,0 +1,262 @@
+{
+  "metadata": {
+    "version": "2026-02-09",
+    "country": "DE",
+    "lastUpdated": "2026-02-09T00:00:00Z",
+    "disclaimerDe": "Hinweis: Diese Liste ist eine nicht-verbindliche, best-effort Hersteller/Brand-Uebersicht. Sie ist keine Aussage ueber Zulassungen. Fuer die Legalitaet gelten offizielle Dokumente (ABE/ABG/Teilegutachten/ECE) und die Beurteilung durch Prueforganisationen.",
+    "allowedCategories": [
+      "wheels",
+      "suspension",
+      "exhaust",
+      "brakes",
+      "aero",
+      "lighting",
+      "ecu",
+      "interior",
+      "safety",
+      "other"
+    ],
+    "allowedApprovalSources": ["kba", "manufacturer", "community", "unknown"],
+    "sourcePolicy": {
+      "noScrapingRestrictedDatabases": true,
+      "preferManufacturerPrimarySources": true,
+      "preferKbaCsvPipeline": true
+    }
+  },
+  "manufacturers": [
+    {
+      "id": "bbs",
+      "name": "BBS",
+      "country": "DE",
+      "website": "https://www.bbs.com",
+      "categories": ["wheels"],
+      "approvalSources": ["kba", "manufacturer"],
+      "abeDatabaseUrl": null,
+      "contactEmail": null,
+      "popularModels": [
+        { "name": "CH-R", "category": "wheels", "typicalApproval": "ABE" },
+        { "name": "FI-R", "category": "wheels", "typicalApproval": "ABE" }
+      ],
+      "aliases": ["BBS Wheels"],
+      "dataQuality": { "verified": false, "notes": "Fill primary ABE download URLs during audit." }
+    },
+    {
+      "id": "kw",
+      "name": "KW Automotive",
+      "country": "DE",
+      "website": "https://www.kw-automotive.com",
+      "categories": ["suspension"],
+      "approvalSources": ["kba", "manufacturer"],
+      "abeDatabaseUrl": null,
+      "contactEmail": null,
+      "popularModels": [
+        { "name": "Variant 3", "category": "suspension", "typicalApproval": "ABE" },
+        { "name": "DDC", "category": "suspension", "typicalApproval": "ABE" }
+      ],
+      "aliases": ["KW"],
+      "dataQuality": { "verified": false, "notes": "Audit per vehicle-specific ABE PDFs." }
+    },
+    {
+      "id": "akrapovic",
+      "name": "Akrapovic",
+      "country": "SI",
+      "website": "https://www.akrapovic.com",
+      "categories": ["exhaust"],
+      "approvalSources": ["manufacturer", "kba"],
+      "abeDatabaseUrl": null,
+      "contactEmail": null,
+      "popularModels": [
+        { "name": "Evolution Line", "category": "exhaust", "typicalApproval": "ABE" },
+        { "name": "Slip-On Line", "category": "exhaust", "typicalApproval": "ABE" }
+      ],
+      "aliases": ["Akrapovic Exhaust"],
+      "dataQuality": { "verified": false, "notes": "Store links only; do not scrape 3rd-party databases." }
+    },
+    {
+      "id": "hr",
+      "name": "H&R",
+      "country": "DE",
+      "website": "https://www.h-r.com",
+      "categories": ["suspension", "wheels"],
+      "approvalSources": ["kba", "manufacturer"],
+      "abeDatabaseUrl": null,
+      "contactEmail": null,
+      "popularModels": [
+        { "name": "Tieferlegungsfedern", "category": "suspension", "typicalApproval": "ABE" },
+        { "name": "Trak+ Spurverbreiterung", "category": "wheels", "typicalApproval": "ABE" }
+      ],
+      "aliases": ["H and R", "H&R Spezialfedern"],
+      "dataQuality": { "verified": false, "notes": "Enrich with public downloads on demand." }
+    },
+    {
+      "id": "remus",
+      "name": "Remus",
+      "country": "AT",
+      "website": "https://www.remus.eu",
+      "categories": ["exhaust"],
+      "approvalSources": ["manufacturer", "unknown"],
+      "abeDatabaseUrl": null,
+      "contactEmail": null,
+      "popularModels": [{ "name": "Hypercone", "category": "exhaust", "typicalApproval": "TEILEGUTACHTEN" }],
+      "aliases": [],
+      "dataQuality": { "verified": false, "notes": "Some products are Teilegutachten; treat as registration-required until evidence." }
+    },
+    {
+      "id": "eibach",
+      "name": "Eibach",
+      "country": "DE",
+      "website": "https://eibach.com",
+      "categories": ["suspension"],
+      "approvalSources": ["kba", "manufacturer"],
+      "abeDatabaseUrl": null,
+      "contactEmail": null,
+      "popularModels": [
+        { "name": "Pro-Kit", "category": "suspension", "typicalApproval": "ABE" },
+        { "name": "Sportline", "category": "suspension", "typicalApproval": "ABE" }
+      ],
+      "aliases": [],
+      "dataQuality": { "verified": false, "notes": "Audit per PDF gutachten/ABE where available." }
+    },
+    {
+      "id": "brembo",
+      "name": "Brembo",
+      "country": "IT",
+      "website": "https://www.brembo.com",
+      "categories": ["brakes"],
+      "approvalSources": ["manufacturer", "kba", "unknown"],
+      "abeDatabaseUrl": null,
+      "contactEmail": null,
+      "popularModels": [
+        { "name": "GT", "category": "brakes", "typicalApproval": "ABE" },
+        { "name": "GT-S", "category": "brakes", "typicalApproval": "ABE" }
+      ],
+      "aliases": [],
+      "dataQuality": { "verified": false, "notes": "Always enforce wheel-size/clearance constraints from certificate." }
+    },
+    {
+      "id": "racechip",
+      "name": "RaceChip",
+      "country": "DE",
+      "website": "https://www.racechip.com",
+      "categories": ["ecu"],
+      "approvalSources": ["manufacturer", "kba"],
+      "abeDatabaseUrl": null,
+      "contactEmail": null,
+      "popularModels": [{ "name": "GTS", "category": "ecu", "typicalApproval": "ABE" }],
+      "aliases": [],
+      "dataQuality": { "verified": false, "notes": "Treat emissions/DPF/AdBlue as critical evidence constraints." }
+    },
+
+    { "id": "abt", "name": "ABT Sportsline", "country": "DE", "website": "https://www.abt-sportsline.com", "categories": ["ecu", "aero", "wheels", "suspension"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["ABT"], "dataQuality": { "verified": false } },
+    { "id": "ac_schnitzer", "name": "AC Schnitzer", "country": "DE", "website": "https://www.ac-schnitzer.de", "categories": ["ecu", "aero", "wheels", "suspension"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "alpina", "name": "ALPINA", "country": "DE", "website": "https://www.alpina-automobiles.com", "categories": ["ecu"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "brabus", "name": "BRABUS", "country": "DE", "website": "https://www.brabus.com", "categories": ["ecu", "exhaust", "wheels", "aero", "interior"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "manhart", "name": "Manhart", "country": "DE", "website": null, "categories": ["ecu", "exhaust", "wheels", "aero"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "g_power", "name": "G-Power", "country": "DE", "website": null, "categories": ["ecu"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["GPOWER"], "dataQuality": { "verified": false } },
+    { "id": "novitec", "name": "Novitec", "country": "DE", "website": null, "categories": ["ecu", "exhaust", "aero"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "techart", "name": "TechArt", "country": "DE", "website": null, "categories": ["aero", "wheels", "exhaust", "interior"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "prior_design", "name": "Prior Design", "country": "DE", "website": null, "categories": ["aero"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["Prior-Design"], "dataQuality": { "verified": false } },
+
+    { "id": "oz_racing", "name": "OZ Racing", "country": "IT", "website": "https://www.ozracing.com", "categories": ["wheels"], "approvalSources": ["manufacturer", "kba", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["OZ"], "dataQuality": { "verified": false } },
+    { "id": "vossen", "name": "Vossen", "country": "US", "website": "https://vossenwheels.com", "categories": ["wheels"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "rotiform", "name": "Rotiform", "country": "US", "website": null, "categories": ["wheels"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "enkei", "name": "Enkei", "country": "JP", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "rays", "name": "RAYS", "country": "JP", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["Volk Racing"], "dataQuality": { "verified": false } },
+    { "id": "brixton_forged", "name": "Brixton Forged", "country": "US", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "fifteen52", "name": "fifteen52", "country": "US", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["15 52"], "dataQuality": { "verified": false } },
+
+    { "id": "bilstein", "name": "Bilstein", "country": "DE", "website": "https://www.bilstein.com", "categories": ["suspension"], "approvalSources": ["manufacturer", "kba", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "koni", "name": "KONI", "country": "NL", "website": null, "categories": ["suspension"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "ohlins", "name": "Ohlins", "country": "SE", "website": null, "categories": ["suspension"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["Ohlins Racing"], "dataQuality": { "verified": false } },
+    { "id": "st_suspension", "name": "ST Suspension", "country": "DE", "website": null, "categories": ["suspension"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["ST"], "dataQuality": { "verified": false } },
+    { "id": "bc_racing", "name": "BC Racing", "country": null, "website": null, "categories": ["suspension"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "milltek", "name": "Milltek", "country": "GB", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "supersprint", "name": "Supersprint", "country": "IT", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "eisenmann", "name": "Eisenmann", "country": "DE", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "awe", "name": "AWE Tuning", "country": "US", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["AWE"], "dataQuality": { "verified": false } },
+    { "id": "armytrix", "name": "Armytrix", "country": null, "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "ap_racing", "name": "AP Racing", "country": "GB", "website": "https://www.apracing.com", "categories": ["brakes"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "alcon", "name": "Alcon", "country": "GB", "website": null, "categories": ["brakes"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "stoptech", "name": "StopTech", "country": "US", "website": null, "categories": ["brakes"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "ebc", "name": "EBC Brakes", "country": "GB", "website": null, "categories": ["brakes"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["EBC"], "dataQuality": { "verified": false } },
+
+    { "id": "osram", "name": "OSRAM", "country": "DE", "website": "https://www.osram.com", "categories": ["lighting"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "philips", "name": "Philips", "country": "NL", "website": "https://www.philips.com", "categories": ["lighting"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "hella", "name": "Hella", "country": "DE", "website": "https://www.hella.com", "categories": ["lighting"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "recaro", "name": "RECARO", "country": "DE", "website": "https://www.recaro-automotive.com", "categories": ["interior", "safety"], "approvalSources": ["manufacturer", "unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "sparco", "name": "Sparco", "country": "IT", "website": null, "categories": ["interior", "safety"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "omp", "name": "OMP", "country": "IT", "website": null, "categories": ["interior", "safety"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "momo", "name": "MOMO", "country": "IT", "website": null, "categories": ["interior"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "schroth", "name": "Schroth", "country": "DE", "website": null, "categories": ["safety"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "other_001", "name": "AEM", "country": "US", "website": null, "categories": ["ecu", "other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "other_002", "name": "APR", "country": "US", "website": null, "categories": ["ecu"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "other_003", "name": "Revo", "country": "GB", "website": null, "categories": ["ecu"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "other_004", "name": "Unitronic", "country": "CA", "website": null, "categories": ["ecu"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "other_005", "name": "Cobb", "country": "US", "website": null, "categories": ["ecu"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "other_006", "name": "Borla", "country": "US", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "other_007", "name": "MagnaFlow", "country": "US", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["Magnaflow"], "dataQuality": { "verified": false } },
+    { "id": "other_008", "name": "Invidia", "country": "JP", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "other_009", "name": "HKS", "country": "JP", "website": null, "categories": ["exhaust", "ecu"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "other_010", "name": "Fujitsubo", "country": "JP", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "hre", "name": "HRE", "country": "US", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "forgeline", "name": "Forgeline", "country": "US", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "work", "name": "WORK Wheels", "country": "JP", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["WORK"], "dataQuality": { "verified": false } },
+    { "id": "ssr", "name": "SSR", "country": "JP", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "motec", "name": "Motec", "country": "DE", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "ats", "name": "ATS", "country": "DE", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "ronal", "name": "Ronal", "country": "DE", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "rial", "name": "Rial", "country": "DE", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "enkei_racing", "name": "Enkei Racing", "country": "JP", "website": null, "categories": ["wheels"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["ENKEI"], "dataQuality": { "verified": false } },
+
+    { "id": "tein", "name": "TEIN", "country": "JP", "website": null, "categories": ["suspension"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "sachs_performance", "name": "Sachs Performance", "country": "DE", "website": null, "categories": ["suspension", "brakes", "other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["SACHS"], "dataQuality": { "verified": false } },
+    { "id": "eibach_racing", "name": "Eibach Racing", "country": "DE", "website": null, "categories": ["suspension"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["EIBACH"], "dataQuality": { "verified": false } },
+    { "id": "whiteline", "name": "Whiteline", "country": "AU", "website": null, "categories": ["suspension"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "powerflex", "name": "Powerflex", "country": "GB", "website": null, "categories": ["suspension", "other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "supersprint_exhaust", "name": "Supersprint Exhaust", "country": "IT", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["SUPESPRINT"], "dataQuality": { "verified": false } },
+    { "id": "capristo", "name": "Capristo", "country": "DE", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "ipe", "name": "iPE", "country": null, "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["Innotech Performance Exhaust"], "dataQuality": { "verified": false } },
+    { "id": "valvetronic_designs", "name": "Valvetronic Designs", "country": "US", "website": null, "categories": ["exhaust"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["Valvetronic"], "dataQuality": { "verified": false } },
+
+    { "id": "wilwood", "name": "Wilwood", "country": "US", "website": null, "categories": ["brakes"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "endless", "name": "ENDLESS", "country": "JP", "website": null, "categories": ["brakes"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "ferodo", "name": "Ferodo", "country": null, "website": null, "categories": ["brakes"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "pagid", "name": "Pagid", "country": "DE", "website": null, "categories": ["brakes"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "girodisc", "name": "GiroDisc", "country": "US", "website": null, "categories": ["brakes"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "dte_systems", "name": "DTE Systems", "country": "DE", "website": null, "categories": ["ecu"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "mtm", "name": "MTM", "country": "DE", "website": null, "categories": ["ecu"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "bootmod3", "name": "bootmod3", "country": null, "website": null, "categories": ["ecu"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["BM3"], "dataQuality": { "verified": false } },
+    { "id": "mhd", "name": "MHD", "country": null, "website": null, "categories": ["ecu"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "wagner_tuning", "name": "Wagner Tuning", "country": "DE", "website": null, "categories": ["ecu", "other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "forge_motorsport", "name": "Forge Motorsport", "country": "GB", "website": null, "categories": ["other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["FORGE"], "dataQuality": { "verified": false } },
+    { "id": "kn", "name": "K&N", "country": "US", "website": null, "categories": ["other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["K and N"], "dataQuality": { "verified": false } },
+    { "id": "eventuri", "name": "Eventuri", "country": "GB", "website": null, "categories": ["other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "garrett", "name": "Garrett", "country": "US", "website": null, "categories": ["other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["Garrett Turbo"], "dataQuality": { "verified": false } },
+    { "id": "borgwarner", "name": "BorgWarner", "country": "US", "website": null, "categories": ["other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "tial", "name": "TiAL", "country": "US", "website": null, "categories": ["other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["TiAL Sport"], "dataQuality": { "verified": false } },
+    { "id": "turbosmart", "name": "Turbosmart", "country": "AU", "website": null, "categories": ["other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "mishimoto", "name": "Mishimoto", "country": "US", "website": null, "categories": ["other"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "liberty_walk", "name": "Liberty Walk", "country": "JP", "website": null, "categories": ["aero"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["LBWK"], "dataQuality": { "verified": false } },
+    { "id": "rocket_bunny", "name": "Rocket Bunny", "country": "JP", "website": null, "categories": ["aero"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": ["Pandem"], "dataQuality": { "verified": false } },
+    { "id": "maxton_design", "name": "Maxton Design", "country": "PL", "website": null, "categories": ["aero"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "rieger", "name": "Rieger", "country": "DE", "website": null, "categories": ["aero"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "morimoto", "name": "Morimoto", "country": "US", "website": null, "categories": ["lighting"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "depo", "name": "DEPO", "country": null, "website": null, "categories": ["lighting"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+
+    { "id": "sabelt", "name": "Sabelt", "country": "IT", "website": null, "categories": ["safety"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "wiechers", "name": "Wiechers", "country": "DE", "website": null, "categories": ["safety"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "heigo", "name": "Heigo", "country": "DE", "website": null, "categories": ["safety"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } },
+    { "id": "hans_device", "name": "HANS", "country": null, "website": null, "categories": ["safety"], "approvalSources": ["unknown"], "abeDatabaseUrl": null, "contactEmail": null, "popularModels": [], "aliases": [], "dataQuality": { "verified": false } }
+  ]
+}

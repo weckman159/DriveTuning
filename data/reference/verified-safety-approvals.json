@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "version": "2026-02-09",
+    "country": "DE",
+    "status": "CANDIDATE_NOT_AUDITED",
+    "note": "User-provided 'verified' approvals for safety/protection. Do not treat as authoritative until audited against primary source documents.",
+    "verificationPolicy": "PRIMARY_SOURCE_REQUIRED"
+  },
+  "verifiedApprovals": [
+    {
+      "brand": "Bullbar",
+      "model": "Protektor Frontschutzbuegel",
+      "approvalNumber": "TUEV Sued SX E1 345678",
+      "approvalType": "TEILEGUTACHTEN",
+      "validFrom": "2021-05-15",
+      "vehicles": ["VW Amarok (2010-2022)", "Ford Ranger (2011-2022)", "Toyota Hilux (2015-2023)"],
+      "restrictions": [
+        "Eintragungspflichtig gemaess §19 StVZO",
+        "Darf Fussgaengerschutz nicht beeintraechtigen (Radius >= 5mm)",
+        "Max. Vorstand: 100mm ueber Serienstossstange",
+        "Darf Airbag-Sensoren nicht verdecken",
+        "Muss aus hochfestem Stahl gefertigt sein"
+      ],
+      "sourceUrl": "https://www.bullbar.de/de/produkte/frontschutzbuegel",
+      "documentUrl": "https://www.bullbar.de/media/tuv/tuev_sued_345678.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Hella",
+      "model": "Micro DE Xenon Nebelscheinwerfer",
+      "approvalNumber": "E1 37R-007890",
+      "approvalType": "ECE",
+      "validFrom": "2017-09-01",
+      "vehicles": ["Alle Fahrzeuge mit ECE-konformen Nebelscheinwerfer-Montagepunkten"],
+      "restrictions": [
+        "Nur in serienmaessigen oder ECE-zugelassenen Halterungen",
+        "Lichtstaerke max. 800 Lumen",
+        "Farbtemperatur 4000K-6000K",
+        "Darf Fernlicht nicht beeintraechtigen"
+      ],
+      "sourceUrl": "https://www.hella.com/de/produkte/scheinwerfer",
+      "documentUrl": "https://www.hella.com/media/ece/e1_37r_007890.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    }
+  ]
+}
+

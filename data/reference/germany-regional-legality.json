@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "country": "DE",
+    "version": "2026-02-09",
+    "lastUpdated": "2026-02-09T00:00:00Z",
+    "disclaimerDe": "Hinweis: Regionale Regeln sind Best-Effort Hinweise (Vollzugsschwerpunkte, Umweltzonen, lokale Kontrollen). Massgeblich sind amtliche Beschilderung, offizielle Stellen und Prueforganisationen.",
+    "sources": [
+      {
+        "id": "places_states",
+        "name": "DriveTuning Places Reference (states)",
+        "path": "data/reference/source/places_states.de.json"
+      },
+      {
+        "id": "regional_rules",
+        "name": "DriveTuning Regional Rules (DE)",
+        "path": "data/reference/germany-regional-rules.json"
+      }
+    ]
+  },
+  "enforcementLevels": {
+    "very_high": "Sehr haeufige Kontrollen (z.B. Umweltzonen, Hotspots)",
+    "high": "Regelmaessige Kontrollen (Stadtgebiete, HU-nahe Themen)",
+    "medium": "Gelegentliche Kontrollen",
+    "low": "Seltene Kontrollen"
+  },
+  "generalInspectionBodies": [
+    {
+      "id": "tuev",
+      "name": "TUEV (Uebersicht)",
+      "website": "https://www.tuev.de/"
+    },
+    {
+      "id": "dekra",
+      "name": "DEKRA",
+      "website": "https://www.dekra.de/"
+    },
+    {
+      "id": "gtue",
+      "name": "GTUE",
+      "website": "https://www.gtue.de/"
+    }
+  ],
+  "states": [
+    { "id": "BW", "name": "Baden-Württemberg", "nameEn": "Baden-Württemberg", "capital": "Stuttgart", "region": "south", "isCityState": false, "specialRules": ["bw_emissions_strict"], "inspectionOffices": [] },
+    { "id": "BY", "name": "Bayern", "nameEn": "Bavaria", "capital": "München", "region": "south", "isCityState": false, "specialRules": ["by_noise_stricter"], "inspectionOffices": [] },
+    { "id": "BE", "name": "Berlin", "nameEn": "Berlin", "capital": "Berlin", "region": "east", "isCityState": true, "specialRules": ["be_umweltzone"], "inspectionOffices": [] },
+    { "id": "BB", "name": "Brandenburg", "nameEn": "Brandenburg", "capital": "Potsdam", "region": "east", "isCityState": false, "specialRules": [], "inspectionOffices": [] },
+    { "id": "HB", "name": "Bremen", "nameEn": "Bremen", "capital": "Bremen", "region": "north", "isCityState": true, "specialRules": [], "inspectionOffices": [] },
+    { "id": "HH", "name": "Hamburg", "nameEn": "Hamburg", "capital": "Hamburg", "region": "north", "isCityState": true, "specialRules": [], "inspectionOffices": [] },
+    { "id": "HE", "name": "Hessen", "nameEn": "Hesse", "capital": "Wiesbaden", "region": "west", "isCityState": false, "specialRules": [], "inspectionOffices": [] },
+    { "id": "MV", "name": "Mecklenburg-Vorpommern", "nameEn": "Mecklenburg-Western Pomerania", "capital": "Schwerin", "region": "north", "isCityState": false, "specialRules": [], "inspectionOffices": [] },
+    { "id": "NI", "name": "Niedersachsen", "nameEn": "Lower Saxony", "capital": "Hannover", "region": "north", "isCityState": false, "specialRules": [], "inspectionOffices": [] },
+    { "id": "NW", "name": "Nordrhein-Westfalen", "nameEn": "North Rhine-Westphalia", "capital": "Düsseldorf", "region": "west", "isCityState": false, "specialRules": [], "inspectionOffices": [] },
+    { "id": "RP", "name": "Rheinland-Pfalz", "nameEn": "Rhineland-Palatinate", "capital": "Mainz", "region": "west", "isCityState": false, "specialRules": [], "inspectionOffices": [] },
+    { "id": "SL", "name": "Saarland", "nameEn": "Saarland", "capital": "Saarbrücken", "region": "west", "isCityState": false, "specialRules": [], "inspectionOffices": [] },
+    { "id": "SN", "name": "Sachsen", "nameEn": "Saxony", "capital": "Dresden", "region": "east", "isCityState": false, "specialRules": [], "inspectionOffices": [] },
+    { "id": "ST", "name": "Sachsen-Anhalt", "nameEn": "Saxony-Anhalt", "capital": "Magdeburg", "region": "east", "isCityState": false, "specialRules": [], "inspectionOffices": [] },
+    { "id": "SH", "name": "Schleswig-Holstein", "nameEn": "Schleswig-Holstein", "capital": "Kiel", "region": "north", "isCityState": false, "specialRules": [], "inspectionOffices": [] },
+    { "id": "TH", "name": "Thüringen", "nameEn": "Thuringia", "capital": "Erfurt", "region": "east", "isCityState": false, "specialRules": [], "inspectionOffices": [] }
+  ]
+}
+

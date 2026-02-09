@@ -1,5 +1,15 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getHomeFeed, type HomeFeedFilter, type HomeFeedItem, type HomeUpcomingEvent } from '@/lib/home-feed'
+import HomeHero from '@/components/home/HomeHero'
+import FeaturedBuildCard from '@/components/home/FeaturedBuildCard'
+import PlatformStats from '@/components/home/PlatformStats'
+import LegalHighlights from '@/components/home/LegalHighlights'
+import CallToActionSection from '@/components/home/CallToActionSection'
+
+function isDataUrl(input: string) {
+  return input.startsWith('data:')
+}
 
 function formatDateTimeDe(input: Date) {
   return input.toLocaleString('de-DE', {
@@ -147,13 +157,16 @@ function FeedCard(props: { item: HomeFeedItem }) {
         <div className="mt-4 flex flex-col sm:flex-row gap-4">
           <div className="sm:w-44 sm:flex-shrink-0">
             {item.car.heroImage ? (
-              // Use <img> to avoid Next/Image domain constraints for user-uploaded URLs.
-              <img
-                src={item.car.heroImage}
-                alt={`${item.car.make} ${item.car.model}`}
-                className="h-28 w-full rounded-xl border border-white/10 object-cover bg-black/20"
-                loading="lazy"
-              />
+              <div className="relative h-28 w-full overflow-hidden rounded-xl border border-white/10 bg-black/20">
+                <Image
+                  src={item.car.heroImage}
+                  alt={`${item.car.make} ${item.car.model}`}
+                  fill
+                  sizes="(max-width: 640px) 100vw, 176px"
+                  unoptimized={isDataUrl(item.car.heroImage)}
+                  className="object-cover"
+                />
+              </div>
             ) : (
               <div className="h-28 w-full rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-xs font-semibold tracking-[0.22em] text-zinc-300">
                 {item.car.make} {item.car.model}
@@ -264,12 +277,16 @@ function FeedCard(props: { item: HomeFeedItem }) {
       <div className="mt-4 flex gap-4">
         <div className="w-28 flex-shrink-0">
           {item.imageUrl ? (
-            <img
-              src={item.imageUrl}
-              alt={item.title}
-              className="h-20 w-28 rounded-xl border border-white/10 object-cover bg-black/20"
-              loading="lazy"
-            />
+            <div className="relative h-20 w-28 overflow-hidden rounded-xl border border-white/10 bg-black/20">
+              <Image
+                src={item.imageUrl}
+                alt={item.title}
+                fill
+                sizes="112px"
+                unoptimized={isDataUrl(item.imageUrl)}
+                className="object-cover"
+              />
+            </div>
           ) : (
             <div className="h-20 w-28 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-[11px] font-semibold tracking-[0.22em] text-zinc-300">
               PART
@@ -299,7 +316,7 @@ function FeedCard(props: { item: HomeFeedItem }) {
 }
 
 export default async function HomeFeed(props: { filter: HomeFeedFilter }) {
-  const { items, upcomingEvents } = await getHomeFeed({ filter: props.filter })
+  const { items, upcomingEvents, featuredBuild, stats } = await getHomeFeed({ filter: props.filter })
 
   const isEventsOnly = props.filter === 'events'
 
@@ -317,19 +334,18 @@ export default async function HomeFeed(props: { filter: HomeFeedFilter }) {
     <div className="relative">
       <div className="pointer-events-none absolute inset-0 -z-10 opacity-70 [background:radial-gradient(70%_55%_at_15%_10%,rgba(56,189,248,0.12),transparent_60%),radial-gradient(55%_40%_at_90%_15%,rgba(16,185,129,0.10),transparent_60%),radial-gradient(60%_50%_at_50%_100%,rgba(59,130,246,0.10),transparent_55%)]" />
 
-      <div className="mx-auto max-w-6xl py-10 sm:py-14">
+      <div className="mx-auto max-w-6xl py-10 sm:py-14 space-y-8">
+        <HomeHero featuredBuild={featuredBuild} />
+
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold tracking-[0.16em] text-zinc-200">
               DRIVETUNING
               <span className="text-zinc-600">|</span>
-              FEED
+              DISCOVERY
             </div>
-            <h1 className="mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-white text-balance">
-              Live Updates. Legal Status. Parts. Trackdays.
-            </h1>
             <p className="mt-3 text-sm sm:text-base text-zinc-400 max-w-3xl text-balance">
-              Alles, was du brauchst, um Interesse zu halten: oeffentliche Build-Updates, LEGAL/ILLEGAL Spots, frische Listings und kommende Events.
+              Entdecke PUBLIC Build Passports, LEGAL Spots, Marketplace Listings und Events. Kein Social Feed: nur oeffentliche, evidence-basierte Updates.
             </p>
           </div>
 
@@ -343,11 +359,18 @@ export default async function HomeFeed(props: { filter: HomeFeedFilter }) {
         </div>
 
         {isEventsOnly ? (
-          <div className="mt-8 space-y-3">
-            {upcomingEvents.length === 0 ? <FeedEmpty filter={props.filter} /> : <EventRail events={upcomingEvents} />}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+            <div className="space-y-3">
+              {upcomingEvents.length === 0 ? <FeedEmpty filter={props.filter} /> : <EventRail events={upcomingEvents} />}
+            </div>
+            <div className="lg:sticky lg:top-24 h-fit space-y-6">
+              <FeaturedBuildCard featuredBuild={featuredBuild} />
+              <PlatformStats stats={stats} />
+              <LegalHighlights />
+            </div>
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
             <div className="space-y-3">
               {feedItems.length === 0 ? <FeedEmpty filter={props.filter} /> : null}
               {feedItems.map((item) => (
@@ -355,11 +378,16 @@ export default async function HomeFeed(props: { filter: HomeFeedFilter }) {
               ))}
             </div>
 
-            <div className="lg:sticky lg:top-24 h-fit">
+            <div className="lg:sticky lg:top-24 h-fit space-y-6">
+              <FeaturedBuildCard featuredBuild={featuredBuild} />
+              <PlatformStats stats={stats} />
+              <LegalHighlights />
               <EventRail events={upcomingEvents} />
             </div>
           </div>
         )}
+
+        <CallToActionSection />
       </div>
     </div>
   )

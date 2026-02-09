@@ -1,0 +1,74 @@
+{
+  "metadata": {
+    "version": "2026-02-09",
+    "country": "DE",
+    "status": "CANDIDATE_NOT_AUDITED",
+    "note": "User-provided 'verified' approvals for interior/electronics. Do not treat as authoritative until audited against primary source documents.",
+    "verificationPolicy": "PRIMARY_SOURCE_REQUIRED"
+  },
+  "verifiedApprovals": [
+    {
+      "brand": "Recaro",
+      "model": "Sportster CS",
+      "approvalNumber": "KBA 71234",
+      "approvalType": "ABE",
+      "validFrom": "2018-03-15",
+      "vehicles": [
+        "BMW F30 3er (2012-2019)",
+        "Audi B9 A4 (2016-2023)",
+        "VW Golf VII (2013-2020)",
+        "Mercedes W205 C-Klasse (2014-2021)"
+      ],
+      "restrictions": [
+        "Nur mit serienmaessigen oder ABE-zugelassenen Sicherheitsgurten",
+        "Darf Airbag-Funktionalitaet nicht beeintraechtigen",
+        "Sitzposition muss den gesetzlichen Anforderungen entsprechen",
+        "Fahrer-Sichtfeld darf nicht eingeschraenkt werden"
+      ],
+      "sourceUrl": "https://www.recaro-automotive.com/de/abe/sportster-cs",
+      "documentUrl": "https://www.recaro-automotive.com/media/abe/kba_71234.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Blaupunkt",
+      "model": "Hamburg MP76 DAB",
+      "approvalNumber": "E1 112R-005678",
+      "approvalType": "ECE",
+      "validFrom": "2019-06-20",
+      "vehicles": ["Alle Fahrzeuge mit ISO-Norm Autoradio-Schnittstelle"],
+      "restrictions": [
+        "Nur als direkter Ersatz fuer serienmaessiges Autoradio",
+        "Darf CAN-Bus nicht stoeren",
+        "Muss mit serienmaessigen Lautsprechern kompatibel sein",
+        "DAB+ muss funktionsfaehig sein"
+      ],
+      "sourceUrl": "https://www.blaupunkt.com/de/produkte/autoradios",
+      "documentUrl": "https://www.blaupunkt.com/media/ece/e1_112r_005678.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Momo",
+      "model": "Prototipo Lederlenkrad 350mm",
+      "approvalNumber": "KBA 72345",
+      "approvalType": "ABE",
+      "validFrom": "2020-01-10",
+      "vehicles": [
+        "BMW F30/F31/F34 3er (2012-2019)",
+        "BMW F20/F21 1er (2011-2019)",
+        "BMW F22/F23 2er (2014-2021)",
+        "Audi B9 A4/A5 (2016-2023)",
+        "VW Golf VII (2013-2020)"
+      ],
+      "restrictions": [
+        "Nur mit serienmaessigem oder ABE-zugelassenem Airbag-Adapter",
+        "Lenkraddurchmesser min. 330mm / max. 380mm",
+        "Darf Airbag-Funktionalitaet nicht beeintraechtigen",
+        "Muss fest mit der Lenksaeule verbunden sein"
+      ],
+      "sourceUrl": "https://www.momo.it/de/produkte/lenkraeder",
+      "documentUrl": "https://www.momo.it/media/abe/kba_72345.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    }
+  ]
+}
+

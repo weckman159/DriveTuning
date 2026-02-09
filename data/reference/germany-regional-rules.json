@@ -1,0 +1,40 @@
+{
+  "version": "2026-02-09",
+  "country": "DE",
+  "rules": [
+    {
+      "id": "by_noise_stricter",
+      "stateId": "BY",
+      "nameDe": "Strengere Laermkontrollen (Bayern)",
+      "descriptionDe": "In einigen Regionen (z.B. Grossraum Muenchen) werden Laermkontrollen haeufiger und strenger durchgefuehrt. Plane Messung/Eintragung konservativ.",
+      "affectedCategories": ["exhaust"],
+      "severity": "warning",
+      "sourceUrl": "https://www.stmuv.bayern.de/verkehr/larm.htm",
+      "validFrom": "2026-02-09",
+      "validUntil": null
+    },
+    {
+      "id": "bw_emissions_strict",
+      "stateId": "BW",
+      "nameDe": "Abgas/DPF Manipulation (Baden-Wuerttemberg)",
+      "descriptionDe": "Manipulation an Abgasnachbehandlung (z.B. DPF/EGR) ist nicht zulaessig und kann zu erheblichen Konsequenzen fuehren. Vor Umbau immer klaeren.",
+      "affectedCategories": ["exhaust", "ecu"],
+      "severity": "critical",
+      "sourceUrl": "https://www.lubw.baden-wuerttemberg.de/luft/reinhalteplanung",
+      "validFrom": "2026-02-09",
+      "validUntil": null
+    },
+    {
+      "id": "be_umweltzone",
+      "stateId": "BE",
+      "nameDe": "Umweltzone (Berlin)",
+      "descriptionDe": "Achte darauf, dass Tuning die Emissionsklasse nicht verschlechtert, sonst drohen Restriktionen in Umweltzonen.",
+      "affectedCategories": ["exhaust", "ecu"],
+      "severity": "warning",
+      "sourceUrl": "https://www.berlin.de/labo/mobilitaet/kfz-pruefung/umweltzone/",
+      "validFrom": "2026-02-09",
+      "validUntil": null
+    }
+  ]
+}
+

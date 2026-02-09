@@ -6,7 +6,7 @@ import { calculateEvidenceScoreV2 } from '@/lib/evidence-score'
 import { parseListingCondition, parseListingStatus, type ListingCondition, type ListingStatus } from '@/lib/vocab'
 import { NextResponse } from 'next/server'
 
-const APPROVAL_TYPES = new Set(['ABE', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'])
+const APPROVAL_TYPES = new Set(['ABE', 'ABG', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'])
 const TRUSTED_APPROVAL_TYPES = new Set(['EINTRAGUNG', 'EINZELABNAHME'])
 
 function buildEvidence(listing: {

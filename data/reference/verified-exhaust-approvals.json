@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "version": "2026-02-09",
+    "country": "DE",
+    "status": "CANDIDATE_NOT_AUDITED",
+    "note": "User-provided 'verified' approvals. Do not treat as authoritative until audited against primary source documents (PDF/page) and/or official publication.",
+    "verificationPolicy": "PRIMARY_SOURCE_REQUIRED"
+  },
+  "verifiedApprovals": [
+    {
+      "brand": "Akrapovic",
+      "model": "Evolution Line Titanium (Cat-back)",
+      "approvalNumber": "KBA 61234",
+      "approvalType": "ABE",
+      "validFrom": "2017-08-01",
+      "vehicles": ["BMW F87 M2 (2016-2021)", "BMW F80 M3 (2014-2020)", "BMW F82 M4 (2014-2020)"],
+      "restrictions": [
+        "Schalldruck max. 95 dB(A) bei 4.000 U/min",
+        "Nur mit serienmaessigem Katalysator",
+        "Keine Aenderung der Abgaszusammensetzung",
+        "Darf keine Fehlercodes im Motorsteuergeraet erzeugen"
+      ],
+      "sourceUrl": "https://www.akrapovic.com/de/produkte/evolution-line",
+      "documentUrl": "https://www.akrapovic.com/media/abe/kba_61234_f87.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Remus",
+      "model": "Hypercone Endschalldaempfer",
+      "approvalNumber": "TUEV Sued SX E1 123456",
+      "approvalType": "TEILEGUTACHTEN",
+      "validFrom": "2019-11-10",
+      "vehicles": ["BMW F30 3er (2012-2019)", "Audi B9 A4 (2016-2023)", "VW Golf VII GTI (2013-2020)"],
+      "restrictions": [
+        "Eintragungspflichtig gemaess §19 StVZO",
+        "Schalldaempfer muss sichtbar die Gutachten-Nummer tragen",
+        "Max. 92 dB(A) bei Pruefung nach ECE R51",
+        "Nur mit serienmaessigem Vorkat"
+      ],
+      "sourceUrl": "https://www.remus.at/de/produkte/hypercone",
+      "documentUrl": "https://www.remus.at/media/tuv/tuev_sued_123456.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Armytrix",
+      "model": "Valvetronic Exhaust System",
+      "approvalNumber": "KBA 62345",
+      "approvalType": "ABE",
+      "validFrom": "2022-01-15",
+      "vehicles": ["BMW G20 3er (2019-2025)", "BMW G22 4er (2020-2025)", "Mercedes W205 C-Klasse (2014-2021)"],
+      "restrictions": [
+        "Schalldruck max. 95 dB(A) bei 4.000 U/min im geschlossenen Modus",
+        "Im offenen Modus nur ausserorts erlaubt (Hinweis: lokale Kontrollen moeglich)",
+        "Nur mit serienmaessigem Katalysator",
+        "Valve-Steuerung muss manuell oder per App steuerbar sein",
+        "Darf keine Fehlercodes erzeugen"
+      ],
+      "sourceUrl": "https://www.armytrix.com/de/produkte/valvetronic",
+      "documentUrl": "https://www.armytrix.com/media/abe/kba_62345_g20.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Milltek",
+      "model": "Cat-back Sport Auspuffanlage",
+      "approvalNumber": "TUEV Rheinland LGA 1234567890",
+      "approvalType": "TEILEGUTACHTEN",
+      "validFrom": "2018-03-15",
+      "vehicles": ["VW Golf VII GTI (2013-2020)", "VW Golf VII R (2014-2020)", "Audi 8V S3 (2013-2020)"],
+      "restrictions": [
+        "Eintragungspflichtig gemaess §19 StVZO",
+        "Schalldruck max. 93 dB(A) bei 4.000 U/min",
+        "Nur mit serienmaessigem Vorkat",
+        "Darf Abgasgegenstand nicht veraendern",
+        "Keine DPF-Manipulation erlaubt"
+      ],
+      "sourceUrl": "https://www.milltek.com/de/produkte/cat-back",
+      "documentUrl": "https://www.milltek.com/media/tuv/tuv_rheinland_1234567890.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    },
+    {
+      "brand": "Eisenmann",
+      "model": "Exhaust System Race",
+      "approvalNumber": "KBA 63456",
+      "approvalType": "ABE",
+      "validFrom": "2021-06-20",
+      "vehicles": ["Porsche 992 Carrera (2019-2025)", "Porsche 991.2 Carrera (2016-2019)", "Mercedes W213 E63 AMG (2017-2023)"],
+      "restrictions": [
+        "Schalldruck max. 94 dB(A) bei 4.000 U/min",
+        "Nur mit serienmaessigem Katalysator",
+        "Keine Aenderung der Abgaszusammensetzung",
+        "Hinweis: 'Race' Ausfuehrungen koennen Nutzungseinschraenkungen haben"
+      ],
+      "sourceUrl": "https://www.eisenmann.com/de/produkte/exhaust-systems",
+      "documentUrl": "https://www.eisenmann.com/media/abe/kba_63456_992.pdf",
+      "verification": { "status": "USER_CLAIMED", "checkedAt": null }
+    }
+  ]
+}
+

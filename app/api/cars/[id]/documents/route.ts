@@ -137,7 +137,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     },
   })
 
-  const approvalTypes = new Set(['ABE', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'])
+  const approvalTypes = new Set(['ABE', 'ABG', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'])
   if (modificationId && approvalTypes.has(type)) {
     try {
       await prisma.approvalDocument.create({

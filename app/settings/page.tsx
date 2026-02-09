@@ -16,6 +16,18 @@ const settingsSections = [
     icon: '🔒',
   },
   {
+    title: 'TUEV Guide',
+    description: 'Checkliste fuer Abnahme/Eintragung',
+    href: '/settings/legality-guide',
+    icon: '📚',
+  },
+  {
+    title: 'Legality Check',
+    description: 'Schnellpruefung fuer Teile (mobilfreundlich)',
+    href: '/mobile/legality-check',
+    icon: '🛡️',
+  },
+  {
     title: 'Benachrichtigungen',
     description: 'Benachrichtigungen konfigurieren',
     href: '/settings/notifications',

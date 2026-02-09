@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { parseBuildStatus, parseCarVisibility } from '@/lib/vocab'
 import { computeTuvReadiness } from '@/lib/tuv-ready'
+import { getStateNameById } from '@/lib/places-dictionary'
 import { NextResponse } from 'next/server'
 
 export async function GET(
@@ -58,7 +59,7 @@ export async function PATCH(
 
   const { id } = await params
   const body = await req.json().catch(() => ({} as any))
-  const { forSale, askingPrice, visibility, buildStatus } = body as any
+  const { forSale, askingPrice, visibility, buildStatus, stateId, registrationPlate } = body as any
 
   const car = await prisma.car.findFirst({
     where: {
@@ -81,6 +82,34 @@ export async function PATCH(
     return NextResponse.json({ error: 'Ungueltiger Build-Status' }, { status: 400 })
   }
 
+  const nextStateId =
+    stateId === undefined
+      ? undefined
+      : stateId === null
+        ? null
+        : typeof stateId === 'string'
+          ? stateId.trim().toUpperCase()
+          : ''
+  if (nextStateId !== undefined && nextStateId !== null) {
+    if (!/^[A-Z]{2}$/.test(nextStateId) || !getStateNameById(nextStateId)) {
+      return NextResponse.json({ error: 'Ungueltiges Bundesland (stateId)' }, { status: 400 })
+    }
+  }
+
+  const nextPlate =
+    registrationPlate === undefined
+      ? undefined
+      : registrationPlate === null
+        ? null
+        : typeof registrationPlate === 'string'
+          ? registrationPlate.trim().toUpperCase()
+          : ''
+  if (nextPlate !== undefined && nextPlate !== null) {
+    if (!nextPlate || nextPlate.length > 5 || !/^[A-Z0-9]+$/.test(nextPlate)) {
+      return NextResponse.json({ error: 'Ungueltiges Kennzeichen-Kuerzel' }, { status: 400 })
+    }
+  }
+
   const updated = await prisma.car.update({
     where: { id },
     data: {
@@ -88,6 +117,8 @@ export async function PATCH(
       askingPrice: askingPrice === null || askingPrice === undefined ? null : askingPrice,
       visibility: nextVisibility ?? car.visibility,
       buildStatus: nextBuildStatus ?? car.buildStatus,
+      stateId: nextStateId === undefined ? car.stateId : nextStateId,
+      registrationPlate: nextPlate === undefined ? car.registrationPlate : nextPlate,
     },
   })
 

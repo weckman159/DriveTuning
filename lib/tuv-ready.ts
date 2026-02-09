@@ -25,7 +25,7 @@ export type TuvReadiness = {
   actions: string[]
 }
 
-const APPROVAL_TYPES = new Set(['ABE', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'])
+const APPROVAL_TYPES = new Set(['ABE', 'ABG', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'])
 
 function norm(input: string | null | undefined): string {
   return (input || '').trim().toUpperCase()
@@ -109,4 +109,3 @@ export function computeTuvReadiness(modifications: ModificationLike[]): TuvReadi
     actions: uniqueActions.length ? uniqueActions : ['Alle dokumentierten Modifikationen haben Nachweise.'],
   }
 }
-

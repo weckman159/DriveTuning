@@ -8,6 +8,15 @@ function formatDate(date: Date) {
   return date.toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+function legalityLabel(statusRaw: unknown) {
+  const s = String(statusRaw || '').trim().toUpperCase()
+  if (s === 'FULLY_LEGAL') return 'LEGAL'
+  if (s === 'REGISTRATION_REQUIRED') return 'EINTRAGUNG'
+  if (s === 'INSPECTION_REQUIRED') return 'PRUEFUNG'
+  if (s === 'ILLEGAL') return 'RISIKO'
+  return 'CHECK'
+}
+
 function euro(value: number | null | undefined) {
   const n = typeof value === 'number' && Number.isFinite(value) ? value : 0
   return `EUR ${n.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
@@ -16,8 +25,15 @@ function euro(value: number | null | undefined) {
 async function renderCarPdf(params: {
   car: any
   tuvSummary: { green: number; yellow: number; red: number }
+  legalitySummary: {
+    fullyLegal: number
+    registrationRequired: number
+    inspectionRequired: number
+    illegal: number
+    unknown: number
+  }
 }) {
-  const { car, tuvSummary } = params
+  const { car, tuvSummary, legalitySummary } = params
   const pdfDoc = await PDFDocument.create()
   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica)
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
@@ -118,6 +134,37 @@ async function renderCarPdf(params: {
   drawBadge(margin + badgeW + 8, 'ABE', tuvSummary.yellow, rgb(0.79, 0.54, 0.02))
   drawBadge(margin + 2 * (badgeW + 8), 'Racing', tuvSummary.red, rgb(0.86, 0.16, 0.16))
 
+  const legY = badgeY - 52
+  cover.drawText('Legalitaet (Hinweis)', { x: margin, y: legY, size: 15, font: fontBold, color: rgb(0.07, 0.07, 0.07) })
+  cover.drawText('Status-Signale basieren auf Nachweisen/Referenzen und ersetzen keine Pruefung.', {
+    x: margin,
+    y: legY - 18,
+    size: 9,
+    font: fontRegular,
+    color: rgb(0.29, 0.32, 0.35),
+  })
+
+  const legBadgeW = (contentWidth - 16) / 5
+  const legBadgeH = 30
+  const legBadgeY = legY - 54
+  const drawLegBadge = (x: number, label: string, count: number, color: any) => {
+    cover.drawRectangle({ x, y: legBadgeY, width: legBadgeW, height: legBadgeH, color })
+    const text = `${label} ${count}`
+    const textW = fontBold.widthOfTextAtSize(text, 9)
+    cover.drawText(text, {
+      x: x + (legBadgeW - textW) / 2,
+      y: legBadgeY + 10,
+      size: 9,
+      font: fontBold,
+      color: rgb(1, 1, 1),
+    })
+  }
+  drawLegBadge(margin, 'LEGAL', legalitySummary.fullyLegal, rgb(0.09, 0.64, 0.29))
+  drawLegBadge(margin + (legBadgeW + 4), 'EINTR.', legalitySummary.registrationRequired, rgb(0.79, 0.54, 0.02))
+  drawLegBadge(margin + 2 * (legBadgeW + 4), 'PRUEF.', legalitySummary.inspectionRequired, rgb(0.97, 0.62, 0.15))
+  drawLegBadge(margin + 3 * (legBadgeW + 4), 'RISIKO', legalitySummary.illegal, rgb(0.86, 0.16, 0.16))
+  drawLegBadge(margin + 4 * (legBadgeW + 4), 'UNK', legalitySummary.unknown, rgb(0.45, 0.49, 0.55))
+
   // Timeline pages
   const addTimelinePage = (titleText: string) => {
     const page = pdfDoc.addPage(A4)
@@ -185,7 +232,10 @@ async function renderCarPdf(params: {
       const name = `${String(m.brand || '').trim()} ${m.partName}`.trim()
       const cat = m.category ? ` (${m.category})` : ''
       const price = euro(m.price)
-      return `${name}${cat} - ${price}`
+      const leg = legalityLabel(m.legalityStatus)
+      const an = String(m.legalityApprovalNumber || m.legalityApprovalType || '').trim()
+      const approval = an ? ` · ${an}` : ''
+      return `${name}${cat} - ${price} · ${leg}${approval}`
     })
     drawEntry(modState as any, { date: entry.date, title: entry.title, type: entry.type, lines })
   }
@@ -217,6 +267,7 @@ export async function GET(
 
   try {
     const { id } = await params
+    const format = new URL(req.url).searchParams.get('format')
     // Verify car belongs to user
     const car = await prisma.car.findFirst({
       where: {
@@ -227,7 +278,13 @@ export async function GET(
         garage: true,
         logEntries: {
           include: {
-            modifications: true,
+            modifications: {
+              include: {
+                documents: { select: { id: true, type: true, url: true, documentNumber: true, uploadedAt: true } },
+                approvalDocuments: { select: { id: true, approvalType: true, approvalNumber: true } },
+                legalityReference: true,
+              },
+            },
           },
           orderBy: { date: 'desc' },
         },
@@ -245,7 +302,81 @@ export async function GET(
       red: car.logEntries.filter((e) => e.modifications.some((m) => m.tuvStatus === 'RED_RACING')).length,
     }
 
-    const pdf = await renderCarPdf({ car, tuvSummary })
+    const allMods = car.logEntries.flatMap((e) => e.modifications || [])
+    const legalitySummary = {
+      fullyLegal: allMods.filter((m) => String(m.legalityStatus || '').toUpperCase() === 'FULLY_LEGAL').length,
+      registrationRequired: allMods.filter((m) => String(m.legalityStatus || '').toUpperCase() === 'REGISTRATION_REQUIRED').length,
+      inspectionRequired: allMods.filter((m) => String(m.legalityStatus || '').toUpperCase() === 'INSPECTION_REQUIRED').length,
+      illegal: allMods.filter((m) => String(m.legalityStatus || '').toUpperCase() === 'ILLEGAL').length,
+      unknown: allMods.filter((m) => String(m.legalityStatus || '').toUpperCase() === 'UNKNOWN').length,
+    }
+
+    if (format && format.trim().toLowerCase() === 'json') {
+      const legalityDocuments = allMods.flatMap((m: any) => {
+        const docs = Array.isArray(m.documents) ? m.documents : []
+        return docs
+          .filter((d: any) => ['ABE', 'ABG', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG', 'ECE'].includes(String(d.type || '').toUpperCase()))
+          .map((d: any) => ({
+            id: d.id,
+            type: d.type,
+            url: d.url,
+            documentNumber: d.documentNumber || null,
+            uploadedAt: d.uploadedAt,
+            modification: {
+              id: m.id,
+              partName: m.partName,
+              brand: m.brand,
+              legalityStatus: m.legalityStatus,
+              legalityApprovalType: m.legalityApprovalType,
+              legalityApprovalNumber: m.legalityApprovalNumber,
+            },
+          }))
+      })
+
+      return NextResponse.json({
+        exportVersion: '2.0',
+        exportedAt: new Date().toISOString(),
+        car: {
+          id: car.id,
+          make: car.make,
+          model: car.model,
+          generation: car.generation,
+          year: car.year,
+          engineCode: car.engineCode,
+          stateId: car.stateId || null,
+          registrationPlate: car.registrationPlate || null,
+          currentMileage: car.currentMileage ?? null,
+        },
+        tuvSummary,
+        legalitySummary,
+        logEntries: car.logEntries.map((e: any) => ({
+          id: e.id,
+          date: e.date,
+          title: e.title,
+          type: e.type,
+          modifications: (e.modifications || []).map((m: any) => ({
+            id: m.id,
+            partName: m.partName,
+            brand: m.brand,
+            category: m.category,
+            price: m.price,
+            tuvStatus: m.tuvStatus,
+            evidenceScore: m.evidenceScore,
+            legality: {
+              status: m.legalityStatus,
+              approvalType: m.legalityApprovalType || m.legalityReference?.approvalType || null,
+              approvalNumber: m.legalityApprovalNumber || m.legalityReference?.approvalNumber || null,
+              sourceId: m.legalitySourceId || m.legalityReference?.sourceId || null,
+              sourceUrl: m.legalitySourceUrl || m.legalityReference?.sourceUrl || null,
+              notes: m.legalityNotes || null,
+            },
+          })),
+        })),
+        legalityDocuments,
+      })
+    }
+
+    const pdf = await renderCarPdf({ car, tuvSummary, legalitySummary })
     const pdfBytes = new Uint8Array(pdf)
 
     const safeName = `${car.make}-${car.model}-${car.year || 'na'}`
