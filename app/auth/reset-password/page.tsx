@@ -58,8 +58,8 @@ function ResetPasswordContent() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <div className="w-full max-w-md">
-        <div className="bg-zinc-800 rounded-xl p-8 border border-zinc-700">
-          <h1 className="text-2xl font-bold text-white mb-2">Passwort zuruecksetzen</h1>
+        <div className="panel p-8">
+          <h1 className="text-2xl font-semibold text-white mb-2">Passwort zuruecksetzen</h1>
           <p className="text-zinc-400 mb-6">
             Lege ein neues Passwort fuer dein Konto fest.
           </p>
@@ -87,8 +87,8 @@ function ResetPasswordContent() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
-                placeholder="••••••••"
+                className="input-base"
+                placeholder="********"
               />
             </div>
 
@@ -101,8 +101,8 @@ function ResetPasswordContent() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
-                placeholder="••••••••"
+                className="input-base"
+                placeholder="********"
               />
             </div>
 

@@ -2,31 +2,56 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { persistImages } from '@/lib/image-storage'
-import { calculateEvidenceScore } from '@/lib/provenance'
+import { calculateEvidenceScoreV2 } from '@/lib/evidence-score'
 import { parseListingCondition } from '@/lib/vocab'
 import { NextResponse } from 'next/server'
+import { consumeRateLimit } from '@/lib/rate-limit'
+import { z } from 'zod'
+import { readJson } from '@/lib/validation'
 
-function buildEvidenceScore(listing: {
+const APPROVAL_TYPES = new Set(['ABE', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'])
+const TRUSTED_APPROVAL_TYPES = new Set(['EINTRAGUNG', 'EINZELABNAHME'])
+
+function buildEvidence(listing: {
   media: { url: string }[]
   modification: {
-    evidenceScore: number
+    installedAt: Date | null
+    removedAt: Date | null
     installedMileage: number | null
     removedMileage: number | null
-    price: number | null
     tuvStatus: string
-    documents: { id: string }[]
+    documents: { type: string }[]
+    approvalDocuments: { approvalType: string }[]
   } | null
 }) {
-  if (!listing.modification) return 0
-  if (listing.modification.evidenceScore > 0) return listing.modification.evidenceScore
+  if (!listing.modification) {
+    return { score: 0, tier: 'NONE' as const, breakdown: { photo: 0, mileage: 0, approval: 0, timestamp: 0 } }
+  }
 
-  return calculateEvidenceScore({
-    hasInstalledPhoto: listing.media.length > 0,
-    hasInstalledMileage: listing.modification.installedMileage !== null,
-    hasRemovedMileage: listing.modification.removedMileage !== null,
-    hasPrice: listing.modification.price !== null,
-    documentCount: listing.modification.documents.length,
-    hasTuvStatus: Boolean(listing.modification.tuvStatus),
+  const docTypes = new Set(
+    (listing.modification.documents || []).map((d) => String(d.type || '').trim().toUpperCase()).filter(Boolean)
+  )
+  const approvalTypes = new Set(
+    (listing.modification.approvalDocuments || [])
+      .map((d) => String(d.approvalType || '').trim().toUpperCase())
+      .filter(Boolean)
+  )
+
+  const hasTrustedApprovalDoc =
+    Array.from(approvalTypes).some((t) => TRUSTED_APPROVAL_TYPES.has(t)) ||
+    Array.from(docTypes).some((t) => TRUSTED_APPROVAL_TYPES.has(t))
+
+  const hasAnyApprovalSignal =
+    Array.from(approvalTypes).some((t) => APPROVAL_TYPES.has(t)) ||
+    Array.from(docTypes).some((t) => APPROVAL_TYPES.has(t)) ||
+    String(listing.modification.tuvStatus || '').trim().toUpperCase() === 'GREEN_REGISTERED'
+
+  return calculateEvidenceScoreV2({
+    hasPhotos: listing.media.length > 0,
+    hasMileageProof: listing.modification.installedMileage !== null || listing.modification.removedMileage !== null,
+    hasTrustedApprovalDoc,
+    hasAnyApprovalSignal,
+    hasTimestamp: listing.modification.installedAt !== null || listing.modification.removedAt !== null,
   })
 }
 
@@ -37,19 +62,38 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
   }
 
-  const body = await req.json().catch(() => ({} as any))
-  const title = typeof (body as any).title === 'string' ? (body as any).title.trim() : ''
-  const description =
-    (body as any).description === null || (body as any).description === undefined
-      ? null
-      : typeof (body as any).description === 'string'
-        ? (body as any).description.trim()
-        : null
-  const numericPrice = Number((body as any).price)
-  const condition = parseListingCondition((body as any).condition)
-  const mileageOnCarRaw = (body as any).mileageOnCar
-  const modificationIdRaw = (body as any).modificationId
-  const images = (body as any).images
+  const rl = await consumeRateLimit({
+    namespace: 'market:listings:create:user',
+    identifier: session.user.id,
+    limit: 10,
+    windowMs: 60_000,
+  })
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Zu viele Inserate in kurzer Zeit' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+    )
+  }
+
+  const bodySchema = z.object({
+    title: z.string().trim().min(1).max(150),
+    description: z.string().trim().max(4000).optional().nullable(),
+    price: z.coerce.number(),
+    condition: z.string(),
+    mileageOnCar: z.union([z.number(), z.string()]).optional().nullable(),
+    modificationId: z.string().trim().optional().nullable(),
+    images: z.array(z.string()).optional(),
+  })
+  const parsed = bodySchema.safeParse(await readJson(req))
+  if (!parsed.success) return NextResponse.json({ error: 'Ungueltige Eingabe' }, { status: 400 })
+
+  const title = parsed.data.title
+  const description = parsed.data.description ?? null
+  const numericPrice = Number(parsed.data.price)
+  const condition = parseListingCondition(parsed.data.condition)
+  const mileageOnCarRaw = parsed.data.mileageOnCar
+  const modificationIdRaw = parsed.data.modificationId
+  const images = parsed.data.images
   const safeImageInputs = Array.isArray(images)
     ? images.filter((img: unknown): img is string => typeof img === 'string' && (img.startsWith('data:image/') || /^https?:\/\//.test(img))).slice(0, 4)
     : []
@@ -110,7 +154,7 @@ export async function POST(req: Request) {
       },
       include: {
         seller: { select: { id: true, name: true } },
-        car: { select: { id: true, make: true, model: true, generation: true } },
+        car: { select: { id: true, make: true, model: true, generation: true, heroImage: true } },
         modification: {
           select: {
             id: true,
@@ -118,22 +162,26 @@ export async function POST(req: Request) {
             brand: true,
             category: true,
             tuvStatus: true,
+            installedAt: true,
             installedMileage: true,
+            removedAt: true,
             removedMileage: true,
-            price: true,
-            evidenceScore: true,
-            documents: { select: { id: true } },
+            documents: { select: { type: true } },
+            approvalDocuments: { select: { approvalType: true } },
           },
         },
         media: { select: { url: true }, orderBy: { id: 'asc' } },
       },
     })
 
+    const evidence = buildEvidence(listing as any)
     return NextResponse.json({
       listing: {
         ...listing,
         images: listing.media.map((m) => m.url),
-        evidenceScore: buildEvidenceScore(listing),
+        evidenceScore: evidence.score,
+        evidenceTier: evidence.tier,
+        evidenceBreakdown: evidence.breakdown,
       },
     }, { status: 201 })
   } catch (error) {
@@ -158,7 +206,7 @@ export async function GET() {
     orderBy: { createdAt: 'desc' },
     include: {
       seller: { select: { id: true, name: true } },
-      car: { select: { id: true, make: true, model: true, generation: true } },
+      car: { select: { id: true, make: true, model: true, generation: true, heroImage: true } },
       modification: {
         select: {
           id: true,
@@ -166,11 +214,12 @@ export async function GET() {
           brand: true,
           category: true,
           tuvStatus: true,
+          installedAt: true,
           installedMileage: true,
+          removedAt: true,
           removedMileage: true,
-          price: true,
-          evidenceScore: true,
-          documents: { select: { id: true } },
+          documents: { select: { type: true } },
+          approvalDocuments: { select: { approvalType: true } },
         },
       },
       media: { select: { url: true }, orderBy: { id: 'asc' } },
@@ -181,7 +230,10 @@ export async function GET() {
     listings: listings.map((listing) => ({
       ...listing,
       images: listing.media.map((m) => m.url),
-      evidenceScore: buildEvidenceScore(listing),
+      ...(() => {
+        const evidence = buildEvidence(listing as any)
+        return { evidenceScore: evidence.score, evidenceTier: evidence.tier }
+      })(),
     })),
   })
 }

@@ -5,6 +5,24 @@ import { persistImage } from '@/lib/image-storage'
 import { slugify } from '@/lib/slug'
 import { parseCarVisibility } from '@/lib/vocab'
 import { NextResponse } from 'next/server'
+import { consumeRateLimit } from '@/lib/rate-limit'
+import { upsertCarReference } from '@/lib/car-reference'
+import { z } from 'zod'
+import { readJson } from '@/lib/validation'
+
+const bodySchema = z.object({
+  make: z.string().trim().min(1).max(50),
+  model: z.string().trim().min(1).max(80),
+  generation: z.string().trim().max(30).optional().nullable(),
+  bodyCode: z.string().trim().max(30).optional().nullable(),
+  year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1).optional().nullable(),
+  transmission: z.string().trim().max(40).optional().nullable(),
+  projectGoal: z.string().trim().min(1).max(30),
+  currentMileage: z.coerce.number().int().min(0).max(2_000_000).optional().nullable(),
+  heroImage: z.string().optional().nullable(),
+  hsn: z.string().trim().max(10).optional().nullable(),
+  tsn: z.string().trim().max(10).optional().nullable(),
+})
 
 export async function POST(
   req: Request,
@@ -16,16 +34,26 @@ export async function POST(
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
   }
 
-  const { id: garageId } = await params
-  const body = await req.json()
-  const { make, model, generation, year, projectGoal, currentMileage, heroImage } = body
-
-  if (!make || !model || !projectGoal) {
+  const rl = await consumeRateLimit({
+    namespace: 'garages:cars:create:user',
+    identifier: session.user.id,
+    limit: 15,
+    windowMs: 60_000,
+  })
+  if (!rl.ok) {
     return NextResponse.json(
-      { error: 'Hersteller, Modell und Projektziel sind erforderlich' },
-      { status: 400 }
+      { error: 'Zu viele Fahrzeuge in kurzer Zeit' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
     )
   }
+
+  const { id: garageId } = await params
+  const parsed = bodySchema.safeParse(await readJson(req))
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Ungueltige Eingabe' }, { status: 400 })
+  }
+
+  const { make, model, generation, bodyCode, year, transmission, projectGoal, currentMileage, heroImage, hsn, tsn } = parsed.data
 
   const garage = await prisma.garage.findFirst({
     where: { id: garageId, userId: session.user.id },
@@ -74,6 +102,15 @@ export async function POST(
     }
   }
 
+  const ref = await upsertCarReference({
+    make,
+    model,
+    generation: generation ?? null,
+    bodyCode: bodyCode ?? null,
+    hsn: hsn ?? null,
+    tsn: tsn ?? null,
+  })
+
   const car = await prisma.car.create({
     data: {
       garageId,
@@ -81,9 +118,14 @@ export async function POST(
       make,
       model,
       generation: generation || null,
-      year: year ? Number(year) : null,
+      bodyCode: bodyCode || null,
+      hsn: hsn || null,
+      tsn: tsn || null,
+      carVariantId: ref?.variant.id || null,
+      year: year ?? null,
+      transmission: transmission || null,
       projectGoal,
-      currentMileage: currentMileage ? Number(currentMileage) : null,
+      currentMileage: currentMileage ?? null,
       visibility: parseCarVisibility(privacy?.defaultCarVisibility) ?? 'UNLISTED',
       heroImage: persistedHeroImage,
     },

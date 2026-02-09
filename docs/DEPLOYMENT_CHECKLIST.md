@@ -45,14 +45,14 @@ npm run build
 
 ### 2.3 Initialize Database
 ```bash
-# Generate Prisma client using PostgreSQL schema
-PRISMA_SCHEMA=prisma/schema.postgres.prisma npm run prisma:generate
+# Generate Prisma client (auto-selects Postgres if DATABASE_URL is postgres://)
+npm run prisma:generate
 
-# Push schema (first time only)
-PRISMA_SCHEMA=prisma/schema.postgres.prisma npx prisma db push --schema prisma/schema.postgres.prisma
+# Apply migrations (production-safe)
+npm run prisma:migrate:deploy
 
 # Seed demo data (optional)
-npx prisma db seed
+npm run db:seed
 ```
 
 ---
@@ -100,7 +100,7 @@ openssl rand -base64 32
 head -c 32 /dev/urandom | base64
 
 # Windows (PowerShell)
-[Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes((1..32 | ForEach-Object { char })))
+$bytes = New-Object byte[] 32; [System.Security.Cryptography.RandomNumberGenerator]::Fill($bytes); [Convert]::ToBase64String($bytes)
 ```
 
 ---
@@ -125,7 +125,7 @@ vercel --prod
 3. Import from GitHub: `your-username/drivetuning`
 4. Settings:
    - **Framework Preset**: `Next.js` (auto-detected)
-   - **Build Command**: `npm run build`
+   - **Build Command**: `npm run vercel-build`
    - **Output Directory**: `.next`
 5. Click "Deploy"
 

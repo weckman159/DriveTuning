@@ -1,8 +1,9 @@
 'use client'
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { TuvBadge } from '@/components/TuvBadge'
 import MarketSoonBanner from '@/components/MarketSoonBanner'
 import ImageLightbox from '@/components/ImageLightbox'
@@ -13,10 +14,11 @@ type Listing = {
   price: number
   condition: 'NEW' | 'LIKE_NEW' | 'USED'
   mileageOnCar: number | null
-  car: { make: string; model: string; generation: string | null } | null
+  car: { make: string; model: string; generation: string | null; heroImage?: string | null } | null
   createdAt: string
   images?: string[]
   evidenceScore?: number
+  evidenceTier?: 'GOLD' | 'SILVER' | 'BRONZE' | 'NONE'
   seller: { id: string; name: string | null }
   modification?: {
     category?: string
@@ -47,6 +49,7 @@ export default function MarketPage() {
   const [selectedCondition, setSelectedCondition] = useState('')
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
   const [sortBy, setSortBy] = useState<'newest' | 'price_asc' | 'price_desc'>('newest')
+  const [verifiedOnly, setVerifiedOnly] = useState(false)
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -73,6 +76,7 @@ export default function MarketPage() {
     if (selectedCategory && listing.modification?.category !== selectedCategory) return false
     if (selectedCondition && listing.condition !== selectedCondition) return false
     if (listing.price < priceRange[0] || listing.price > priceRange[1]) return false
+    if (verifiedOnly && (listing.evidenceScore || 0) < 70) return false
     return true
   })
 
@@ -92,14 +96,14 @@ export default function MarketPage() {
         onClose={() => setLightboxOpen(false)}
       />
       <MarketSoonBanner />
-      <div className="flex gap-8">
+      <div className="flex flex-col lg:flex-row gap-8">
         {/* Sidebar Filters */}
-      <aside className="w-64 flex-shrink-0 space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Marktplatz</h1>
+      <aside className="w-full lg:w-64 flex-shrink-0 space-y-6 panel p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h1 className="text-2xl font-semibold text-white leading-tight">Marktplatz</h1>
           <Link
             href="/market/new"
-            className="px-3 py-1.5 bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold rounded-lg transition-colors shrink-0"
           >
             + Teil verkaufen
           </Link>
@@ -111,8 +115,20 @@ export default function MarketPage() {
           <input
             type="text"
             placeholder="Teile suchen..."
-            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500"
+            className="input-base"
           />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-zinc-300">Nachweise</label>
+          <label className="inline-flex items-center gap-2 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              checked={verifiedOnly}
+              onChange={(e) => setVerifiedOnly(e.target.checked)}
+            />
+            Nur bestaetigt (&gt;= 70%)
+          </label>
         </div>
 
         {/* Make Filter */}
@@ -121,7 +137,7 @@ export default function MarketPage() {
           <select
             value={selectedMake}
             onChange={(e) => setSelectedMake(e.target.value)}
-            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
+            className="select-base"
           >
             <option value="">Alle Marken</option>
             {makes.map((make) => (
@@ -136,7 +152,7 @@ export default function MarketPage() {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
+            className="select-base"
           >
             <option value="">Alle Kategorien</option>
             {categories.map((cat) => (
@@ -156,7 +172,7 @@ export default function MarketPage() {
                 className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                   selectedCondition === cond
                     ? 'bg-sky-500 text-white'
-                    : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                    : 'btn-secondary text-zinc-200'
                 }`}
               >
                 {conditionLabels[cond as keyof typeof conditionLabels]}
@@ -173,7 +189,7 @@ export default function MarketPage() {
               type="number"
               value={priceRange[0]}
               onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
+              className="input-base"
               placeholder="Min."
             />
             <span className="text-zinc-500">-</span>
@@ -181,7 +197,7 @@ export default function MarketPage() {
               type="number"
               value={priceRange[1]}
               onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
+              className="input-base"
               placeholder="Max."
             />
           </div>
@@ -192,15 +208,15 @@ export default function MarketPage() {
           <label className="text-sm font-medium text-zinc-300">TÜV Status</label>
           <div className="space-y-1">
             <label className="flex items-center gap-2 text-zinc-400 cursor-pointer">
-              <input type="checkbox" className="rounded bg-zinc-800 border-zinc-700" />
+              <input type="checkbox" className="checkbox-base" />
               TÜV OK (Eintragung)
             </label>
             <label className="flex items-center gap-2 text-zinc-400 cursor-pointer">
-              <input type="checkbox" className="rounded bg-zinc-800 border-zinc-700" />
+              <input type="checkbox" className="checkbox-base" />
               ABE/E-Nummer
             </label>
             <label className="flex items-center gap-2 text-zinc-400 cursor-pointer">
-              <input type="checkbox" className="rounded bg-zinc-800 border-zinc-700" />
+              <input type="checkbox" className="checkbox-base" />
               Nur Rennstrecke
             </label>
           </div>
@@ -215,7 +231,7 @@ export default function MarketPage() {
               setSelectedCondition('')
               setPriceRange([0, 10000])
             }}
-            className="w-full px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors"
+            className="w-full px-4 py-2 btn-secondary"
           >
             Filter zuruecksetzen
           </button>
@@ -223,7 +239,7 @@ export default function MarketPage() {
       </aside>
 
       {/* Listings Grid */}
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         {/* Sort and Count */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-zinc-400">
@@ -232,7 +248,7 @@ export default function MarketPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm"
+            className="px-3 py-2 rounded-xl bg-zinc-900/60 border border-white/10 text-white text-sm"
           >
             <option value="newest">Neueste zuerst</option>
             <option value="price_asc">Preis: aufsteigend</option>
@@ -245,20 +261,24 @@ export default function MarketPage() {
         ) : sortedListings.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedListings.map((listing) => (
+              (() => {
+                const thumb = listing.images?.[0] || listing.car?.heroImage || null
+                return (
               <Link
                 key={listing.id}
                 href={`/market/${listing.id}`}
-                className="group bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700 hover:border-sky-500 transition-all hover:scale-[1.02]"
+                className="group panel overflow-hidden transition-all hover:-translate-y-0.5 hover:border-white/20"
               >
-                 <div className="aspect-[4/3] bg-zinc-700 flex items-center justify-center relative">
-                   {listing.images?.[0] ? (
+                 <div className="aspect-[4/3] bg-zinc-900/50 flex items-center justify-center relative">
+                   {thumb ? (
                     <div
                        className="group absolute inset-0 cursor-zoom-in border border-transparent hover:border-sky-400 transition-all hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_28px_rgba(56,189,248,0.18)] relative"
                       title="Bilder ansehen"
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        setLightboxImages(listing.images || [])
+                        const imgs = (listing.images && listing.images.length > 0) ? listing.images : (listing.car?.heroImage ? [listing.car.heroImage] : [])
+                        setLightboxImages(imgs || [])
                         setLightboxIndex(0)
                         setLightboxAlt(listing.title)
                         setLightboxOpen(true)
@@ -269,20 +289,20 @@ export default function MarketPage() {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault()
                           e.stopPropagation()
-                          setLightboxImages(listing.images || [])
+                          const imgs = (listing.images && listing.images.length > 0) ? listing.images : (listing.car?.heroImage ? [listing.car.heroImage] : [])
+                          setLightboxImages(imgs || [])
                           setLightboxIndex(0)
                           setLightboxAlt(listing.title)
                           setLightboxOpen(true)
                         }
                       }}
                     >
-                      <Image
-                        src={listing.images[0]}
+                      <img
+                        src={thumb}
                         alt={listing.title}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover"
-                        unoptimized={typeof listing.images?.[0] === 'string' && listing.images[0].startsWith('data:')}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
                       />
                     </div>
                    ) : (
@@ -301,8 +321,20 @@ export default function MarketPage() {
                     </h3>
                   </div>
                    {(listing.evidenceScore || 0) > 0 && (
-                     <div className="inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-300">
-                      Nachweis {listing.evidenceScore}/10
+                     <div
+                       className={[
+                         'inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold',
+                         listing.evidenceTier === 'GOLD'
+                           ? 'border-amber-500/45 bg-amber-500/15 text-amber-300'
+                           : listing.evidenceTier === 'SILVER'
+                             ? 'border-slate-300/25 bg-slate-200/10 text-slate-200'
+                             : listing.evidenceTier === 'BRONZE'
+                               ? 'border-orange-500/35 bg-orange-500/15 text-orange-300'
+                               : 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300',
+                       ].join(' ')}
+                       title="Evidence Score"
+                     >
+                       Nachweis {Math.round(listing.evidenceScore || 0)}%
                      </div>
                    )}
                    <p className="text-2xl font-bold text-sky-500">€{listing.price.toLocaleString()}</p>
@@ -324,6 +356,8 @@ export default function MarketPage() {
                   </div>
                 </div>
               </Link>
+                )
+              })()
             ))}
           </div>
         ) : (

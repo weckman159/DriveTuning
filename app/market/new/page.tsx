@@ -184,9 +184,9 @@ function NewListingContent() {
         alt="Angebotsfoto"
         onClose={() => setLightboxOpen(false)}
       />
-      <h1 className="text-3xl font-bold text-white mb-8">Angebot erstellen</h1>
+      <h1 className="text-3xl font-semibold text-white mb-8">Angebot erstellen</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-800 p-6 rounded-xl border border-zinc-700">
+      <form onSubmit={handleSubmit} className="space-y-6 p-6 panel">
         {/* Title */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-zinc-300">Titel</label>
@@ -196,7 +196,7 @@ function NewListingContent() {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="z.B. KW V3 Gewindefahrwerk"
             required
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+            className="input-base"
           />
         </div>
 
@@ -207,7 +207,7 @@ function NewListingContent() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500 resize-none"
+            className="textarea-base resize-none"
           />
         </div>
 
@@ -222,7 +222,7 @@ function NewListingContent() {
             step="0.01"
             min="0"
             required
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+            className="input-base"
           />
         </div>
 
@@ -232,7 +232,7 @@ function NewListingContent() {
           <select
             value={condition}
             onChange={(e) => setCondition(e.target.value as typeof condition)}
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:border-sky-500"
+            className="select-base"
           >
             <option value="USED">Gebraucht</option>
             <option value="LIKE_NEW">Wie neu</option>
@@ -249,7 +249,7 @@ function NewListingContent() {
             onChange={(e) => setMileageOnCar(e.target.value)}
             placeholder="0"
             min="0"
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+            className="input-base"
           />
         </div>
 
@@ -262,7 +262,7 @@ function NewListingContent() {
             multiple
             onChange={handleImageChange}
             disabled={processingImages}
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white file:mr-4 file:rounded file:border-0 file:bg-sky-500 file:px-3 file:py-1.5 file:text-white hover:file:bg-sky-400"
+            className="input-base file:mr-4 file:rounded file:border-0 file:bg-sky-500 file:px-3 file:py-1.5 file:text-white hover:file:bg-sky-400"
           />
           <p className="text-xs text-zinc-500">
             Bis zu {MAX_IMAGES} Fotos. Bilder werden automatisch (WebP) optimiert (Ziel: {Math.round(MAX_OUTPUT_WEBP_BYTES / 1024)}KB).
@@ -279,7 +279,7 @@ function NewListingContent() {
                       setLightboxIndex(index)
                       setLightboxOpen(true)
                     }}
-                    className="group block w-full rounded-lg border border-zinc-700 overflow-hidden cursor-zoom-in transition-all hover:border-sky-400 hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_22px_rgba(56,189,248,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                    className="group block w-full rounded-xl border border-white/10 overflow-hidden cursor-zoom-in transition-all hover:border-sky-400 hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_22px_rgba(56,189,248,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   >
                      <Image
                        src={img}

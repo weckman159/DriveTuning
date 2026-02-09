@@ -75,6 +75,20 @@ type Document = {
   uploadedAt: string
 }
 
+type TuvReadiness = {
+  status: 'READY' | 'NEEDS_DOCS' | 'NOT_READY' | 'UNKNOWN'
+  score: number
+  summary: {
+    totalMods: number
+    green: number
+    yellow: number
+    red: number
+    withApprovals: number
+    missingApprovals: number
+  }
+  actions: string[]
+}
+
 const typeColors = {
   MODIFICATION: 'bg-sky-500',
   MAINTENANCE: 'bg-zinc-500',
@@ -96,7 +110,55 @@ const buildStatusLabels: Record<Car['buildStatus'], string> = {
   DAILY_READY: 'Alltag bereit',
 }
 
+const tuvReadinessLabels: Record<TuvReadiness['status'], string> = {
+  READY: 'Bereit',
+  NEEDS_DOCS: 'Nachweise fehlen',
+  NOT_READY: 'Nicht bereit',
+  UNKNOWN: 'Unbekannt',
+}
+
+const tuvReadinessToneClass: Record<TuvReadiness['status'], string> = {
+  READY: 'bg-green-500/20 text-green-400',
+  NEEDS_DOCS: 'bg-amber-500/20 text-amber-300',
+  NOT_READY: 'bg-red-500/20 text-red-300',
+  UNKNOWN: 'bg-zinc-500/20 text-zinc-300',
+}
+
+const documentTypeLabels: Record<string, string> = {
+  ABE: 'ABE',
+  EINTRAGUNG: 'Eintragung',
+  RECEIPT: 'Beleg',
+  SERVICE: 'Service',
+  OTHER: 'Sonstiges',
+}
+
 function QuickActionTile(props: { href: string; label: string; icon: ReactNode; iconToneClass: string }) {
+  const isHashLink = props.href.startsWith('#')
+
+  if (isHashLink) {
+    return (
+      <a
+        href={props.href}
+        onClick={(e) => {
+          const targetId = props.href.slice(1)
+          const target = document.getElementById(targetId)
+          if (!target) return
+          e.preventDefault()
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }}
+        className="group relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/40 px-5 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] transition-all hover:-translate-y-0.5 hover:border-white/20"
+      >
+        <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border ${props.iconToneClass}`}>
+          {props.icon}
+        </div>
+        <div className="mt-4 text-center text-[11px] font-semibold tracking-[0.22em] text-zinc-200">
+          {props.label}
+        </div>
+        <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100 [background:radial-gradient(60%_60%_at_50%_20%,rgba(255,255,255,0.06),transparent_60%)]" />
+      </a>
+    )
+  }
+
   return (
     <Link
       href={props.href}
@@ -119,6 +181,7 @@ export default function CarPage() {
 
   const [showNewEntry, setShowNewEntry] = useState(false)
   const [car, setCar] = useState<Car | null>(null)
+  const [tuvReadiness, setTuvReadiness] = useState<TuvReadiness | null>(null)
   const [forSale, setForSale] = useState(false)
   const [askingPrice, setAskingPrice] = useState('')
   const [shareUrl, setShareUrl] = useState<string | null>(null)
@@ -168,6 +231,7 @@ export default function CarPage() {
       }
       const data = await res.json()
       setCar(data.car)
+      setTuvReadiness(data?.tuvReadiness || null)
       setForSale(!!data.car.forSale)
       setAskingPrice(data.car.askingPrice ? String(data.car.askingPrice) : '')
       if (data.car.visibility === 'PUBLIC' || data.car.visibility === 'UNLISTED' || data.car.visibility === 'PRIVATE') {
@@ -182,6 +246,7 @@ export default function CarPage() {
         setBuildStatus(data.car.buildStatus)
       }
     } catch (err) {
+      setTuvReadiness(null)
       setError(err instanceof Error ? err.message : 'Etwas ist schiefgelaufen')
     } finally {
       setLoading(false)
@@ -580,6 +645,15 @@ export default function CarPage() {
   const totalMods = car.logEntries.filter((e) => e.type === 'MODIFICATION').length
   const totalTrackDays = car.logEntries.filter((e) => e.type === 'TRACK_DAY').length
   const totalSpent = car.logEntries.reduce((acc, e) => acc + (Number(e.totalCostImpact) || 0), 0)
+  const shareDestinationPath = shareUrl
+    ? (() => {
+        try {
+          return new URL(shareUrl).pathname
+        } catch {
+          return null
+        }
+      })()
+    : null
 
   return (
     <div className="relative">
@@ -595,7 +669,7 @@ export default function CarPage() {
 
         <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white">
+            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
               {car.make} {car.model} {car.generation || ''}
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-400">
@@ -608,14 +682,14 @@ export default function CarPage() {
               <span>{totalTrackDays} Trackdays</span>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="inline-flex items-center rounded-full border border-sky-500/25 bg-sky-500/15 px-3 py-1 text-xs font-semibold text-sky-300">
+              <span className="inline-flex items-center rounded-full border border-sky-400 bg-sky-500 px-3 py-1 text-xs font-semibold text-white">
                 {projectGoalLabels[car.projectGoal]}
               </span>
-              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-zinc-200">
+              <span className="inline-flex items-center rounded-full border border-white/15 bg-zinc-950 px-3 py-1 text-xs font-semibold text-white">
                 {buildStatusLabels[buildStatus]}
               </span>
               {forSale ? (
-                <span className="inline-flex items-center rounded-full border border-emerald-500/25 bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
+                <span className="inline-flex items-center rounded-full border border-emerald-400 bg-emerald-500 px-3 py-1 text-xs font-semibold text-white">
                   Zu verkaufen
                 </span>
               ) : null}
@@ -744,10 +818,10 @@ export default function CarPage() {
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
           <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-full border border-sky-500/25 bg-sky-500/15 px-3 py-1 text-xs font-semibold text-sky-300">
+              <span className="inline-flex items-center rounded-full border border-sky-400 bg-sky-500 px-3 py-1 text-xs font-semibold text-white">
                 {projectGoalLabels[car.projectGoal]}
               </span>
-              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-zinc-200">
+              <span className="inline-flex items-center rounded-full border border-white/15 bg-zinc-950 px-3 py-1 text-xs font-semibold text-white">
                 {buildStatusLabels[car.buildStatus]}
               </span>
             </div>
@@ -812,6 +886,19 @@ export default function CarPage() {
         <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
           <h3 className="text-lg font-semibold text-white mb-4">Status</h3>
           <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-zinc-400">TUEV-Ready</p>
+                <p className="text-white">{tuvReadiness ? `${tuvReadiness.score}%` : '—'}</p>
+              </div>
+              {tuvReadiness ? (
+                <span className={`px-2 py-1 text-xs font-medium rounded ${tuvReadinessToneClass[tuvReadiness.status]}`}>
+                  {tuvReadinessLabels[tuvReadiness.status]}
+                </span>
+              ) : (
+                <span className="px-2 py-1 bg-white/5 text-zinc-400 text-xs font-medium rounded">—</span>
+              )}
+            </div>
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-zinc-400">Naechster TÜV</p>
@@ -905,9 +992,17 @@ export default function CarPage() {
         </div>
         {shareUrl && (
           <div className="mt-4 pt-4 border-t border-white/10">
-            <p className="text-sm text-zinc-400">Share-Link (in die Zwischenablage kopiert)</p>
-            <a className="text-sky-400 hover:text-sky-300 break-all" href={shareUrl} target="_blank" rel="noreferrer">
-              {shareUrl}
+            <p className="text-sm text-zinc-400">
+              {shareDestinationPath ? `Fuehrt zu: ${shareDestinationPath} (Build-Passport, schreibgeschuetzt)` : 'Link zum Build-Passport (schreibgeschuetzt)'}
+            </p>
+            <a
+              className="text-sky-400 hover:text-sky-300"
+              href={shareUrl}
+              target="_blank"
+              rel="noreferrer"
+              title={shareUrl}
+            >
+              Build-Passport oeffnen
             </a>
           </div>
         )}
@@ -938,7 +1033,7 @@ export default function CarPage() {
                   <div className="ml-auto flex items-center gap-2">
                     <button
                       onClick={() => copyShareLink(l.token)}
-                      className="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white text-sm rounded"
+                      className="px-3 py-1.5 btn-secondary text-sm"
                       title={car?.slug ? 'Kopiert die Share-URL' : 'Kopiert das Token'}
                     >
                       Kopieren
@@ -1035,7 +1130,7 @@ export default function CarPage() {
       {/* Journal Section */}
       <div className="space-y-6">
         <div id="journal" className="flex justify-between items-center scroll-mt-24">
-          <h2 className="text-2xl font-bold text-white">Journal</h2>
+          <h2 className="text-2xl font-semibold text-white">Journal</h2>
         </div>
 
         <div className="space-y-4">
@@ -1058,7 +1153,7 @@ export default function CarPage() {
                     </span>
                     {entry.modifications[0]?.tuvStatus && <TuvBadge status={entry.modifications[0].tuvStatus} />}
                     {entry.totalCostImpact && (
-                      <span className="px-2 py-0.5 bg-zinc-700 text-zinc-300 text-xs rounded">
+                      <span className="px-2 py-0.5 border border-white/10 bg-white/5 text-zinc-200 text-xs rounded">
                         €{Number(entry.totalCostImpact).toLocaleString()}
                       </span>
                     )}
@@ -1132,7 +1227,7 @@ export default function CarPage() {
           )}
           {tasks.map((t) => (
             <div key={t.id} className="flex flex-wrap items-center gap-2 bg-zinc-950/30 border border-white/10 rounded-lg p-3">
-              <span className="text-xs px-2 py-0.5 rounded bg-zinc-700 text-zinc-200">
+              <span className="text-xs px-2 py-0.5 rounded border border-white/10 bg-white/5 text-zinc-200">
                 {t.status}
               </span>
               <span className={`text-white ${t.status === 'DONE' ? 'line-through opacity-70' : ''}`}>
@@ -1145,14 +1240,14 @@ export default function CarPage() {
                 <button
                   onClick={() => setTaskStatus(t.id, 'TODO')}
                   disabled={tasksLoading || t.status === 'TODO'}
-                  className="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 disabled:bg-zinc-700/40 text-white text-sm rounded"
+                  className="px-3 py-1.5 btn-secondary disabled:opacity-60 text-sm rounded"
                 >
                   Offen
                 </button>
                 <button
                   onClick={() => setTaskStatus(t.id, 'IN_PROGRESS')}
                   disabled={tasksLoading || t.status === 'IN_PROGRESS'}
-                  className="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 disabled:bg-zinc-700/40 text-white text-sm rounded"
+                  className="px-3 py-1.5 btn-secondary disabled:opacity-60 text-sm rounded"
                 >
                   In Arbeit
                 </button>
@@ -1282,34 +1377,51 @@ export default function CarPage() {
           )}
           {documents.map((d) => (
             <div key={d.id} className="flex flex-wrap items-center gap-2 bg-zinc-950/30 border border-white/10 rounded-lg p-3">
-              <span className="text-xs px-2 py-0.5 rounded bg-zinc-700 text-zinc-200">{d.type}</span>
-              <select
-                value={d.visibility}
-                onChange={(e) => setDocumentVisibility(d.id, e.target.value as Document['visibility'])}
-                disabled={docsLoading}
-                className="px-2 py-1 bg-zinc-900/60 border border-white/10 rounded text-xs text-zinc-100"
-                aria-label="Dokument-Sichtbarkeit"
-                title="Dokument-Sichtbarkeit"
-              >
-                <option value="SELF">Nur ich</option>
-                <option value="LINK">Link</option>
-                <option value="PUBLIC">Oeffentlich</option>
-                <option value="NONE">Keine</option>
-              </select>
-              <span className="text-white">{d.title || d.documentNumber || d.url}</span>
-              <span className="text-xs text-zinc-500">{new Date(d.uploadedAt).toLocaleDateString('de-DE')}</span>
-              <a className="text-sky-400 hover:text-sky-300 text-sm break-all" href={d.url} target="_blank" rel="noreferrer">
-                Oeffnen
-              </a>
-              <div className="ml-auto">
-                <button
-                  onClick={() => deleteDocument(d.id)}
-                  disabled={docsLoading}
-                  className="px-3 py-1.5 bg-red-500/80 hover:bg-red-500 disabled:bg-red-500/30 text-white text-sm rounded"
-                >
-                  Loeschen
-                </button>
-              </div>
+              {(() => {
+                const typeLabel = documentTypeLabels[d.type] ?? d.type
+                const title = (d.title || '').trim()
+                const number = (d.documentNumber || '').trim()
+                const displayName = title || number || typeLabel || 'Dokument'
+                return (
+                  <>
+                    <span className="text-xs px-2 py-0.5 rounded border border-white/10 bg-white/5 text-zinc-200">
+                      {typeLabel}
+                    </span>
+                    <select
+                      value={d.visibility}
+                      onChange={(e) => setDocumentVisibility(d.id, e.target.value as Document['visibility'])}
+                      disabled={docsLoading}
+                      className="px-2 py-1 bg-zinc-900/60 border border-white/10 rounded text-xs text-zinc-100"
+                      aria-label="Dokument-Sichtbarkeit"
+                      title="Dokument-Sichtbarkeit"
+                    >
+                      <option value="SELF">Nur ich</option>
+                      <option value="LINK">Link</option>
+                      <option value="PUBLIC">Oeffentlich</option>
+                      <option value="NONE">Keine</option>
+                    </select>
+                    <a
+                      className="text-white hover:text-sky-300 text-sm break-words"
+                      href={d.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      title={d.url}
+                    >
+                      {displayName}
+                    </a>
+                    <span className="text-xs text-zinc-500">{new Date(d.uploadedAt).toLocaleDateString('de-DE')}</span>
+                    <div className="ml-auto">
+                      <button
+                        onClick={() => deleteDocument(d.id)}
+                        disabled={docsLoading}
+                        className="px-3 py-1.5 bg-red-500/80 hover:bg-red-500 disabled:bg-red-500/30 text-white text-sm rounded"
+                      >
+                        Loeschen
+                      </button>
+                    </div>
+                  </>
+                )
+              })()}
             </div>
           ))}
         </div>

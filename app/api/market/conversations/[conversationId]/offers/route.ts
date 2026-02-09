@@ -2,6 +2,15 @@ import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { consumeRateLimit } from '@/lib/rate-limit'
+import { z } from 'zod'
+import { readJson } from '@/lib/validation'
+
+const bodySchema = z.object({
+  amountCents: z.union([z.number(), z.string()]).optional(),
+  amount: z.union([z.number(), z.string()]).optional(),
+  currency: z.string().trim().optional(),
+})
 
 export async function POST(
   req: Request,
@@ -10,10 +19,24 @@ export async function POST(
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
 
+  const rl = await consumeRateLimit({
+    namespace: 'market:offers:user',
+    identifier: session.user.id,
+    limit: 12,
+    windowMs: 60_000,
+  })
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Zu viele Angebote in kurzer Zeit' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+    )
+  }
+
   const { conversationId } = await params
-  const body = await req.json().catch(() => ({} as any))
-  const amountRaw = body.amountCents ?? body.amount ?? null
-  const currency = typeof body.currency === 'string' ? body.currency.trim().toUpperCase() : 'EUR'
+  const parsed = bodySchema.safeParse(await readJson(req))
+  if (!parsed.success) return NextResponse.json({ error: 'Ungueltige Eingabe' }, { status: 400 })
+  const amountRaw = (parsed.data.amountCents ?? parsed.data.amount ?? null) as any
+  const currency = typeof parsed.data.currency === 'string' ? parsed.data.currency.trim().toUpperCase() : 'EUR'
 
   const amountCents = Number(amountRaw)
   if (!Number.isFinite(amountCents) || amountCents <= 0) {

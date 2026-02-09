@@ -3,12 +3,12 @@ import { LEGAL } from '@/lib/legal'
 export default function AgbPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      <h1 className="text-3xl font-bold text-white">AGB</h1>
+      <h1 className="text-3xl font-semibold text-white">AGB</h1>
       <p className="text-zinc-400 text-sm">
         Hinweis: Dies ist ein Mustertext (Beta) und ersetzt keine Rechtsberatung. Bitte pruefe und passe die Bedingungen vor Aktivierung von Zahlungen/Versand an.
       </p>
 
-      <div className="rounded-xl border border-zinc-700 bg-zinc-800 p-5 text-zinc-300 space-y-4">
+      <div className="panel p-5 text-zinc-300 space-y-4">
         <h2 className="text-lg font-semibold text-white">1. Anbieter</h2>
         <p className="text-sm text-zinc-300">
           {LEGAL.operatorName}, E-Mail: {LEGAL.email}

@@ -35,8 +35,8 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <div className="w-full max-w-md">
-        <div className="bg-zinc-800 rounded-xl p-8 border border-zinc-700">
-          <h1 className="text-2xl font-bold text-white mb-2">Passwort vergessen</h1>
+        <div className="panel p-8">
+          <h1 className="text-2xl font-semibold text-white mb-2">Passwort vergessen</h1>
           <p className="text-zinc-400 mb-6">
             Wenn ein Konto existiert, senden wir dir einen Reset-Link per E-Mail.
           </p>
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
               </div>
 
               {devLink && (
-                <div className="p-3 bg-zinc-900 border border-zinc-700 rounded-lg text-zinc-200 text-sm break-words">
+                <div className="panel-soft p-3 text-zinc-200 text-sm break-words">
                   <div className="text-zinc-400 mb-1">Dev-Reset-Link:</div>
                   <a className="text-sky-400 hover:text-sky-300" href={devLink}>
                     {devLink}
@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+                  className="input-base"
                   placeholder="you@example.com"
                 />
               </div>

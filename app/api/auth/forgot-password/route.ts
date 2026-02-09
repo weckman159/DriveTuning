@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { defaultPasswordResetConfig, generateResetToken, hashResetToken } from '@/lib/password-reset'
 import { sendEmail } from '@/lib/email'
+import { consumeRateLimit } from '@/lib/rate-limit'
+import { getRequestIp } from '@/lib/request-ip'
+import { z } from 'zod'
+import { readJson } from '@/lib/validation'
+
+const bodySchema = z.object({
+  email: z.string().trim().email().optional(),
+})
 
 function baseUrl(): string {
   return process.env.NEXTAUTH_URL || 'http://localhost:3000'
@@ -9,13 +17,30 @@ function baseUrl(): string {
 
 export async function POST(req: Request) {
   try {
-    const { email } = await req.json()
-    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
-
-    // Always respond with success to avoid account enumeration.
     const okResponse = NextResponse.json({ ok: true })
 
+    const parsed = bodySchema.safeParse(await readJson(req))
+    const normalizedEmail = parsed.success && parsed.data.email ? parsed.data.email.trim().toLowerCase() : ''
+
+    // Always respond with success to avoid account enumeration.
+    const ip = getRequestIp(req) || 'unknown'
+    const ipLimit = await consumeRateLimit({
+      namespace: 'auth:forgot-password:ip',
+      identifier: ip,
+      limit: 10,
+      windowMs: 60_000,
+    })
+    if (!ipLimit.ok) return okResponse
+
     if (!normalizedEmail) return okResponse
+
+    const emailLimit = await consumeRateLimit({
+      namespace: 'auth:forgot-password:email',
+      identifier: normalizedEmail,
+      limit: 3,
+      windowMs: 60_000,
+    })
+    if (!emailLimit.ok) return okResponse
 
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },

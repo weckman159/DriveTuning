@@ -8,7 +8,16 @@
     "start": "next start",
     "lint": "next lint",
     "prisma:generate": "node scripts/prisma-generate.cjs",
+    "prisma:db:push": "node scripts/prisma-db-push.cjs",
+    "prisma:migrate:deploy": "node scripts/prisma-migrate-deploy.cjs",
+    "prisma:sync": "node scripts/prisma-sync.cjs",
+    "db:seed": "node prisma/seed.js",
+    "ref:places": "node scripts/build-places-dictionary.cjs",
+    "vercel-build": "npm run prisma:generate && npm run prisma:sync && next build",
     "postinstall": "npm run prisma:generate"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.0.0",
@@ -18,15 +27,19 @@
     "bcryptjs": "^2.4.3",
     "next": "15.5.11",
     "next-auth": "^4.24.0",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.17.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "stripe": "^20.3.1"
+    "stripe": "^20.3.1",
+    "zod": "^3.25.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.11.0",
+    "@types/pdfkit": "^0.13.9",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.17",

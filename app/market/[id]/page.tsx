@@ -1,8 +1,9 @@
 'use client'
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { TuvBadge } from '@/components/TuvBadge'
 import { useSession } from 'next-auth/react'
@@ -32,7 +33,7 @@ type Listing = {
   price: number
   condition: 'NEW' | 'LIKE_NEW' | 'USED'
   mileageOnCar: number | null
-  car: { make: string; model: string; generation: string | null } | null
+  car: { make: string; model: string; generation: string | null; heroImage?: string | null } | null
   createdAt: string
   seller: { id: string; name: string | null }
   modification: {
@@ -44,6 +45,7 @@ type Listing = {
   } | null
   images?: string[]
   evidenceScore?: number
+  evidenceTier?: 'GOLD' | 'SILVER' | 'BRONZE' | 'NONE'
   category?: string
   partNumber?: string
   compatibility?: string[]
@@ -219,7 +221,10 @@ export default function MarketListingPage() {
   }
 
   const isSeller = session?.user?.id === listing.seller.id
-  const images = listing.images || []
+  const images =
+    listing.images && listing.images.length > 0
+      ? listing.images
+      : (listing.car?.heroImage ? [listing.car.heroImage] : [])
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -243,8 +248,8 @@ export default function MarketListingPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column - Images */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="aspect-[4/3] bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700">
-            {listing.images && listing.images.length > 0 ? (
+          <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 bg-zinc-950/40 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+            {images.length > 0 ? (
               <button
                 type="button"
                 className="group block w-full h-full cursor-zoom-in border border-transparent hover:border-sky-400 transition-all hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_28px_rgba(56,189,248,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 relative"
@@ -254,13 +259,12 @@ export default function MarketListingPage() {
                   setLightboxOpen(true)
                 }}
               >
-                <Image
-                  src={listing.images[0]}
+                <img
+                  src={images[0]}
                   alt={listing.title}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 66vw"
-                  className="object-cover"
-                  unoptimized={typeof listing.images?.[0] === 'string' && listing.images[0].startsWith('data:')}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="eager"
+                  referrerPolicy="no-referrer"
                 />
               </button>
             ) : (
@@ -273,10 +277,10 @@ export default function MarketListingPage() {
             )}
           </div>
           <div className="grid grid-cols-4 gap-4">
-            {(listing.images && listing.images.length > 0 ? listing.images : [null, null, null, null]).slice(0, 4).map((img, i) => (
+            {(images.length > 0 ? images : [null, null, null, null]).slice(0, 4).map((img, i) => (
               <div
                 key={i}
-                className="aspect-square bg-zinc-800 rounded-lg border border-zinc-700 flex items-center justify-center overflow-hidden"
+                className="aspect-square rounded-xl border border-white/10 bg-zinc-950/40 flex items-center justify-center overflow-hidden shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
               >
                 {img ? (
                   <button
@@ -288,13 +292,12 @@ export default function MarketListingPage() {
                       setLightboxOpen(true)
                     }}
                   >
-                    <Image
+                    <img
                       src={img}
                       alt={`${listing.title} ${i + 1}`}
-                      fill
-                      sizes="(max-width: 1024px) 25vw, 200px"
-                      className="object-cover"
-                      unoptimized={typeof img === 'string' && img.startsWith('data:')}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
                     />
                   </button>
                 ) : (
@@ -305,19 +308,19 @@ export default function MarketListingPage() {
           </div>
 
           {/* Description */}
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-            <h2 className="text-xl font-bold text-white mb-4">Beschreibung</h2>
+          <div className="panel p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Beschreibung</h2>
             <p className="text-zinc-300 whitespace-pre-line">{listing.description || 'Keine Beschreibung vorhanden.'}</p>
           </div>
 
           {/* Compatibility */}
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-            <h2 className="text-xl font-bold text-white mb-4">Kompatibilitaet</h2>
+          <div className="panel p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Kompatibilitaet</h2>
             <div className="flex flex-wrap gap-2">
           {(listing.compatibility || []).map((car) => (
             <span
               key={car}
-              className="px-3 py-1 bg-zinc-700 text-zinc-300 rounded-full text-sm"
+              className="px-3 py-1 rounded-full text-sm border border-white/10 bg-white/5 text-zinc-200"
             >
                   {car}
                 </span>
@@ -329,17 +332,28 @@ export default function MarketListingPage() {
         {/* Right Column - Details & Buy */}
         <div className="space-y-6">
           {/* Title & Price */}
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+          <div className="panel p-6">
             <div className="flex items-start justify-between mb-4">
-              <h1 className="text-2xl font-bold text-white">{listing.title}</h1>
+              <h1 className="text-2xl font-semibold text-white">{listing.title}</h1>
               <span className={`px-3 py-1 text-sm font-medium rounded text-white ${conditionColors[listing.condition]}`}>
                 {conditionLabels[listing.condition]}
               </span>
             </div>
             <p className="text-4xl font-bold text-sky-500 mb-4">€{listing.price.toLocaleString()}</p>
             {(listing.evidenceScore || 0) > 0 && (
-              <div className="mb-4 inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 text-sm font-medium text-emerald-300">
-                Nachweis: {listing.evidenceScore}/10
+              <div
+                className={[
+                  'mb-4 inline-flex items-center rounded-full border px-3 py-1 text-sm font-semibold',
+                  listing.evidenceTier === 'GOLD'
+                    ? 'border-amber-500/45 bg-amber-500/15 text-amber-300'
+                    : listing.evidenceTier === 'SILVER'
+                      ? 'border-slate-300/25 bg-slate-200/10 text-slate-200'
+                      : listing.evidenceTier === 'BRONZE'
+                        ? 'border-orange-500/35 bg-orange-500/15 text-orange-300'
+                        : 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300',
+                ].join(' ')}
+              >
+                Nachweis: {Math.round(listing.evidenceScore || 0)}%
               </div>
             )}
             <div className="space-y-2 text-sm text-zinc-400">
@@ -371,7 +385,7 @@ export default function MarketListingPage() {
               </div>
             </div>
             {listing.modification?.tuvStatus && (
-              <div className="mt-4 pt-4 border-t border-zinc-700">
+              <div className="mt-4 pt-4 border-t border-white/10">
                 <p className="text-sm text-zinc-400 mb-2">TÜV Status</p>
                 <TuvBadge status={listing.modification.tuvStatus} />
               </div>
@@ -379,14 +393,14 @@ export default function MarketListingPage() {
           </div>
 
           {/* Actions */}
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700 space-y-3">
+          <div className="panel p-6 space-y-3">
             {commerceEnabled && !isSeller ? (
               <label className="flex items-start gap-2 text-xs text-zinc-300">
                 <input
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-700"
+                  className="mt-0.5 checkbox-base"
                 />
                 <span>
                   Ich akzeptiere{' '}
@@ -425,13 +439,13 @@ export default function MarketListingPage() {
               <>
                 <button
                   onClick={() => setShowContactForm(true)}
-                  className="w-full px-4 py-3 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors"
+                  className="w-full px-4 py-3 btn-secondary"
                 >
                   Verkaeufer kontaktieren
                 </button>
                 <button
                   onClick={() => setShowOfferModal(true)}
-                  className="w-full px-4 py-3 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors"
+                  className="w-full px-4 py-3 btn-secondary"
                 >
                   Angebot machen
                 </button>
@@ -440,7 +454,7 @@ export default function MarketListingPage() {
             {isSeller && (
               <Link
                 href="/settings/messages"
-                className="w-full px-4 py-3 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors text-center"
+                className="block w-full px-4 py-3 btn-secondary text-center"
               >
                 Nachrichten ansehen
               </Link>
@@ -448,7 +462,7 @@ export default function MarketListingPage() {
             {isSeller && (
               <Link
                 href={`/market/${listing.id}/edit`}
-                className="w-full px-4 py-3 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-lg transition-colors text-center"
+                className="block w-full px-4 py-3 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-lg transition-colors text-center"
               >
                 Angebot bearbeiten
               </Link>
@@ -457,7 +471,7 @@ export default function MarketListingPage() {
           </div>
 
           {/* Seller Info */}
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+          <div className="panel p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Verkaeufer</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
@@ -476,13 +490,13 @@ export default function MarketListingPage() {
           </div>
 
           {/* Safety Tips */}
-          <div className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-700">
+          <div className="panel-soft p-4">
             <h4 className="text-sm font-semibold text-white mb-2">Sicherheitstipps</h4>
             <ul className="text-xs text-zinc-400 space-y-1">
-              <li>• Treffe dich an einem sicheren Ort</li>
-              <li>• Artikel vor der Zahlung pruefen</li>
-              <li>• Sichere Zahlungsmethoden verwenden</li>
-              <li>• Quittungen/Nachweise anfordern</li>
+              <li>Treffe dich an einem sicheren Ort</li>
+              <li>Artikel vor der Zahlung pruefen</li>
+              <li>Sichere Zahlungsmethoden verwenden</li>
+              <li>Quittungen/Nachweise anfordern</li>
             </ul>
           </div>
         </div>
@@ -491,10 +505,10 @@ export default function MarketListingPage() {
       {/* Contact Modal */}
       {showContactForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700 w-full max-w-md">
-            <h2 className="text-xl font-bold text-white mb-4">Verkaeufer kontaktieren</h2>
+          <div className="panel p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold text-white mb-4">Verkaeufer kontaktieren</h2>
             {messages.length > 0 && (
-              <div className="mb-4 max-h-60 overflow-y-auto space-y-3 rounded-lg border border-zinc-700 bg-zinc-900/50 p-3">
+              <div className="mb-4 max-h-60 overflow-y-auto space-y-3 rounded-xl border border-white/10 bg-zinc-950/30 p-3">
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.senderId === session?.user?.id ? 'justify-end' : 'justify-start'}`}>
                     <div className="max-w-[85%] rounded-lg bg-sky-500/20 border border-sky-500/40 px-3 py-2">
@@ -518,7 +532,7 @@ export default function MarketListingPage() {
                   placeholder="Hallo, ich interessiere mich fuer den Artikel..."
                   rows={4}
                   required
-                  className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white resize-none"
+                  className="textarea-base resize-none"
                 />
               </div>
               {actionError && <p className="text-sm text-red-400">{actionError}</p>}
@@ -527,7 +541,7 @@ export default function MarketListingPage() {
                   type="button"
                   onClick={() => setShowContactForm(false)}
                   disabled={sending}
-                  className="flex-1 px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 btn-secondary"
                 >
                   Abbrechen
                 </button>
@@ -547,10 +561,10 @@ export default function MarketListingPage() {
       {/* Offer Modal */}
       {showOfferModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700 w-full max-w-md">
-            <h2 className="text-xl font-bold text-white mb-4">Angebot machen</h2>
+          <div className="panel p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold text-white mb-4">Angebot machen</h2>
             {offers.length > 0 && (
-              <div className="mb-4 rounded-lg border border-zinc-700 bg-zinc-900/50 p-3 text-sm text-zinc-300">
+              <div className="mb-4 rounded-xl border border-white/10 bg-zinc-950/30 p-3 text-sm text-zinc-300">
                 Letztes Angebot: €{(offers[0].amountCents / 100).toLocaleString()} ({offers[0].status})
               </div>
             )}
@@ -561,7 +575,7 @@ export default function MarketListingPage() {
                   value={offerAmount}
                   onChange={(e) => setOfferAmount(e.target.value)}
                   placeholder="z.B. 2500"
-                  className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+                  className="input-base"
                 />
               </div>
               {actionError && <p className="text-sm text-red-400">{actionError}</p>}
@@ -570,7 +584,7 @@ export default function MarketListingPage() {
                   type="button"
                   onClick={() => setShowOfferModal(false)}
                   disabled={sending}
-                  className="flex-1 px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 btn-secondary"
                 >
                   Abbrechen
                 </button>
@@ -587,7 +601,7 @@ export default function MarketListingPage() {
         </div>
       )}
 
-      {contactSuccess && (
+          {contactSuccess && (
         <div className="fixed bottom-6 right-6 bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-2 rounded-lg text-sm">
           Nachricht an Verkaeufer gesendet.
         </div>

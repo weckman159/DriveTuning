@@ -61,8 +61,8 @@ export default function SignUpPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <div className="w-full max-w-md">
-        <div className="bg-zinc-800 rounded-xl p-8 border border-zinc-700">
-          <h1 className="text-2xl font-bold text-white mb-2">Konto erstellen</h1>
+        <div className="panel p-8">
+          <h1 className="text-2xl font-semibold text-white mb-2">Konto erstellen</h1>
           <p className="text-zinc-400 mb-6">
             Registriere dich bei DRIVETUNING, um deine Builds zu dokumentieren
           </p>
@@ -83,7 +83,7 @@ export default function SignUpPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+                className="input-base"
                 placeholder="Dein Name"
               />
             </div>
@@ -97,7 +97,7 @@ export default function SignUpPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+                className="input-base"
                 placeholder="you@example.com"
               />
             </div>
@@ -112,8 +112,8 @@ export default function SignUpPage() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 minLength={8}
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
-                placeholder="••••••••"
+                className="input-base"
+                placeholder="********"
               />
             </div>
 
@@ -126,8 +126,8 @@ export default function SignUpPage() {
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
-                placeholder="••••••••"
+                className="input-base"
+                placeholder="********"
               />
             </div>
 

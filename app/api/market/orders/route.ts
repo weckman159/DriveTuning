@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
 import { marketCommerceEnabled } from '@/lib/feature-flags'
+import { consumeRateLimit } from '@/lib/rate-limit'
+import { z } from 'zod'
+import { readJson } from '@/lib/validation'
 
 function getAppUrl(): string {
   const env = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || ''
@@ -17,13 +20,33 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Zahlungen sind deaktiviert' }, { status: 403 })
   }
 
+  const rl = await consumeRateLimit({
+    namespace: 'market:orders:user',
+    identifier: session.user.id,
+    limit: 5,
+    windowMs: 60_000,
+  })
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Zu viele Checkout-Versuche. Bitte spaeter erneut versuchen.' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+    )
+  }
+
   const appUrl = getAppUrl()
   if (!appUrl) return NextResponse.json({ error: 'APP_URL ist nicht konfiguriert' }, { status: 500 })
 
-  const body = await req.json().catch(() => ({} as any))
-  const listingId = typeof body.listingId === 'string' ? body.listingId.trim() : ''
-  const offerId = typeof body.offerId === 'string' ? body.offerId.trim() : ''
-  const termsAccepted = body.termsAccepted === true
+  const bodySchema = z.object({
+    listingId: z.string().trim().min(1),
+    offerId: z.string().trim().optional(),
+    termsAccepted: z.boolean(),
+  })
+  const parsed = bodySchema.safeParse(await readJson(req))
+  if (!parsed.success) return NextResponse.json({ error: 'Ungueltige Eingabe' }, { status: 400 })
+
+  const listingId = parsed.data.listingId
+  const offerId = parsed.data.offerId || ''
+  const termsAccepted = parsed.data.termsAccepted
   if (!listingId) return NextResponse.json({ error: 'listingId fehlt' }, { status: 400 })
   if (!termsAccepted) {
     return NextResponse.json(
@@ -39,6 +62,14 @@ export async function POST(req: Request) {
   if (!listing) return NextResponse.json({ error: 'Angebot nicht gefunden' }, { status: 404 })
   if (listing.sellerId === session.user.id) return NextResponse.json({ error: 'Du kannst dein eigenes Angebot nicht kaufen' }, { status: 400 })
   if (listing.status !== 'ACTIVE') return NextResponse.json({ error: 'Angebot ist nicht verfuegbar' }, { status: 400 })
+
+  const sellerAccount = await prisma.stripeConnectAccount.findUnique({
+    where: { userId: listing.sellerId },
+    select: { verificationStatus: true },
+  })
+  if (!sellerAccount || sellerAccount.verificationStatus !== 'VERIFIED') {
+    return NextResponse.json({ error: 'Verkaeufer ist nicht fuer Zahlungen verifiziert' }, { status: 403 })
+  }
 
   let amountCents = Math.round(Number(listing.price) * 100)
   if (!Number.isFinite(amountCents) || amountCents <= 0) {

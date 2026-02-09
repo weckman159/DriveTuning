@@ -187,9 +187,9 @@ export default function EditListingPage() {
         <span className="text-white">Bearbeiten</span>
       </nav>
 
-      <h1 className="text-3xl font-bold text-white">Angebot bearbeiten</h1>
+      <h1 className="text-3xl font-semibold text-white">Angebot bearbeiten</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-800 p-6 rounded-xl border border-zinc-700">
+      <form onSubmit={handleSubmit} className="space-y-6 p-6 panel">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-zinc-300">Titel</label>
           <input
@@ -197,7 +197,7 @@ export default function EditListingPage() {
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             required
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+            className="input-base"
           />
         </div>
         <div className="space-y-2">
@@ -206,7 +206,7 @@ export default function EditListingPage() {
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={4}
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white resize-none"
+            className="textarea-base resize-none"
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -219,7 +219,7 @@ export default function EditListingPage() {
               min="0"
               step="0.01"
               required
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="input-base"
             />
           </div>
           <div className="space-y-2">
@@ -227,7 +227,7 @@ export default function EditListingPage() {
             <select
               value={formData.condition}
               onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="select-base"
             >
               <option value="USED">Gebraucht</option>
               <option value="LIKE_NEW">Wie neu</option>
@@ -241,7 +241,7 @@ export default function EditListingPage() {
               value={formData.mileageOnCar}
               onChange={(e) => setFormData({ ...formData, mileageOnCar: e.target.value })}
               min="0"
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="input-base"
             />
           </div>
           <div className="space-y-2">
@@ -249,7 +249,7 @@ export default function EditListingPage() {
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="select-base"
             >
               <option value="ACTIVE">Aktiv</option>
               <option value="RESERVED">Reserviert</option>
@@ -266,7 +266,7 @@ export default function EditListingPage() {
             multiple
             onChange={handleImageChange}
             disabled={processingImages}
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white file:mr-4 file:rounded file:border-0 file:bg-sky-500 file:px-3 file:py-1.5 file:text-white hover:file:bg-sky-400"
+            className="input-base file:mr-4 file:rounded file:border-0 file:bg-sky-500 file:px-3 file:py-1.5 file:text-white hover:file:bg-sky-400"
           />
           <p className="text-xs text-zinc-500">
             Bis zu {MAX_IMAGES} Fotos. Bilder werden automatisch (WebP) optimiert (Ziel: {Math.round(MAX_OUTPUT_WEBP_BYTES / 1024)}KB).
@@ -283,7 +283,7 @@ export default function EditListingPage() {
                       setLightboxIndex(index)
                       setLightboxOpen(true)
                     }}
-                    className="group block w-full rounded-lg border border-zinc-700 overflow-hidden cursor-zoom-in transition-all hover:border-sky-400 hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_22px_rgba(56,189,248,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                    className="group block w-full rounded-xl border border-white/10 overflow-hidden cursor-zoom-in transition-all hover:border-sky-400 hover:shadow-[0_0_0_1px_rgba(56,189,248,0.65),0_0_22px_rgba(56,189,248,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                   >
                     <Image
                       src={img}
@@ -312,7 +312,7 @@ export default function EditListingPage() {
         <div className="flex justify-end gap-3">
           <Link
             href={`/market/${listing.id}`}
-            className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors"
+            className="px-4 py-2 btn-secondary"
           >
             Abbrechen
           </Link>

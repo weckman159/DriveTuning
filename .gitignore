@@ -22,3 +22,5 @@ prisma/dev.db
 
 # Build artifacts
 *.tsbuildinfo
+
+.vercel

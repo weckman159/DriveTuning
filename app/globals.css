@@ -31,11 +31,11 @@
 
 @layer components {
   .panel {
-    @apply bg-zinc-900/60 border border-zinc-700/60 rounded-xl backdrop-blur-sm;
+    @apply rounded-2xl border border-white/10 bg-zinc-950/40 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur;
   }
 
   .panel-soft {
-    @apply bg-zinc-900/40 border border-zinc-700/40 rounded-xl backdrop-blur-sm;
+    @apply rounded-2xl border border-white/10 bg-zinc-950/25 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur;
   }
 
   .btn-primary {
@@ -43,7 +43,27 @@
   }
 
   .btn-secondary {
-    @apply bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors;
+    @apply border border-white/10 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-lg transition-colors;
+  }
+
+  .input-base {
+    @apply w-full rounded-xl bg-zinc-900/60 border border-white/10 px-4 py-2.5 text-white placeholder:text-zinc-600;
+    @apply focus:outline-none focus:ring-2 focus:ring-sky-400/35 focus:border-sky-400/35;
+  }
+
+  .select-base {
+    @apply w-full rounded-xl bg-zinc-900/60 border border-white/10 px-4 py-2.5 text-white;
+    @apply focus:outline-none focus:ring-2 focus:ring-sky-400/35 focus:border-sky-400/35;
+  }
+
+  .textarea-base {
+    @apply w-full rounded-xl bg-zinc-900/60 border border-white/10 px-4 py-2.5 text-white placeholder:text-zinc-600;
+    @apply focus:outline-none focus:ring-2 focus:ring-sky-400/35 focus:border-sky-400/35;
+  }
+
+  .checkbox-base {
+    @apply h-4 w-4 rounded border border-white/10 bg-zinc-900/60 text-sky-500;
+    @apply focus:outline-none focus:ring-2 focus:ring-sky-400/35 focus:ring-offset-0;
   }
 }
 

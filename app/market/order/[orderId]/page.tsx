@@ -24,8 +24,8 @@ export default async function OrderPage({ params }: { params: Promise<{ orderId:
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold text-white">Bestellung</h1>
-      <div className="rounded-xl border border-zinc-700 bg-zinc-800 p-5 space-y-2">
+      <h1 className="text-3xl font-semibold text-white">Bestellung</h1>
+      <div className="panel p-5 space-y-2">
         <p className="text-zinc-300">
           Angebot:{' '}
           <Link className="text-sky-400 hover:text-sky-300" href={`/market/${order.partListing.id}`}>

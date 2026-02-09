@@ -46,7 +46,7 @@ export default async function PrivacyPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
-      <h1 className="text-3xl font-bold text-white">Datenschutz-Einstellungen</h1>
+      <h1 className="text-3xl font-semibold text-white">Datenschutz-Einstellungen</h1>
 
       <PrivacySettingsForm initialSettings={settings} />
     </div>

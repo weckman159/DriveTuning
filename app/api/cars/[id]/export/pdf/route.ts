@@ -2,6 +2,208 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+function euro(value: number | null | undefined) {
+  const n = typeof value === 'number' && Number.isFinite(value) ? value : 0
+  return `EUR ${n.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+}
+
+async function renderCarPdf(params: {
+  car: any
+  tuvSummary: { green: number; yellow: number; red: number }
+}) {
+  const { car, tuvSummary } = params
+  const pdfDoc = await PDFDocument.create()
+  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica)
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+
+  const A4: [number, number] = [595.28, 841.89]
+  const margin = 48
+  const contentWidth = A4[0] - margin * 2
+
+  const title = `${car.make} ${car.model}${car.generation ? ` ${car.generation}` : ''}`.trim()
+
+  const wrapText = (text: string, maxWidth: number, font: any, size: number) => {
+    const words = String(text || '').split(/\s+/).filter(Boolean)
+    if (words.length === 0) return ['']
+    const lines: string[] = []
+    let line = words[0]!
+    for (let i = 1; i < words.length; i++) {
+      const next = `${line} ${words[i]}`
+      if (font.widthOfTextAtSize(next, size) <= maxWidth) {
+        line = next
+      } else {
+        lines.push(line)
+        line = words[i]!
+      }
+    }
+    lines.push(line)
+    return lines
+  }
+
+  const drawCentered = (page: any, text: string, y: number, font: any, size: number, color: any) => {
+    const w = font.widthOfTextAtSize(text, size)
+    page.drawText(text, { x: margin + (contentWidth - w) / 2, y, size, font, color })
+  }
+
+  const cover = pdfDoc.addPage(A4)
+
+  drawCentered(cover, title, A4[1] - 120, fontBold, 26, rgb(0.07, 0.07, 0.07))
+  drawCentered(cover, 'Fahrzeughistorie & Dokumentation', A4[1] - 150, fontRegular, 12, rgb(0.33, 0.33, 0.33))
+  drawCentered(cover, car.year ? String(car.year) : 'k.A.', A4[1] - 175, fontBold, 13, rgb(0.01, 0.52, 0.78))
+
+  cover.drawLine({
+    start: { x: margin, y: A4[1] - 195 },
+    end: { x: A4[0] - margin, y: A4[1] - 195 },
+    thickness: 2,
+    color: rgb(0.01, 0.52, 0.78),
+  })
+
+  const box = (page: any, x: number, y: number, w: number, h: number, label: string, value: string) => {
+    page.drawRectangle({ x, y, width: w, height: h, color: rgb(0.95, 0.96, 0.97) })
+    page.drawText(label.toUpperCase(), { x: x + 12, y: y + h - 18, font: fontRegular, size: 8, color: rgb(0.42, 0.45, 0.49) })
+    const v = value && String(value).trim() ? String(value).trim() : 'k.A.'
+    page.drawText(v, { x: x + 12, y: y + 16, font: fontBold, size: 12, color: rgb(0.07, 0.07, 0.07) })
+  }
+
+  const gridTop = A4[1] - 285
+  const colGap = 18
+  const colW = (contentWidth - colGap) / 2
+  const rowH = 54
+
+  box(cover, margin, gridTop, colW, rowH, 'Motor', car.engineCode || 'k.A.')
+  box(cover, margin + colW + colGap, gridTop, colW, rowH, 'Werksleistung', car.factoryHp ? `${car.factoryHp} hp` : 'k.A.')
+  box(cover, margin, gridTop - rowH - 12, colW, rowH, 'Projektziel', car.projectGoal || 'k.A.')
+  box(
+    cover,
+    margin + colW + colGap,
+    gridTop - rowH - 12,
+    colW,
+    rowH,
+    'Aktueller Kilometerstand',
+    car.currentMileage != null ? `${Number(car.currentMileage).toLocaleString('de-DE')} km` : 'k.A.'
+  )
+
+  const tuvY = gridTop - 2 * (rowH + 12) - 26
+  cover.drawText('TUEV-Uebersicht', { x: margin, y: tuvY, size: 15, font: fontBold, color: rgb(0.07, 0.07, 0.07) })
+  cover.drawText('Modifikationen nach Eintragungsstatus:', {
+    x: margin,
+    y: tuvY - 18,
+    size: 10,
+    font: fontRegular,
+    color: rgb(0.29, 0.32, 0.35),
+  })
+
+  const badgeW = (contentWidth - 16) / 3
+  const badgeH = 34
+  const badgeY = tuvY - 56
+  const drawBadge = (x: number, label: string, count: number, color: any) => {
+    cover.drawRectangle({ x, y: badgeY, width: badgeW, height: badgeH, color })
+    const text = `${label}: ${count}`
+    const textW = fontBold.widthOfTextAtSize(text, 10)
+    cover.drawText(text, {
+      x: x + (badgeW - textW) / 2,
+      y: badgeY + 12,
+      size: 10,
+      font: fontBold,
+      color: rgb(1, 1, 1),
+    })
+  }
+  drawBadge(margin, 'TUEV OK', tuvSummary.green, rgb(0.09, 0.64, 0.29))
+  drawBadge(margin + badgeW + 8, 'ABE', tuvSummary.yellow, rgb(0.79, 0.54, 0.02))
+  drawBadge(margin + 2 * (badgeW + 8), 'Racing', tuvSummary.red, rgb(0.86, 0.16, 0.16))
+
+  // Timeline pages
+  const addTimelinePage = (titleText: string) => {
+    const page = pdfDoc.addPage(A4)
+    let cursorY = A4[1] - margin
+    page.drawText(titleText, { x: margin, y: cursorY - 18, size: 17, font: fontBold, color: rgb(0.07, 0.07, 0.07) })
+    cursorY -= 32
+    page.drawLine({
+      start: { x: margin, y: cursorY },
+      end: { x: A4[0] - margin, y: cursorY },
+      thickness: 2,
+      color: rgb(0.01, 0.52, 0.78),
+    })
+    cursorY -= 18
+    return { page, cursorY }
+  }
+
+  const drawEntry = (state: { page: any; cursorY: number }, payload: { date: Date; title: string; type: string; lines?: string[] }) => {
+    const minSpace = payload.lines && payload.lines.length > 0 ? 92 : 64
+    if (state.cursorY < margin + minSpace) {
+      state.page = pdfDoc.addPage(A4)
+      state.cursorY = A4[1] - margin
+    }
+
+    const dateText = formatDate(payload.date)
+    state.page.drawText(dateText, { x: margin, y: state.cursorY - 10, size: 8, font: fontRegular, color: rgb(0.42, 0.45, 0.49) })
+    state.cursorY -= 22
+
+    const tLines = wrapText(payload.title || '—', contentWidth, fontBold, 11)
+    for (const line of tLines) {
+      state.page.drawText(line, { x: margin, y: state.cursorY - 10, size: 11, font: fontBold, color: rgb(0.07, 0.07, 0.07) })
+      state.cursorY -= 14
+    }
+
+    state.page.drawText(payload.type.replace('_', ' '), { x: margin, y: state.cursorY - 10, size: 8, font: fontRegular, color: rgb(0.22, 0.25, 0.29) })
+    state.cursorY -= 18
+
+    if (payload.lines && payload.lines.length > 0) {
+      const boxPadding = 10
+      const maxLineW = contentWidth - boxPadding * 2
+      const wrapped: string[] = []
+      for (const raw of payload.lines) wrapped.push(...wrapText(raw, maxLineW, fontRegular, 9))
+      const boxH = boxPadding * 2 + wrapped.length * 12
+
+      state.page.drawRectangle({
+        x: margin,
+        y: state.cursorY - boxH,
+        width: contentWidth,
+        height: boxH,
+        color: rgb(0.98, 0.98, 0.99),
+      })
+      let y = state.cursorY - boxPadding - 10
+      for (const line of wrapped) {
+        state.page.drawText(line, { x: margin + boxPadding, y, size: 9, font: fontRegular, color: rgb(0.07, 0.07, 0.07) })
+        y -= 12
+      }
+      state.cursorY -= boxH + 14
+    }
+
+    state.cursorY -= 8
+  }
+
+  let modState = addTimelinePage('Modifikationsverlauf')
+  for (const entry of car.logEntries.filter((e: any) => e.type === 'MODIFICATION')) {
+    const lines = (entry.modifications || []).map((m: any) => {
+      const name = `${String(m.brand || '').trim()} ${m.partName}`.trim()
+      const cat = m.category ? ` (${m.category})` : ''
+      const price = euro(m.price)
+      return `${name}${cat} - ${price}`
+    })
+    drawEntry(modState as any, { date: entry.date, title: entry.title, type: entry.type, lines })
+  }
+
+  let svcState = addTimelinePage('Service- & Track-Historie')
+  for (const entry of car.logEntries.filter((e: any) => e.type !== 'MODIFICATION')) {
+    drawEntry(svcState as any, { date: entry.date, title: entry.title, type: entry.type })
+  }
+
+  const footerText = `Erstellt von DRIVETUNING • ${new Date().toLocaleDateString('de-DE')}`
+  for (const p of pdfDoc.getPages()) {
+    const w = fontRegular.widthOfTextAtSize(footerText, 8)
+    p.drawText(footerText, { x: (A4[0] - w) / 2, y: 22, size: 8, font: fontRegular, color: rgb(0.42, 0.45, 0.49) })
+  }
+
+  const bytes = await pdfDoc.save()
+  return Buffer.from(bytes)
+}
 
 export async function GET(
   req: Request,
@@ -13,151 +215,52 @@ export async function GET(
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
   }
 
-  const { id } = await params
-  // Verify car belongs to user
-  const car = await prisma.car.findFirst({
-    where: {
-      id,
-      garage: { userId: session.user.id },
-    },
-    include: {
-      garage: true,
-      logEntries: {
-        include: {
-          modifications: true,
-        },
-        orderBy: { date: 'desc' },
+  try {
+    const { id } = await params
+    // Verify car belongs to user
+    const car = await prisma.car.findFirst({
+      where: {
+        id,
+        garage: { userId: session.user.id },
       },
-    },
-  })
+      include: {
+        garage: true,
+        logEntries: {
+          include: {
+            modifications: true,
+          },
+          orderBy: { date: 'desc' },
+        },
+      },
+    })
 
-  if (!car) {
-    return NextResponse.json({ error: 'Auto nicht gefunden' }, { status: 404 })
+    if (!car) {
+      return NextResponse.json({ error: 'Auto nicht gefunden' }, { status: 404 })
+    }
+
+    // Calculate TÜV summary
+    const tuvSummary = {
+      green: car.logEntries.filter((e) => e.modifications.some((m) => m.tuvStatus === 'GREEN_REGISTERED')).length,
+      yellow: car.logEntries.filter((e) => e.modifications.some((m) => m.tuvStatus === 'YELLOW_ABE')).length,
+      red: car.logEntries.filter((e) => e.modifications.some((m) => m.tuvStatus === 'RED_RACING')).length,
+    }
+
+    const pdf = await renderCarPdf({ car, tuvSummary })
+    const pdfBytes = new Uint8Array(pdf)
+
+    const safeName = `${car.make}-${car.model}-${car.year || 'na'}`
+      .toLowerCase()
+      .replace(/[^a-z0-9-_]+/g, '-')
+
+    return new NextResponse(pdfBytes, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${safeName}.pdf"`,
+        'Cache-Control': 'no-store',
+      },
+    })
+  } catch (err) {
+    console.error('GET /api/cars/[id]/export/pdf failed:', err)
+    return NextResponse.json({ error: 'PDF konnte nicht erstellt werden' }, { status: 500 })
   }
-
-  // Calculate TÜV summary
-  const tuvSummary = {
-    green: car.logEntries.filter(e => e.modifications.some(m => m.tuvStatus === 'GREEN_REGISTERED')).length,
-    yellow: car.logEntries.filter(e => e.modifications.some(m => m.tuvStatus === 'YELLOW_ABE')).length,
-    red: car.logEntries.filter(e => e.modifications.some(m => m.tuvStatus === 'RED_RACING')).length,
-  }
-
-  // Generate HTML for PDF
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>${car.make} ${car.model} - Fahrzeughistorie</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 40px; color: #333; }
-        .cover { text-align: center; padding: 80px 0; border-bottom: 3px solid #FF6B35; margin-bottom: 40px; }
-        .cover h1 { font-size: 48px; margin-bottom: 10px; color: #1a1a1a; }
-        .cover .subtitle { font-size: 24px; color: #666; margin-bottom: 20px; }
-        .specs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 40px; }
-        .spec-item { padding: 15px; background: #f5f5f5; border-radius: 8px; }
-        .spec-label { font-size: 12px; color: #666; text-transform: uppercase; }
-        .spec-value { font-size: 18px; font-weight: bold; }
-        .section { margin-bottom: 40px; }
-        .section h2 { font-size: 28px; border-bottom: 2px solid #FF6B35; padding-bottom: 10px; margin-bottom: 20px; }
-        .timeline { border-left: 3px solid #ddd; padding-left: 30px; }
-        .entry { position: relative; padding-bottom: 30px; }
-        .entry::before { content: ''; position: absolute; left: -39px; top: 5px; width: 15px; height: 15px; background: #FF6B35; border-radius: 50%; }
-        .entry-date { font-size: 12px; color: #666; }
-        .entry-title { font-size: 18px; font-weight: bold; margin: 5px 0; }
-        .entry-type { display: inline-block; padding: 3px 10px; background: #e0e0e0; border-radius: 4px; font-size: 12px; }
-        .tuv-summary { display: flex; gap: 20px; margin-top: 20px; }
-        .tuv-badge { padding: 10px 20px; border-radius: 8px; color: white; font-weight: bold; }
-        .tuv-green { background: #22c55e; }
-        .tuv-yellow { background: #eab308; }
-        .tuv-red { background: #ef4444; }
-        .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; font-size: 12px; color: #666; }
-      </style>
-    </head>
-    <body>
-      <div class="cover">
-        <h1>${car.make} ${car.model} ${car.generation || ''}</h1>
-        <p class="subtitle">Fahrzeughistorie & Dokumentation</p>
-        <p style="color: #FF6B35; font-weight: bold;">${car.year || 'k.A.'}</p>
-      </div>
-
-      <div class="specs">
-        <div class="spec-item">
-          <div class="spec-label">Motor</div>
-          <div class="spec-value">${car.engineCode || 'k.A.'}</div>
-        </div>
-        <div class="spec-item">
-          <div class="spec-label">Werksleistung</div>
-          <div class="spec-value">${car.factoryHp || 'k.A.'} hp</div>
-        </div>
-        <div class="spec-item">
-          <div class="spec-label">Projektziel</div>
-          <div class="spec-value">${car.projectGoal}</div>
-        </div>
-        <div class="spec-item">
-          <div class="spec-label">Aktueller Kilometerstand</div>
-          <div class="spec-value">${car.currentMileage?.toLocaleString() || 0} km</div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h2>TÜV-Uebersicht</h2>
-        <p>Modifikationen nach Eintragungsstatus:</p>
-        <div class="tuv-summary">
-          <div class="tuv-badge tuv-green">TÜV OK: ${tuvSummary.green}</div>
-          <div class="tuv-badge tuv-yellow">ABE: ${tuvSummary.yellow}</div>
-          <div class="tuv-badge tuv-red">Racing: ${tuvSummary.red}</div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h2>Modifikationsverlauf</h2>
-        <div class="timeline">
-          ${car.logEntries
-            .filter(e => e.type === 'MODIFICATION')
-            .map(entry => `
-              <div class="entry">
-                <div class="entry-date">${entry.date.toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                <div class="entry-title">${entry.title}</div>
-                <span class="entry-type">${entry.type.replace('_', ' ')}</span>
-                ${entry.modifications.length > 0 ? entry.modifications.map(m => `
-                  <div style="margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 4px;">
-                    <strong>${m.brand || ''} ${m.partName}</strong> (${m.category}) - €${m.price || 0}
-                  </div>
-                `).join('') : ''}
-              </div>
-            `).join('')}
-        </div>
-      </div>
-
-      <div class="section">
-        <h2>Service- & Track-Historie</h2>
-        <div class="timeline">
-          ${car.logEntries
-            .filter(e => e.type !== 'MODIFICATION')
-            .map(entry => `
-              <div class="entry">
-                <div class="entry-date">${entry.date.toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                <div class="entry-title">${entry.title}</div>
-                <span class="entry-type">${entry.type.replace('_', ' ')}</span>
-              </div>
-            `).join('')}
-        </div>
-      </div>
-
-      <div class="footer">
-        <p>Erstellt von DRIVETUNING</p>
-        <p>Dokument erstellt am ${new Date().toLocaleDateString('de-DE')}</p>
-      </div>
-    </body>
-    </html>
-  `
-
-  // In production, use puppeteer/pdfkit to generate actual PDF
-  // For now, return HTML with PDF content-type
-  return new NextResponse(html, {
-    headers: {
-      'Content-Type': 'text/html',
-      'Content-Disposition': `attachment; filename="${car.make}-${car.model}-historie.html"`,
-    },
-  })
 }

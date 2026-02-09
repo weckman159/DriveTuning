@@ -148,8 +148,8 @@ export default function EventDetailPage() {
       </nav>
 
       {/* Event Header */}
-      <div className="relative bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700">
-        <div className="aspect-[3/1] bg-zinc-700 flex items-center justify-center">
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/40 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+        <div className="aspect-[3/1] bg-zinc-900/50 flex items-center justify-center">
           <span className="text-zinc-500 text-lg">Event-Banner</span>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
@@ -164,7 +164,7 @@ export default function EventDetailPage() {
               Kommend
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">{event.title}</h1>
+          <h1 className="text-3xl font-semibold text-white mb-2">{event.title}</h1>
           <div className="flex flex-wrap items-center gap-4 text-zinc-300">
             <span className="flex items-center gap-1">
               📅 {new Date(event.dateStart).toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
@@ -180,14 +180,14 @@ export default function EventDetailPage() {
         {/* Left Column - Details */}
         <div className="lg:col-span-2 space-y-6">
           {/* Description */}
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-            <h2 className="text-xl font-bold text-white mb-4">Ueber dieses Event</h2>
+          <div className="panel p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Ueber dieses Event</h2>
             <p className="text-zinc-300 whitespace-pre-line">{event.description || 'Keine Beschreibung vorhanden.'}</p>
           </div>
 
           {/* Requirements */}
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-            <h2 className="text-xl font-bold text-white mb-4">Voraussetzungen</h2>
+          <div className="panel p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Voraussetzungen</h2>
             <ul className="space-y-2">
               {requirements.map((req, i) => (
                 <li key={i} className="flex items-center gap-2 text-zinc-300">
@@ -199,9 +199,9 @@ export default function EventDetailPage() {
           </div>
 
           {/* The Grid */}
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+          <div className="panel p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="text-xl font-semibold text-white">
                 Teilnehmer ({event.attendances?.length || 0})
               </h2>
             </div>
@@ -209,9 +209,9 @@ export default function EventDetailPage() {
               {(event.attendances || []).map((attendee) => (
                 <div
                   key={attendee.id}
-                  className="aspect-square bg-zinc-700 rounded-xl border border-zinc-600 flex flex-col items-center justify-center p-2 text-center"
+                  className="aspect-square bg-zinc-900/60 rounded-xl border border-white/10 flex flex-col items-center justify-center p-2 text-center"
                 >
-                  <div className="w-10 h-10 bg-zinc-600 rounded-full flex items-center justify-center text-white font-bold text-sm mb-1">
+                  <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white font-bold text-sm mb-1">
                     {(attendee.user.name || 'U')[0]}
                   </div>
                   <p className="text-xs text-white truncate w-full">
@@ -228,8 +228,8 @@ export default function EventDetailPage() {
 
         {/* Right Column - RSVP */}
         <div className="space-y-6">
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700 sticky top-4">
-            <h3 className="text-lg font-bold text-white mb-4">Anmelden</h3>
+          <div className="panel p-6 lg:sticky lg:top-4">
+            <h3 className="text-lg font-semibold text-white mb-4">Anmelden</h3>
 
             {status === 'SUCCESS' ? (
               <div className="text-center py-6">
@@ -248,7 +248,7 @@ export default function EventDetailPage() {
                   <select
                     value={selectedCar}
                     onChange={(e) => setSelectedCar(e.target.value)}
-                    className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+                    className="select-base"
                   >
                     <option value="">Auto waehlen...</option>
                     {cars.map((car) => (
@@ -281,8 +281,8 @@ export default function EventDetailPage() {
           </div>
 
           {/* Organizer Info */}
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-            <h3 className="text-lg font-bold text-white mb-4">Veranstalter</h3>
+          <div className="panel p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Veranstalter</h3>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-sky-500 rounded-full flex items-center justify-center text-white font-bold">
                 O
@@ -295,18 +295,18 @@ export default function EventDetailPage() {
           </div>
 
           {/* Share */}
-          <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-            <h3 className="text-lg font-bold text-white mb-4">Event teilen</h3>
+          <div className="panel p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Event teilen</h3>
             <div className="flex gap-2">
               <button
                 onClick={handleCopyLink}
-                className="flex-1 px-3 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium rounded-lg transition-colors"
+                className="flex-1 px-3 py-2 border border-white/10 bg-white/5 hover:bg-white/10 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 Link kopieren
               </button>
               <button
                 onClick={handleShare}
-                className="flex-1 px-3 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium rounded-lg transition-colors"
+                className="flex-1 px-3 py-2 border border-white/10 bg-white/5 hover:bg-white/10 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 Teilen
               </button>

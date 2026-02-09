@@ -3,12 +3,12 @@ import { LEGAL } from '@/lib/legal'
 export default function DatenschutzPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      <h1 className="text-3xl font-bold text-white">Datenschutz</h1>
+      <h1 className="text-3xl font-semibold text-white">Datenschutz</h1>
       <p className="text-zinc-400 text-sm">
         Hinweis: Dies ist ein Mustertext und ersetzt keine Rechtsberatung. Bitte passe ihn an deine tatsaechlichen Prozesse/Anbieter an.
       </p>
 
-      <div className="rounded-xl border border-zinc-700 bg-zinc-800 p-5 text-zinc-300 space-y-4">
+      <div className="panel p-5 text-zinc-300 space-y-4">
         <p className="text-sm text-zinc-300">
           DriveTuning ist ein Build Passport (System of Record) fuer Tuning-Projekte. Datenschutz ist privacy-by-default: Inhalte sind standardmaessig privat
           und werden nur durch ausdrueckliche Sichtbarkeits-Einstellungen oder Share-Links geteilt.

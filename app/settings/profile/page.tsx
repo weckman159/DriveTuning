@@ -34,13 +34,13 @@ export default function ProfilePage() {
       </nav>
 
       <div>
-        <h1 className="text-3xl font-bold text-white">Profil</h1>
+        <h1 className="text-3xl font-semibold text-white">Profil</h1>
         <p className="text-zinc-400 mt-1">Dein oeffentliches Profil verwalten</p>
       </div>
 
       {/* Avatar */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-        <h2 className="text-xl font-bold text-white mb-4">Avatar</h2>
+      <div className="panel p-6">
+        <h2 className="text-xl font-semibold text-white mb-4">Avatar</h2>
         <div className="flex items-center gap-6">
           <div className="w-24 h-24 bg-sky-500 rounded-full flex items-center justify-center text-white text-3xl font-bold">
             {(formData.displayName[0] || 'U').toUpperCase()}
@@ -49,7 +49,7 @@ export default function ProfilePage() {
           <button
             disabled
             title="Bald"
-            className="px-4 py-2 bg-zinc-700/60 text-zinc-300 font-semibold rounded-lg transition-colors mb-2 cursor-not-allowed"
+            className="px-4 py-2 border border-white/10 bg-white/5 text-zinc-300 font-semibold rounded-lg transition-colors mb-2 cursor-not-allowed"
           >
             Foto hochladen
           </button>
@@ -59,8 +59,8 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Info */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700 space-y-4">
-        <h2 className="text-xl font-bold text-white mb-4">Profilinformationen</h2>
+      <div className="panel p-6 space-y-4">
+        <h2 className="text-xl font-semibold text-white mb-4">Profilinformationen</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -71,7 +71,7 @@ export default function ProfilePage() {
               type="text"
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="input-base"
             />
           </div>
           <div>
@@ -82,7 +82,7 @@ export default function ProfilePage() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="input-base"
             />
           </div>
           <div className="md:col-span-2">
@@ -93,7 +93,7 @@ export default function ProfilePage() {
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               rows={3}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white resize-none"
+              className="textarea-base resize-none"
             />
           </div>
           <div>
@@ -104,7 +104,7 @@ export default function ProfilePage() {
               type="text"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="input-base"
             />
           </div>
           <div>
@@ -115,7 +115,7 @@ export default function ProfilePage() {
               type="url"
               value={formData.website}
               onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="input-base"
             />
           </div>
         </div>
@@ -132,19 +132,19 @@ export default function ProfilePage() {
       </div>
 
       {/* Username */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-        <h2 className="text-xl font-bold text-white mb-4">Benutzername</h2>
+      <div className="panel p-6">
+        <h2 className="text-xl font-semibold text-white mb-4">Benutzername</h2>
         <div className="flex items-center gap-4">
           <span className="text-zinc-400">@</span>
           <input
             type="text"
             defaultValue="m-power-lab"
-            className="flex-1 px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+            className="flex-1 input-base"
           />
           <button
             disabled
             title="Bald"
-            className="px-4 py-2 bg-zinc-700/60 text-zinc-300 font-semibold rounded-lg transition-colors cursor-not-allowed"
+            className="px-4 py-2 border border-white/10 bg-white/5 text-zinc-300 font-semibold rounded-lg transition-colors cursor-not-allowed"
           >
             Benutzername aendern
           </button>
@@ -155,15 +155,15 @@ export default function ProfilePage() {
       </div>
 
       {/* Social Links */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-        <h2 className="text-xl font-bold text-white mb-4">Social Links</h2>
+      <div className="panel p-6">
+        <h2 className="text-xl font-semibold text-white mb-4">Social Links</h2>
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <span className="w-10 text-xl">📸</span>
             <input
               type="text"
               placeholder="Instagram Benutzername"
-              className="flex-1 px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="flex-1 input-base"
             />
           </div>
           <div className="flex items-center gap-4">
@@ -171,7 +171,7 @@ export default function ProfilePage() {
             <input
               type="text"
               placeholder="X/Twitter Handle"
-              className="flex-1 px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="flex-1 input-base"
             />
           </div>
           <div className="flex items-center gap-4">
@@ -179,7 +179,7 @@ export default function ProfilePage() {
             <input
               type="text"
               placeholder="YouTube Kanal"
-              className="flex-1 px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="flex-1 input-base"
             />
           </div>
         </div>

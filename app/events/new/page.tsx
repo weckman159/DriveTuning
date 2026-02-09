@@ -3,19 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import PlaceSuggestInput from '@/components/PlaceSuggestInput'
 
 export default function NewEventPage() {
   const router = useRouter()
-  const regions = ['Nürburgring', 'Hockenheim', 'Berlin', 'Muenchen', 'Frankfurt', 'Hamburg', 'NRW']
-  const locations = [
-    'Nürburgring GP',
-    'Nürburgring Nordschleife',
-    'Hockenheimring',
-    'Tempelhof Airport',
-    'Olympiapark Munich',
-    'Messe Frankfurt',
-    'Hamburg Port',
-  ]
   const brands = ['BMW', 'Audi', 'Porsche', 'Mercedes', 'Volkswagen', 'Ford']
   const [formData, setFormData] = useState({
     title: '',
@@ -26,6 +17,10 @@ export default function NewEventPage() {
     locationName: '',
     brandFilter: '',
   })
+  const [selectedStateId, setSelectedStateId] = useState<string | null>(null)
+  const [cityQuery, setCityQuery] = useState('')
+  const [selectedCityId, setSelectedCityId] = useState<string | null>(null)
+  const [districtQuery, setDistrictQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -65,9 +60,9 @@ export default function NewEventPage() {
         <span className="text-white">Event erstellen</span>
       </nav>
 
-      <h1 className="text-3xl font-bold text-white">Event erstellen</h1>
+      <h1 className="text-3xl font-semibold text-white">Event erstellen</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-800 p-6 rounded-xl border border-zinc-700">
+      <form onSubmit={handleSubmit} className="space-y-6 p-6 panel">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-zinc-300">Titel</label>
           <input
@@ -75,7 +70,7 @@ export default function NewEventPage() {
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             required
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+            className="input-base"
           />
         </div>
         <div className="space-y-2">
@@ -84,7 +79,7 @@ export default function NewEventPage() {
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={4}
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white resize-none"
+            className="textarea-base resize-none"
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -95,7 +90,7 @@ export default function NewEventPage() {
               value={formData.dateStart}
               onChange={(e) => setFormData({ ...formData, dateStart: e.target.value })}
               required
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="input-base"
             />
           </div>
           <div className="space-y-2">
@@ -104,46 +99,85 @@ export default function NewEventPage() {
               type="date"
               value={formData.dateEnd}
               onChange={(e) => setFormData({ ...formData, dateEnd: e.target.value })}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="input-base"
             />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-zinc-300">Region</label>
-            <select
+            <PlaceSuggestInput
+              type="state"
               value={formData.locationRegion}
-              onChange={(e) => setFormData({ ...formData, locationRegion: e.target.value })}
+              onChange={(value) => {
+                setFormData({ ...formData, locationRegion: value })
+              }}
+              onSelect={(s) => {
+                setSelectedStateId((s.stateId || s.id || '').toString() || null)
+                // Reset dependent fields
+                setCityQuery('')
+                setSelectedCityId(null)
+                setDistrictQuery('')
+                setFormData((prev) => ({ ...prev, locationName: '' }))
+              }}
+              placeholder="z.B. Bayern, Berlin, Nordrhein-Westfalen"
               required
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
-            >
-              <option value="">Region waehlen</option>
-              {regions.map((region) => (
-                <option key={region} value={region}>{region}</option>
-              ))}
-            </select>
+              inputClassName="select-base"
+            />
           </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-zinc-300">Ort</label>
-            <select
-              value={formData.locationName}
-              onChange={(e) => setFormData({ ...formData, locationName: e.target.value })}
+            <PlaceSuggestInput
+              type="city"
+              value={cityQuery}
+              stateId={selectedStateId}
+              onChange={(value) => {
+                setCityQuery(value)
+                // While typing, keep locationName aligned with city text (no district).
+                setFormData((prev) => ({ ...prev, locationName: value }))
+                setSelectedCityId(null)
+                setDistrictQuery('')
+              }}
+              onSelect={(s) => {
+                setCityQuery(s.value)
+                setSelectedCityId(s.id || null)
+                setDistrictQuery('')
+                setFormData((prev) => ({ ...prev, locationName: s.value }))
+              }}
+              placeholder={selectedStateId ? 'Stadt suchen...' : 'Bitte zuerst Region waehlen'}
               required
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
-            >
-              <option value="">Ort waehlen</option>
-              {locations.map((location) => (
-                <option key={location} value={location}>{location}</option>
-              ))}
-            </select>
+              disabled={!selectedStateId}
+              inputClassName="select-base"
+            />
           </div>
         </div>
+
+        {selectedCityId ? (
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-zinc-300">Bezirk (optional)</label>
+            <PlaceSuggestInput
+              type="district"
+              value={districtQuery}
+              cityId={selectedCityId}
+              onChange={(value) => {
+                setDistrictQuery(value)
+                setFormData((prev) => ({ ...prev, locationName: cityQuery ? `${cityQuery}, ${value}` : value }))
+              }}
+              onSelect={(s) => {
+                setDistrictQuery(s.value)
+                setFormData((prev) => ({ ...prev, locationName: cityQuery ? `${cityQuery}, ${s.value}` : s.value }))
+              }}
+              placeholder="Bezirk suchen..."
+              inputClassName="select-base"
+            />
+          </div>
+        ) : null}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-zinc-300">Markenfilter (optional)</label>
           <select
             value={formData.brandFilter}
             onChange={(e) => setFormData({ ...formData, brandFilter: e.target.value })}
-            className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+            className="select-base"
           >
             <option value="">Alle Marken</option>
             {brands.map((brand) => (
@@ -157,7 +191,7 @@ export default function NewEventPage() {
         <div className="flex justify-end gap-3">
           <Link
             href="/events"
-            className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-lg transition-colors"
+            className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-semibold transition-colors"
           >
             Abbrechen
           </Link>

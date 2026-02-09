@@ -68,6 +68,7 @@ cat > .env << EOF
 POSTGRES_PRISMA_URL="${POSTGRES_URL}"
 POSTGRES_URL_NON_POOLING="${POSTGRES_URL}&pool=false"
 DATABASE_URL="${POSTGRES_URL}"
+DIRECT_URL="${POSTGRES_URL}&pool=false"
 NEXTAUTH_SECRET="$(openssl rand -base64 32 2>/dev/null || head -c 32 /dev/urandom | base64)"
 NEXTAUTH_URL="https://drivetuning.vercel.app"
 EOF
@@ -79,16 +80,22 @@ echo "✅ Environment configured"
 # =============================================================================
 echo ""
 echo "🔄 Step 4: Running database migrations..."
-npx prisma db push
-echo "✅ Database schema applied"
+npm run prisma:generate
+npm run prisma:migrate:deploy
+echo "✅ Database migrations applied"
 
 # =============================================================================
 # Step 5: Seed Demo Data
 # =============================================================================
 echo ""
-echo "🌱 Step 5: Seeding demo data..."
-npx prisma db seed
-echo "✅ Demo data seeded"
+echo "🌱 Step 5: Seeding demo data (optional)..."
+read -p "Seed demo data? (y/N): " SEED
+if [ "$SEED" = "y" ] || [ "$SEED" = "Y" ]; then
+  npm run db:seed
+  echo "✅ Demo data seeded"
+else
+  echo "⏭️  Skipped seeding"
+fi
 
 # =============================================================================
 # Step 6: Vercel Login

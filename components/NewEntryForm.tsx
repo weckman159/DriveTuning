@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import { TuvBadge } from './TuvBadge'
+import SuggestInput from './SuggestInput'
 
 type LogEntryType = 'MODIFICATION' | 'MAINTENANCE' | 'TRACK_DAY' | 'DYNO'
 type ModificationCategory = 'SUSPENSION' | 'ENGINE' | 'EXHAUST' | 'BRAKES' | 'WHEELS' | 'AERO' | 'INTERIOR' | 'OTHER'
 type TuvStatus = 'GREEN_REGISTERED' | 'YELLOW_ABE' | 'RED_RACING'
 type ElementVisibility = 'NONE' | 'SELF' | 'LINK' | 'PUBLIC'
-type DocumentType = 'ABE' | 'EINTRAGUNG' | 'RECEIPT' | 'SERVICE' | 'OTHER'
+type DocumentType = 'ABE' | 'EBE' | 'TEILEGUTACHTEN' | 'EINZELABNAHME' | 'EINTRAGUNG' | 'RECEIPT' | 'SERVICE' | 'OTHER'
 
 interface Props {
   carId: string
@@ -34,7 +35,6 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [warning, setWarning] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
   function resetForm() {
@@ -61,47 +61,25 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
     })
   }
 
-  async function maybeAttachEvidence(input: {
-    modificationId?: string | null
-  }) {
-    const url = evidenceUrl.trim()
-    if (!url && !evidenceFile) return
-
-    let fileDataUrl: string | null = null
-    if (evidenceFile) {
-      const maxBytes = 10 * 1024 * 1024
-      if (evidenceFile.size > maxBytes) throw new Error('Dokument zu gross (max. 10MB)')
-      fileDataUrl = await readFileAsDataUrl(evidenceFile)
-    }
-
-    const res = await fetch(`/api/cars/${carId}/documents`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: evidenceType,
-        visibility: evidenceVisibility,
-        title: evidenceTitle.trim() || null,
-        issuer: evidenceIssuer.trim() || null,
-        documentNumber: evidenceNumber.trim() || null,
-        url: url || null,
-        fileDataUrl,
-        modificationId: input.modificationId || null,
-      }),
-    })
-
-    const data = await res.json().catch(() => ({}))
-    if (!res.ok) {
-      throw new Error(data.error || 'Nachweis konnte nicht angehaengt werden')
-    }
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    setWarning(null)
     setSuccess(false)
 
+    const url = evidenceUrl.trim()
+    let fileDataUrl: string | null = null
+    if (evidenceFile) {
+      const maxBytes = 10 * 1024 * 1024
+      if (evidenceFile.size > maxBytes) {
+        setLoading(false)
+        setError('Dokument zu gross (max. 10MB)')
+        return
+      }
+      fileDataUrl = await readFileAsDataUrl(evidenceFile)
+    }
+
+    const hasEvidence = Boolean(url || fileDataUrl)
     const payload = {
       carId,
       type,
@@ -110,6 +88,30 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
       description,
       date,
       totalCostImpact: price ? parseFloat(price) : null,
+      documents: hasEvidence
+        ? [
+            {
+              type: evidenceType,
+              visibility: evidenceVisibility,
+              title: evidenceTitle.trim() || null,
+              issuer: evidenceIssuer.trim() || null,
+              documentNumber: evidenceNumber.trim() || null,
+              url: url || null,
+              fileDataUrl,
+              attachTo: type === 'MODIFICATION' ? 'MODIFICATION' : 'CAR',
+              approvalType:
+                evidenceType === 'ABE' ||
+                evidenceType === 'EBE' ||
+                evidenceType === 'TEILEGUTACHTEN' ||
+                evidenceType === 'EINZELABNAHME' ||
+                evidenceType === 'EINTRAGUNG'
+                  ? evidenceType
+                  : null,
+              approvalNumber: evidenceNumber.trim() || null,
+              issuingAuthority: evidenceIssuer.trim() || null,
+            },
+          ]
+        : undefined,
       ...(type === 'MODIFICATION' && {
         modification: {
           partName,
@@ -133,17 +135,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
         throw new Error(data.error || 'Eintrag konnte nicht erstellt werden')
       }
 
-      const created = await res.json().catch(() => ({} as any))
-      const modificationId =
-        created && Array.isArray(created.modifications) && typeof created.modifications[0]?.id === 'string'
-          ? created.modifications[0].id
-          : null
-
-      try {
-        await maybeAttachEvidence({ modificationId })
-      } catch (err) {
-        setWarning(err instanceof Error ? err.message : 'Nachweis konnte nicht angehaengt werden')
-      }
+      await res.json().catch(() => ({} as any))
 
       setSuccess(true)
       resetForm()
@@ -161,14 +153,14 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-800 p-6 rounded-xl border border-zinc-700">
+    <form onSubmit={handleSubmit} className="space-y-6 p-6 panel">
       {/* Entry Type */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-zinc-300">Eintragstyp</label>
         <select
           value={type}
           onChange={(e) => setType(e.target.value as LogEntryType)}
-          className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:border-sky-500"
+          className="select-base"
         >
           <option value="MODIFICATION">Modifikation</option>
           <option value="MAINTENANCE">Wartung</option>
@@ -183,7 +175,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
         <select
           value={visibility}
           onChange={(e) => setVisibility(e.target.value as ElementVisibility)}
-          className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:border-sky-500"
+          className="select-base"
         >
           <option value="SELF">Nur ich</option>
           <option value="LINK">Link</option>
@@ -204,7 +196,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="z.B. KW V3 Gewindefahrwerk eingebaut"
           required
-          className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+          className="input-base"
         />
       </div>
 
@@ -215,7 +207,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500 resize-none"
+          className="textarea-base resize-none"
         />
       </div>
 
@@ -227,13 +219,13 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
-          className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:border-sky-500"
+          className="input-base"
         />
       </div>
 
       {/* Modification Fields */}
       {type === 'MODIFICATION' && (
-        <div className="space-y-4 pt-4 border-t border-zinc-700">
+        <div className="space-y-4 pt-4 border-t border-white/10">
           <h3 className="text-lg font-medium text-white">Modifikationsdetails</h3>
 
           <div className="grid grid-cols-2 gap-4">
@@ -245,18 +237,18 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
                 onChange={(e) => setPartName(e.target.value)}
                 placeholder="z.B. Gewindefahrwerk"
                 required
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+                className="input-base"
               />
             </div>
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-zinc-300">Marke</label>
-              <input
-                type="text"
+              <SuggestInput
                 value={brand}
-                onChange={(e) => setBrand(e.target.value)}
+                onChange={(value) => setBrand(value)}
                 placeholder="z.B. KW"
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+                dictType="brand"
+                inputClassName="input-base"
               />
             </div>
           </div>
@@ -267,7 +259,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ModificationCategory)}
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:border-sky-500"
+                className="select-base"
               >
                 <option value="SUSPENSION">Fahrwerk</option>
                 <option value="ENGINE">Motor</option>
@@ -281,7 +273,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-zinc-300">Price (€)</label>
+              <label className="block text-sm font-medium text-zinc-300">Preis (EUR)</label>
               <input
                 type="number"
                 value={price}
@@ -289,14 +281,14 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
                 placeholder="0.00"
                 step="0.01"
                 min="0"
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+                className="input-base"
               />
             </div>
           </div>
 
           {/* TUV Status */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-zinc-300">TÜV Status</label>
+            <label className="block text-sm font-medium text-zinc-300">TUEV Status</label>
             <div className="flex gap-3">
               {(['GREEN_REGISTERED', 'YELLOW_ABE', 'RED_RACING'] as const).map((status) => (
                 <button
@@ -306,7 +298,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
                   className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
                     tuvStatus === status
                       ? 'bg-sky-500 text-white'
-                      : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                      : 'border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10'
                   }`}
                 >
                   <div className="flex justify-center">
@@ -320,7 +312,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
       )}
 
       {/* Evidence */}
-      <div className="space-y-3 pt-4 border-t border-zinc-700">
+      <div className="space-y-3 pt-4 border-t border-white/10">
         <h3 className="text-lg font-medium text-white">Nachweis (optional)</h3>
         <p className="text-xs text-zinc-500">
           Haenge jetzt einen Beleg, ABE, eine Eintragung oder eine Service-Rechnung an, damit der Eintrag nachvollziehbar bleibt.
@@ -332,11 +324,14 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
             <select
               value={evidenceType}
               onChange={(e) => setEvidenceType(e.target.value as DocumentType)}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:border-sky-500"
+              className="select-base"
             >
               <option value="RECEIPT">Beleg</option>
               <option value="SERVICE">Service</option>
               <option value="ABE">ABE</option>
+              <option value="EBE">EBE</option>
+              <option value="TEILEGUTACHTEN">Teilegutachten</option>
+              <option value="EINZELABNAHME">Einzelabnahme</option>
               <option value="EINTRAGUNG">Eintragung</option>
               <option value="OTHER">Sonstiges</option>
             </select>
@@ -347,7 +342,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
             <select
               value={evidenceVisibility}
               onChange={(e) => setEvidenceVisibility(e.target.value as ElementVisibility)}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:border-sky-500"
+              className="select-base"
             >
               <option value="SELF">Nur ich</option>
               <option value="LINK">Link</option>
@@ -363,7 +358,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
               value={evidenceTitle}
               onChange={(e) => setEvidenceTitle(e.target.value)}
               placeholder="z.B. ABE-741163 / Rechnung #123"
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+              className="input-base"
             />
           </div>
 
@@ -374,7 +369,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
               value={evidenceIssuer}
               onChange={(e) => setEvidenceIssuer(e.target.value)}
               placeholder="z.B. KBA / TUEV / Werkstatt"
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+              className="input-base"
             />
           </div>
 
@@ -385,7 +380,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
               value={evidenceNumber}
               onChange={(e) => setEvidenceNumber(e.target.value)}
               placeholder="z.B. ABE-123456"
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+              className="input-base"
             />
           </div>
 
@@ -396,7 +391,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
               value={evidenceUrl}
               onChange={(e) => setEvidenceUrl(e.target.value)}
               placeholder="https://... oder /pfad"
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+              className="input-base"
             />
           </div>
 
@@ -406,7 +401,7 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
               type="file"
               accept="application/pdf,image/*"
               onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
-              className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="input-base"
             />
             <p className="text-xs text-zinc-500">Max 10MB. Wenn eine Datei ausgewaehlt ist, wird sie hochgeladen und als Dokument-URL verwendet.</p>
           </div>
@@ -417,9 +412,6 @@ export default function NewEntryForm({ carId, onSubmitSuccess }: Props) {
       <div className="space-y-2">
         {error && (
           <p className="text-red-400 text-sm text-center">{error}</p>
-        )}
-        {warning && !error && (
-          <p className="text-amber-300 text-sm text-center">{warning}</p>
         )}
         {success && (
           <p className="text-green-400 text-sm text-center">Eintrag erfolgreich erstellt</p>

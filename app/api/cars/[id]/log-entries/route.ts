@@ -3,6 +3,66 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { parseElementVisibilityOrDefault, parseLogEntryType, parseTuvStatus } from '@/lib/vocab'
 import { NextResponse } from 'next/server'
+import { consumeRateLimit } from '@/lib/rate-limit'
+import { persistImages } from '@/lib/image-storage'
+import { persistDocumentDataUrl } from '@/lib/blob-storage'
+import { z } from 'zod'
+import { readJson } from '@/lib/validation'
+
+const APPROVAL_TYPES = ['ABE', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'] as const
+
+const bodySchema = z.object({
+  type: z.string(),
+  title: z.string().trim().min(1).max(200),
+  description: z.string().trim().max(4000).optional().nullable(),
+  date: z.string(),
+  totalCostImpact: z.union([z.number(), z.string()]).optional().nullable(),
+  visibility: z.string().optional().nullable(),
+  modification: z
+    .object({
+      partName: z.string().trim().min(1).max(120),
+      brand: z.string().trim().max(80).optional().nullable(),
+      category: z.string().trim().min(1).max(40),
+      price: z.union([z.number(), z.string()]).optional().nullable(),
+      tuvStatus: z.string(),
+      installedAt: z.string().trim().optional().nullable(),
+      installedMileage: z.union([z.number(), z.string()]).optional().nullable(),
+      removedAt: z.string().trim().optional().nullable(),
+      removedMileage: z.union([z.number(), z.string()]).optional().nullable(),
+    })
+    .optional()
+    .nullable(),
+  documents: z
+    .array(
+      z.object({
+        type: z.string().trim().min(1).max(40),
+        title: z.string().trim().max(200).optional().nullable(),
+        issuer: z.string().trim().max(120).optional().nullable(),
+        documentNumber: z.string().trim().max(80).optional().nullable(),
+        url: z.string().trim().optional().nullable(),
+        fileDataUrl: z.string().trim().optional().nullable(),
+        visibility: z.string().optional().nullable(),
+        attachTo: z.enum(['CAR', 'MODIFICATION']).optional(),
+        approvalType: z.enum(APPROVAL_TYPES).optional().nullable(),
+        approvalNumber: z.string().trim().max(80).optional().nullable(),
+        issuingAuthority: z.string().trim().max(120).optional().nullable(),
+        issueDate: z.string().trim().optional().nullable(),
+        validUntil: z.string().trim().optional().nullable(),
+      })
+    )
+    .optional(),
+  media: z.array(z.string()).optional(),
+})
+
+type DocumentItem = NonNullable<z.infer<typeof bodySchema>['documents']>[number]
+
+function parseOptionalDate(input: unknown): Date | null {
+  const raw = typeof input === 'string' ? input.trim() : ''
+  if (!raw) return null
+  const d = new Date(raw)
+  if (Number.isNaN(d.getTime())) return null
+  return d
+}
 
 export async function POST(
   req: Request,
@@ -14,15 +74,33 @@ export async function POST(
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
   }
 
+  const rl = await consumeRateLimit({
+    namespace: 'cars:log-entries:create:user',
+    identifier: session.user.id,
+    limit: 30,
+    windowMs: 60_000,
+  })
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Zu viele Anfragen in kurzer Zeit' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+    )
+  }
+
   const { id: carId } = await params
-  const body = await req.json().catch(() => ({} as any))
-  const type = parseLogEntryType((body as any).type)
-  const title = typeof (body as any).title === 'string' ? (body as any).title.trim() : ''
-  const description = typeof (body as any).description === 'string' ? (body as any).description.trim() : null
-  const dateRaw = (body as any).date
-  const totalCostImpactRaw = (body as any).totalCostImpact
-  const modification = (body as any).modification
-  const elementVisibility = parseElementVisibilityOrDefault((body as any).visibility, 'SELF')
+  const parsed = bodySchema.safeParse(await readJson(req))
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Ungueltige Eingabe' }, { status: 400 })
+  }
+
+  const body = parsed.data as z.infer<typeof bodySchema>
+  const type = parseLogEntryType(body.type)
+  const title = body.title
+  const description = typeof body.description === 'string' ? body.description : null
+  const dateRaw = body.date
+  const totalCostImpactRaw = body.totalCostImpact
+  const modification = body.modification
+  const elementVisibility = parseElementVisibilityOrDefault(body.visibility, 'SELF')
 
   if (!type) return NextResponse.json({ error: 'Ungueltiger Typ' }, { status: 400 })
   if (!title) return NextResponse.json({ error: 'Titel ist erforderlich' }, { status: 400 })
@@ -54,14 +132,14 @@ export async function POST(
   }
 
   if (type === 'MODIFICATION' && modification !== undefined && modification !== null) {
-    const partName = typeof (modification as any).partName === 'string' ? (modification as any).partName.trim() : ''
-    const category = typeof (modification as any).category === 'string' ? (modification as any).category.trim() : ''
-    const tuvStatus = parseTuvStatus((modification as any).tuvStatus)
+    const partName = modification.partName
+    const category = modification.category
+    const tuvStatus = parseTuvStatus(modification.tuvStatus)
     if (!tuvStatus) return NextResponse.json({ error: 'Ungueltiger TUEV-Status' }, { status: 400 })
     if (!partName) return NextResponse.json({ error: 'Teilname ist erforderlich' }, { status: 400 })
     if (!category) return NextResponse.json({ error: 'Kategorie ist erforderlich' }, { status: 400 })
 
-    const priceRaw = (modification as any).price
+    const priceRaw = modification.price
     if (priceRaw !== null && priceRaw !== undefined && priceRaw !== '') {
       const price = Number(priceRaw)
       if (!Number.isFinite(price) || price < 0) {
@@ -74,36 +152,166 @@ export async function POST(
     return NextResponse.json({ error: 'Fuer Modifikationen sind Teildaten erforderlich' }, { status: 400 })
   }
 
-  // Create log entry
-  const logEntry = await prisma.logEntry.create({
-    data: {
-      carId,
-      visibility: elementVisibility,
-      type,
-      title,
-      description,
-      date: parsedDate,
-      totalCostImpact,
-      modifications:
-        type === 'MODIFICATION' && modification
+  const safeMediaInputs = Array.isArray(body.media)
+    ? body.media
+        .filter((u): u is string => typeof u === 'string' && (u.startsWith('data:image/') || /^https?:\/\//i.test(u)))
+        .slice(0, 6)
+    : []
+
+  const safeDocInputs = Array.isArray(body.documents) ? body.documents.slice(0, 8) : []
+  for (const d of safeDocInputs) {
+    const hasUrl = typeof d.url === 'string' && d.url.trim()
+    const hasFile = typeof d.fileDataUrl === 'string' && d.fileDataUrl.trim()
+    if (!hasUrl && !hasFile) {
+      return NextResponse.json({ error: 'Dokument: URL oder Datei ist erforderlich' }, { status: 400 })
+    }
+  }
+
+  let persistedMedia: string[] = []
+  if (safeMediaInputs.length) {
+    try {
+      persistedMedia = await persistImages(safeMediaInputs, `log/${session.user.id}/${carId}`, 6)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Medien konnten nicht verarbeitet werden'
+      if (msg === 'Media storage not configured') return NextResponse.json({ error: 'Medien-Speicher ist nicht konfiguriert' }, { status: 500 })
+      if (msg === 'Image too large') return NextResponse.json({ error: 'Bild zu gross' }, { status: 400 })
+      if (msg === 'Unsupported image type') return NextResponse.json({ error: 'Bildtyp nicht unterstuetzt' }, { status: 400 })
+      return NextResponse.json({ error: 'Medien konnten nicht verarbeitet werden' }, { status: 500 })
+    }
+  }
+
+  const preparedDocs = [] as Array<Omit<DocumentItem, 'url' | 'fileDataUrl'> & { url: string }>
+  for (const d of safeDocInputs) {
+    const urlRaw = (d.url || '').trim()
+    const fileDataUrl = (d.fileDataUrl || '').trim()
+    let url = urlRaw
+    if (fileDataUrl) {
+      try {
+        const persisted = await persistDocumentDataUrl(fileDataUrl, `documents/${session.user.id}/${carId}/log`)
+        url = persisted.url
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Dokument-Upload fehlgeschlagen'
+        if (msg === 'Media storage not configured') return NextResponse.json({ error: 'Medien-Speicher ist nicht konfiguriert' }, { status: 500 })
+        if (msg === 'Document too large') return NextResponse.json({ error: 'Dokument zu gross' }, { status: 400 })
+        if (msg === 'Unsupported document type') return NextResponse.json({ error: 'Dokumenttyp nicht unterstuetzt' }, { status: 400 })
+        if (msg === 'Invalid data URL') return NextResponse.json({ error: 'Ungueltige Datei-Daten' }, { status: 400 })
+        return NextResponse.json({ error: 'Dokument-Upload fehlgeschlagen' }, { status: 500 })
+      }
+    }
+    if (!url) return NextResponse.json({ error: 'Dokument: URL ist ungueltig' }, { status: 400 })
+    preparedDocs.push({
+      ...d,
+      url,
+    } as any)
+  }
+
+  const created = await prisma.$transaction(async (tx) => {
+    const logEntry = await tx.logEntry.create({
+      data: {
+        carId,
+        visibility: elementVisibility,
+        type,
+        title,
+        description,
+        date: parsedDate,
+        totalCostImpact,
+        media: persistedMedia.length
           ? {
-              create: {
-                partName: String((modification as any).partName || '').trim(),
-                brand: typeof (modification as any).brand === 'string' ? (modification as any).brand.trim() : null,
-                category: String((modification as any).category || '').trim(),
-                price:
-                  (modification as any).price === null || (modification as any).price === undefined || (modification as any).price === ''
-                    ? null
-                    : Number((modification as any).price),
-                tuvStatus: parseTuvStatus((modification as any).tuvStatus) || 'YELLOW_ABE',
-              },
+              create: persistedMedia.map((url) => ({ type: 'IMAGE', url })),
             }
           : undefined,
-    },
-    include: {
-      modifications: true,
-    },
+        modifications:
+          type === 'MODIFICATION' && modification
+            ? {
+                create: {
+                  partName: modification.partName,
+                  brand: modification.brand ?? null,
+                  category: modification.category,
+                  price:
+                    modification.price === null || modification.price === undefined || modification.price === ''
+                      ? null
+                      : Number(modification.price),
+                  tuvStatus: parseTuvStatus(modification.tuvStatus) || 'YELLOW_ABE',
+                  installedAt: parseOptionalDate(modification.installedAt),
+                  installedMileage:
+                    modification.installedMileage === null || modification.installedMileage === undefined || modification.installedMileage === ''
+                      ? null
+                      : Math.floor(Number(modification.installedMileage)),
+                  removedAt: parseOptionalDate(modification.removedAt),
+                  removedMileage:
+                    modification.removedMileage === null || modification.removedMileage === undefined || modification.removedMileage === ''
+                      ? null
+                      : Math.floor(Number(modification.removedMileage)),
+                },
+              }
+            : undefined,
+      },
+      include: {
+        modifications: true,
+        media: true,
+      },
+    })
+
+    const modificationId = logEntry.modifications[0]?.id ?? null
+
+    const createdDocs = []
+    for (const d of preparedDocs) {
+      const visibility = parseElementVisibilityOrDefault(d.visibility, 'SELF')
+      const attachTo =
+        d.attachTo || (type === 'MODIFICATION' ? 'MODIFICATION' : 'CAR')
+
+      const doc = await tx.document.create({
+        data: {
+          ownerId: session.user.id,
+          carId,
+          modificationId: attachTo === 'MODIFICATION' ? modificationId : null,
+          type: d.type.trim().toUpperCase(),
+          status: 'UPLOADED',
+          title: d.title ?? null,
+          issuer: d.issuer ?? null,
+          documentNumber: d.documentNumber ?? null,
+          url: d.url,
+          visibility,
+        },
+        select: { id: true, type: true, url: true },
+      })
+      createdDocs.push(doc)
+
+      const explicitApprovalType = (d.approvalType || '').trim().toUpperCase()
+      const inferredApprovalType = d.type.trim().toUpperCase()
+      const approvalTypeRaw =
+        explicitApprovalType ||
+        ((APPROVAL_TYPES as readonly string[]).includes(inferredApprovalType) ? inferredApprovalType : '')
+
+      if (
+        attachTo === 'MODIFICATION' &&
+        modificationId &&
+        (APPROVAL_TYPES as readonly string[]).includes(approvalTypeRaw)
+      ) {
+        const issueDate = parseOptionalDate(d.issueDate)
+        const validUntil = parseOptionalDate(d.validUntil)
+        await tx.approvalDocument.create({
+          data: {
+            modificationId,
+            documentId: doc.id,
+            approvalType: approvalTypeRaw,
+            approvalNumber: d.approvalNumber ?? d.documentNumber ?? null,
+            issuingAuthority: d.issuingAuthority ?? d.issuer ?? null,
+            issueDate,
+            validUntil,
+          },
+        })
+      }
+    }
+
+    return { logEntry, createdDocs }
   })
 
-  return NextResponse.json(logEntry, { status: 201 })
+  return NextResponse.json(
+    {
+      ...created.logEntry,
+      documentsCreated: created.createdDocs.length,
+    },
+    { status: 201 }
+  )
 }

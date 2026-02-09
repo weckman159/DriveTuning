@@ -76,14 +76,21 @@ if ([string]::IsNullOrWhiteSpace($neonUrl)) {
     exit 1
 }
 
+function New-RandomBase64Secret([int]$Bytes = 32) {
+    $buf = New-Object byte[] $Bytes
+    [System.Security.Cryptography.RandomNumberGenerator]::Fill($buf)
+    return [Convert]::ToBase64String($buf)
+}
+
 # Generate NEXTAUTH_SECRET
-$nextAuthSecret = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes((1..32 | ForEach-Object { char })))
+$nextAuthSecret = New-RandomBase64Secret 32
 
 # Create .env file
 @"
 POSTGRES_PRISMA_URL="$neonUrl"
 POSTGRES_URL_NON_POOLING="$neonUrl&pool=false"
 DATABASE_URL="$neonUrl"
+DIRECT_URL="$neonUrl&pool=false"
 NEXTAUTH_SECRET="$nextAuthSecret"
 NEXTAUTH_URL="https://drivetuning.vercel.app"
 "@ | Out-File -FilePath ".env" -Encoding UTF8
@@ -96,19 +103,23 @@ Write-Host "✅ Environment configured" -ForegroundColor Green
 Write-Host ""
 Write-Host "🔄 Step 4: Running database migrations..." -ForegroundColor Yellow
 
-npx prisma db push
+npm run prisma:generate
+npm run prisma:migrate:deploy
 
-Write-Host "✅ Database schema applied" -ForegroundColor Green
+Write-Host "✅ Database migrations applied" -ForegroundColor Green
 
 # =============================================================================
 # Step 5: Seed Demo Data
 # =============================================================================
 Write-Host ""
-Write-Host "🌱 Step 5: Seeding demo data..." -ForegroundColor Yellow
-
-npx prisma db seed
-
-Write-Host "✅ Demo data seeded" -ForegroundColor Green
+Write-Host "🌱 Step 5: Seeding demo data (optional)..." -ForegroundColor Yellow
+$seed = Read-Host "Seed demo data? (y/N)"
+if ($seed -eq "y" -or $seed -eq "Y") {
+    npm run db:seed
+    Write-Host "✅ Demo data seeded" -ForegroundColor Green
+} else {
+    Write-Host "⏭️  Skipped seeding" -ForegroundColor Yellow
+}
 
 # =============================================================================
 # Step 6: Vercel Login

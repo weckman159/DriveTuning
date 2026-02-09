@@ -6,6 +6,9 @@ export function computeViewerHash(input: {
   acceptLanguage?: string | null
 }): string | null {
   const salt = (process.env.VIEWER_HASH_SALT || '').trim()
+  // If the operator didn't configure a salt, disable tracking. A stable salt is required
+  // to avoid storing reversible viewer fingerprints or meaningless hashes.
+  if (!salt) return null
   const ip = (input.ip || '').trim()
   const ua = (input.userAgent || '').trim()
   const lang = (input.acceptLanguage || '').trim()

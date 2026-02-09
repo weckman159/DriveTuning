@@ -2,17 +2,39 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hash } from 'bcryptjs'
 import { hashResetToken } from '@/lib/password-reset'
+import { consumeRateLimit } from '@/lib/rate-limit'
+import { getRequestIp } from '@/lib/request-ip'
+import { z } from 'zod'
+import { readJson } from '@/lib/validation'
+
+const bodySchema = z.object({
+  token: z.string().trim().min(1),
+  password: z.string().min(8).max(200),
+})
 
 export async function POST(req: Request) {
   try {
-    const { token, password } = await req.json()
+    const ip = getRequestIp(req) || 'unknown'
+    const rl = await consumeRateLimit({
+      namespace: 'auth:reset-password:ip',
+      identifier: ip,
+      limit: 10,
+      windowMs: 60_000,
+    })
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: 'Zu viele Versuche. Bitte spaeter erneut versuchen.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+      )
+    }
 
-    const rawToken = typeof token === 'string' ? token.trim() : ''
-    const newPassword = typeof password === 'string' ? password : ''
-
-    if (!rawToken || newPassword.length < 8) {
+    const parsed = bodySchema.safeParse(await readJson(req))
+    if (!parsed.success) {
       return NextResponse.json({ error: 'Ungueltiger Token oder Passwort' }, { status: 400 })
     }
+
+    const rawToken = parsed.data.token
+    const newPassword = parsed.data.password
 
     const tokenHash = hashResetToken(rawToken)
 

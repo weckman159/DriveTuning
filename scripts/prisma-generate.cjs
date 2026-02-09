@@ -1,6 +1,13 @@
 const { execSync } = require('node:child_process');
 
-const schema = process.env.PRISMA_SCHEMA || 'prisma/schema.prisma';
+function chooseSchema() {
+  if (process.env.PRISMA_SCHEMA) return process.env.PRISMA_SCHEMA;
+  const url = String(process.env.DATABASE_URL || '');
+  if (/^postgres(ql)?:/i.test(url)) return 'prisma/schema.postgres.prisma';
+  return 'prisma/schema.prisma';
+}
+
+const schema = chooseSchema();
 
 console.log(`[prisma] generating client using schema: ${schema}`);
 execSync(`npx prisma generate --schema "${schema}"`, { stdio: 'inherit' });

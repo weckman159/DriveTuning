@@ -2,6 +2,13 @@ import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { consumeRateLimit } from '@/lib/rate-limit'
+import { z } from 'zod'
+import { readJson } from '@/lib/validation'
+
+const bodySchema = z.object({
+  message: z.string().trim().min(1).max(2000),
+})
 
 export async function POST(
   req: Request,
@@ -10,11 +17,24 @@ export async function POST(
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
 
+  const rl = await consumeRateLimit({
+    namespace: 'market:messages:user',
+    identifier: session.user.id,
+    limit: 30,
+    windowMs: 60_000,
+  })
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Zu viele Nachrichten in kurzer Zeit' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+    )
+  }
+
   const { conversationId } = await params
-  const body = await req.json().catch(() => ({} as any))
-  const message = typeof body.message === 'string' ? body.message.trim() : ''
+  const parsed = bodySchema.safeParse(await readJson(req))
+  if (!parsed.success) return NextResponse.json({ error: 'Nachricht ist erforderlich' }, { status: 400 })
+  const message = parsed.data.message
   if (!message) return NextResponse.json({ error: 'Nachricht ist erforderlich' }, { status: 400 })
-  if (message.length > 2000) return NextResponse.json({ error: 'Nachricht ist zu lang' }, { status: 400 })
 
   const conv = await prisma.marketConversation.findUnique({
     where: { id: conversationId },

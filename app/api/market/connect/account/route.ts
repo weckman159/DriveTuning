@@ -3,10 +3,15 @@ import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
+import { consumeRateLimit } from '@/lib/rate-limit'
 
 function getAppUrl(): string {
   const env = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || ''
   return env.trim().replace(/\/+$/, '')
+}
+
+function computeVerificationStatus(flags: { chargesEnabled: boolean; payoutsEnabled: boolean; detailsSubmitted: boolean }) {
+  return flags.chargesEnabled && flags.payoutsEnabled && flags.detailsSubmitted ? 'VERIFIED' : 'PENDING'
 }
 
 export async function GET() {
@@ -24,10 +29,18 @@ export async function GET() {
       const chargesEnabled = Boolean((acct as any).charges_enabled)
       const payoutsEnabled = Boolean((acct as any).payouts_enabled)
       const detailsSubmitted = Boolean((acct as any).details_submitted)
+      const verificationStatus = computeVerificationStatus({ chargesEnabled, payoutsEnabled, detailsSubmitted })
+      const verifiedAt = verificationStatus === 'VERIFIED' ? account.verifiedAt || new Date() : null
 
       const updated = await prisma.stripeConnectAccount.update({
         where: { id: account.id },
-        data: { chargesEnabled, payoutsEnabled, detailsSubmitted },
+        data: {
+          chargesEnabled,
+          payoutsEnabled,
+          detailsSubmitted,
+          verificationStatus,
+          verifiedAt,
+        },
       })
 
       return NextResponse.json({ account: updated })
@@ -42,6 +55,19 @@ export async function GET() {
 export async function POST() {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
+
+  const rl = await consumeRateLimit({
+    namespace: 'market:connect:onboarding:user',
+    identifier: session.user.id,
+    limit: 10,
+    windowMs: 60_000,
+  })
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Zu viele Versuche. Bitte spaeter erneut versuchen.' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+    )
+  }
 
   const appUrl = getAppUrl()
   if (!appUrl) return NextResponse.json({ error: 'APP_URL ist nicht konfiguriert' }, { status: 500 })
@@ -66,13 +92,19 @@ export async function POST() {
 
   if (!existing) {
     const acct = await stripe.accounts.retrieve(stripeAccountId)
+    const chargesEnabled = Boolean((acct as any).charges_enabled)
+    const payoutsEnabled = Boolean((acct as any).payouts_enabled)
+    const detailsSubmitted = Boolean((acct as any).details_submitted)
+    const verificationStatus = computeVerificationStatus({ chargesEnabled, payoutsEnabled, detailsSubmitted })
     await prisma.stripeConnectAccount.create({
       data: {
         userId: session.user.id,
         stripeAccountId,
-        chargesEnabled: Boolean((acct as any).charges_enabled),
-        payoutsEnabled: Boolean((acct as any).payouts_enabled),
-        detailsSubmitted: Boolean((acct as any).details_submitted),
+        chargesEnabled,
+        payoutsEnabled,
+        detailsSubmitted,
+        verificationStatus,
+        verifiedAt: verificationStatus === 'VERIFIED' ? new Date() : null,
       },
     })
   }

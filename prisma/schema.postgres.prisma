@@ -84,6 +84,17 @@ model PasswordResetToken {
   @@index([expiresAt])
 }
 
+model ApiRateLimit {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  count     Int      @default(0)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
+}
+
 model UserPrivacySettings {
   id                   String  @id @default(cuid())
   userId               String  @unique
@@ -93,6 +104,44 @@ model UserPrivacySettings {
   defaultCarVisibility String  @default("UNLISTED")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Brand {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  models CarModel[]
+}
+
+model CarModel {
+  id        String   @id @default(cuid())
+  brandId   String
+  name      String
+  createdAt DateTime @default(now())
+
+  brand    Brand       @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  variants CarVariant[]
+
+  @@unique([brandId, name])
+  @@index([brandId])
+}
+
+model CarVariant {
+  id          String   @id @default(cuid())
+  carModelId  String
+  fingerprint String   @unique
+  generation  String?
+  bodyCode    String?
+  engineCode  String?
+  hsn         String?
+  tsn         String?
+  createdAt   DateTime @default(now())
+
+  carModel CarModel @relation(fields: [carModelId], references: [id], onDelete: Cascade)
+  cars     Car[]
+
+  @@index([carModelId])
 }
 
 model Garage {
@@ -115,7 +164,12 @@ model Car {
   make           String
   model          String
   generation     String?
+  bodyCode       String?
+  hsn            String?
+  tsn            String?
+  carVariantId   String?
   year           Int?
+  transmission   String?
   engineCode     String?
   factoryHp      Int?
   factoryWeight  Int?
@@ -133,6 +187,7 @@ model Car {
   updatedAt      DateTime @updatedAt
 
   garage           Garage             @relation(fields: [garageId], references: [id], onDelete: Cascade)
+  carVariant       CarVariant?        @relation(fields: [carVariantId], references: [id], onDelete: SetNull)
   logEntries       LogEntry[]
   partListings     PartListing[]
   eventAttendances EventAttendance[]
@@ -201,6 +256,7 @@ model Modification {
   evidenceScore    Int @default(0)
   partListings PartListing[]
   documents    Document[]
+  approvalDocuments ApprovalDocument[]
 
   logEntry LogEntry @relation(fields: [logEntryId], references: [id], onDelete: Cascade)
 }
@@ -297,6 +353,9 @@ model StripeConnectAccount {
   chargesEnabled   Boolean  @default(false)
   payoutsEnabled   Boolean  @default(false)
   detailsSubmitted Boolean  @default(false)
+  verificationStatus String @default("PENDING") // PENDING | VERIFIED | REJECTED
+  verifiedAt       DateTime?
+  rejectedAt       DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -359,6 +418,25 @@ model Document {
   owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   modification Modification? @relation(fields: [modificationId], references: [id], onDelete: Cascade)
   car          Car?          @relation(fields: [carId], references: [id], onDelete: Cascade)
+  approvalDocument ApprovalDocument?
+}
+
+model ApprovalDocument {
+  id              String   @id @default(cuid())
+  modificationId  String
+  documentId      String   @unique
+  approvalType    String
+  approvalNumber  String?
+  issuingAuthority String?
+  issueDate       DateTime?
+  validUntil      DateTime?
+  createdAt       DateTime @default(now())
+
+  modification Modification @relation(fields: [modificationId], references: [id], onDelete: Cascade)
+  document     Document     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([modificationId])
+  @@index([approvalType])
 }
 
 model ShareLink {

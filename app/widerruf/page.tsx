@@ -3,12 +3,12 @@ import { LEGAL } from '@/lib/legal'
 export default function WiderrufPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      <h1 className="text-3xl font-bold text-white">Widerruf</h1>
+      <h1 className="text-3xl font-semibold text-white">Widerruf</h1>
       <p className="text-zinc-400 text-sm">
         Hinweis: Dies ist ein Mustertext und ersetzt keine Rechtsberatung. Bitte passe ihn an deine tatsaechlichen Produkte/Leistungen an.
       </p>
 
-      <div className="rounded-xl border border-zinc-700 bg-zinc-800 p-5 text-zinc-300 space-y-4">
+      <div className="panel p-5 text-zinc-300 space-y-4">
         <p className="text-sm text-zinc-300">
           Diese Widerrufsbelehrung gilt fuer Verbraucher im Sinne von § 13 BGB, wenn ein entgeltlicher Vertrag (z.B. Abo/Pro-Funktionen oder kostenpflichtige
           Services) mit DriveTuning zustande kommt.
@@ -47,7 +47,7 @@ export default function WiderrufPage() {
         </p>
 
         <h2 className="text-lg font-semibold text-white">Muster-Widerrufsformular</h2>
-        <div className="rounded-lg border border-zinc-700 bg-zinc-900/40 p-4 text-sm text-zinc-200 whitespace-pre-wrap">
+        <div className="rounded-xl border border-white/10 bg-zinc-950/30 p-4 text-sm text-zinc-200 whitespace-pre-wrap">
           {`(Wenn du den Vertrag widerrufen willst, dann fuelle bitte dieses Formular aus und sende es zurueck.)
 
 An: ${LEGAL.operatorName}, ${LEGAL.address}, E-Mail: ${LEGAL.email}

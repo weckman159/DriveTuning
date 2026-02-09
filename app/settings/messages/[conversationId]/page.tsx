@@ -147,15 +147,15 @@ export default function MessageThreadPage() {
         </Link>
       </nav>
 
-      <div className="rounded-xl border border-zinc-700 bg-zinc-800 p-5">
+      <div className="panel p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold text-white">{conv.partListing.title}</h1>
+            <h1 className="text-xl font-semibold text-white">{conv.partListing.title}</h1>
             <p className="text-sm text-zinc-400">€{conv.partListing.price.toLocaleString()}</p>
           </div>
           <Link
             href={`/market/${conv.partListing.id}`}
-            className="px-3 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white text-sm"
+            className="px-3 py-2 rounded-lg btn-secondary text-sm"
           >
             Anzeige oeffnen
           </Link>
@@ -163,7 +163,7 @@ export default function MessageThreadPage() {
       </div>
 
       {conv.offers.length > 0 && (
-        <div className="rounded-xl border border-zinc-700 bg-zinc-800 p-5 space-y-3">
+        <div className="panel p-5 space-y-3">
           <h2 className="text-lg font-semibold text-white">Angebote</h2>
           {commerceEnabled && !isSeller ? (
             <label className="flex items-start gap-2 text-xs text-zinc-300">
@@ -171,7 +171,7 @@ export default function MessageThreadPage() {
                 type="checkbox"
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-700"
+                className="mt-0.5 checkbox-base"
               />
               <span>
                 I agree to{' '}
@@ -191,7 +191,7 @@ export default function MessageThreadPage() {
             </label>
           ) : null}
           {conv.offers.map((o) => (
-            <div key={o.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-zinc-700 bg-zinc-900/40 p-3">
+            <div key={o.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 bg-zinc-950/30 p-3">
               <div className="text-sm text-zinc-200">
                 <span className="font-semibold">€{(o.amountCents / 100).toLocaleString()}</span>{' '}
                 <span className="text-zinc-400">({o.status})</span>
@@ -220,7 +220,7 @@ export default function MessageThreadPage() {
                     <button
                       onClick={() => updateOffer(o.id, 'CANCEL')}
                       disabled={sending}
-                      className="px-3 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 disabled:bg-zinc-700/60 text-white text-sm"
+                      className="px-3 py-2 rounded-lg btn-secondary disabled:opacity-60 text-sm"
                     >
                       Abbrechen
                     </button>
@@ -241,9 +241,9 @@ export default function MessageThreadPage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-zinc-700 bg-zinc-800 p-5 space-y-4">
+      <div className="panel p-5 space-y-4">
         <h2 className="text-lg font-semibold text-white">Chat</h2>
-        <div className="max-h-[420px] overflow-y-auto space-y-3 rounded-lg border border-zinc-700 bg-zinc-900/50 p-3">
+        <div className="max-h-[420px] overflow-y-auto space-y-3 rounded-xl border border-white/10 bg-zinc-950/30 p-3">
           {conv.messages.length === 0 ? <p className="text-sm text-zinc-400">Noch keine Nachrichten.</p> : null}
           {conv.messages.map((m) => (
             <div key={m.id} className={`flex ${m.senderId === userId ? 'justify-end' : 'justify-start'}`}>
@@ -263,7 +263,7 @@ export default function MessageThreadPage() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Nachricht schreiben..."
-              className="flex-1 px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white"
+              className="flex-1 input-base"
             />
             <button
               type="submit"

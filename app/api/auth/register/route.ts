@@ -1,24 +1,41 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hash } from 'bcryptjs'
+import { consumeRateLimit } from '@/lib/rate-limit'
+import { getRequestIp } from '@/lib/request-ip'
+import { z } from 'zod'
+import { readJson } from '@/lib/validation'
+
+const bodySchema = z.object({
+  name: z.string().trim().max(80).optional(),
+  email: z.string().trim().email(),
+  password: z.string().min(8).max(200),
+})
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json()
-
-    if (!email || !password) {
+    const ip = getRequestIp(req) || 'unknown'
+    const rl = await consumeRateLimit({
+      namespace: 'auth:register:ip',
+      identifier: ip,
+      limit: 5,
+      windowMs: 60_000,
+    })
+    if (!rl.ok) {
       return NextResponse.json(
-        { error: 'E-Mail und Passwort sind erforderlich' },
-        { status: 400 }
+        { error: 'Zu viele Versuche. Bitte spaeter erneut versuchen.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
       )
     }
 
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: 'Passwort muss mindestens 8 Zeichen haben' },
-        { status: 400 }
-      )
+    const parsed = bodySchema.safeParse(await readJson(req))
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Ungueltige Eingabe' }, { status: 400 })
     }
+
+    const name = parsed.data.name
+    const email = parsed.data.email.trim().toLowerCase()
+    const password = parsed.data.password
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({

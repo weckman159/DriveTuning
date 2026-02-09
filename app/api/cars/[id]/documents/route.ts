@@ -4,6 +4,20 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { parseElementVisibilityOrDefault } from '@/lib/vocab'
 import { persistDocumentDataUrl } from '@/lib/blob-storage'
+import { consumeRateLimit } from '@/lib/rate-limit'
+import { z } from 'zod'
+import { readJson } from '@/lib/validation'
+
+const bodySchema = z.object({
+  type: z.string().trim().min(1).max(40).optional(),
+  title: z.string().trim().max(200).optional().nullable(),
+  issuer: z.string().trim().max(120).optional().nullable(),
+  documentNumber: z.string().trim().max(80).optional().nullable(),
+  url: z.string().trim().optional(),
+  fileDataUrl: z.string().trim().optional(),
+  modificationId: z.string().trim().optional(),
+  visibility: z.string().optional(),
+})
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -28,6 +42,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
 
+  const rl = await consumeRateLimit({
+    namespace: 'cars:documents:create:user',
+    identifier: session.user.id,
+    limit: 20,
+    windowMs: 60_000,
+  })
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Zu viele Uploads in kurzer Zeit' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+    )
+  }
+
   const { id } = await params
   const car = await prisma.car.findFirst({
     where: { id, garage: { userId: session.user.id } },
@@ -35,11 +62,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   })
   if (!car) return NextResponse.json({ error: 'Auto nicht gefunden' }, { status: 404 })
 
-  const body = await req.json().catch(() => ({} as any))
+  const parsed = bodySchema.safeParse(await readJson(req))
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Ungueltige Eingabe' }, { status: 400 })
+  }
+
+  const body = parsed.data
   const type = typeof body.type === 'string' ? body.type.trim().toUpperCase() : 'OTHER'
-  const title = typeof body.title === 'string' ? body.title.trim() : null
-  const issuer = typeof body.issuer === 'string' ? body.issuer.trim() : null
-  const documentNumber = typeof body.documentNumber === 'string' ? body.documentNumber.trim() : null
+  const title = body.title ?? null
+  const issuer = body.issuer ?? null
+  const documentNumber = body.documentNumber ?? null
   const urlRaw = typeof body.url === 'string' ? body.url.trim() : ''
   const fileDataUrl = typeof body.fileDataUrl === 'string' ? body.fileDataUrl.trim() : ''
   const modificationIdRaw = typeof body.modificationId === 'string' ? body.modificationId.trim() : ''
@@ -104,6 +136,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       visibility,
     },
   })
+
+  const approvalTypes = new Set(['ABE', 'EBE', 'TEILEGUTACHTEN', 'EINZELABNAHME', 'EINTRAGUNG'])
+  if (modificationId && approvalTypes.has(type)) {
+    try {
+      await prisma.approvalDocument.create({
+        data: {
+          modificationId,
+          documentId: doc.id,
+          approvalType: type,
+          approvalNumber: documentNumber,
+          issuingAuthority: issuer,
+        },
+      })
+    } catch {
+      // Best effort: document upload should still succeed even if structured approval insert fails.
+    }
+  }
 
   return NextResponse.json({ document: doc }, { status: 201 })
 }

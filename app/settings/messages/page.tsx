@@ -46,7 +46,7 @@ export default function MessagesPage() {
       </nav>
 
       <div>
-        <h1 className="text-3xl font-bold text-white">Nachrichten</h1>
+        <h1 className="text-3xl font-semibold text-white">Nachrichten</h1>
         <p className="text-zinc-400 mt-1">Marktplatz-Konversationen</p>
       </div>
 
@@ -61,7 +61,7 @@ export default function MessagesPage() {
         {items.map((c) => {
           const last = c.messages?.[0]
           return (
-            <div key={c.id} className="rounded-xl border border-zinc-700 bg-zinc-800 p-4">
+            <div key={c.id} className="panel p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <p className="font-semibold text-white">{c.partListing.title}</p>
@@ -76,7 +76,7 @@ export default function MessagesPage() {
                   </Link>
                   <Link
                     href={`/market/${c.partListing.id}`}
-                    className="px-3 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white text-sm"
+                    className="px-3 py-2 rounded-lg btn-secondary text-sm"
                   >
                     Anzeige
                   </Link>

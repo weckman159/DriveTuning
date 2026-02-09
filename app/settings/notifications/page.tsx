@@ -56,7 +56,7 @@ export default function NotificationsPage() {
       </nav>
 
       <div>
-        <h1 className="text-3xl font-bold text-white">Benachrichtigungen</h1>
+        <h1 className="text-3xl font-semibold text-white">Benachrichtigungen</h1>
         <p className="text-zinc-400 mt-1">Benachrichtigungseinstellungen verwalten</p>
       </div>
 
@@ -64,7 +64,7 @@ export default function NotificationsPage() {
         {notificationTypes.map((type) => (
           <div
             key={type.id}
-            className="bg-zinc-800 rounded-xl p-6 border border-zinc-700"
+            className="panel p-6"
           >
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -78,7 +78,7 @@ export default function NotificationsPage() {
                   type="checkbox"
                   checked={notifications[type.id as keyof typeof notifications].email}
                   onChange={() => toggleNotification(type.id, 'email')}
-                  className="w-5 h-5 rounded bg-zinc-700 border-zinc-600 text-sky-500 focus:ring-sky-500"
+                  className="w-5 h-5 rounded bg-zinc-900/60 border-white/10 text-sky-500 focus:ring-sky-400/35"
                 />
                 <div>
                   <p className="text-white font-medium">E-Mail</p>
@@ -90,7 +90,7 @@ export default function NotificationsPage() {
                   type="checkbox"
                   checked={notifications[type.id as keyof typeof notifications].push}
                   onChange={() => toggleNotification(type.id, 'push')}
-                  className="w-5 h-5 rounded bg-zinc-700 border-zinc-600 text-sky-500 focus:ring-sky-500"
+                  className="w-5 h-5 rounded bg-zinc-900/60 border-white/10 text-sky-500 focus:ring-sky-400/35"
                 />
                 <div>
                   <p className="text-white font-medium">Push</p>

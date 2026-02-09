@@ -70,7 +70,7 @@ export default function EventsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Events</h1>
+          <h1 className="text-3xl font-semibold text-white">Events</h1>
           <p className="text-zinc-400 mt-1">
             {upcomingCount} kommende {upcomingCount === 1 ? 'Veranstaltung' : 'Veranstaltungen'}
           </p>
@@ -88,7 +88,7 @@ export default function EventsPage() {
         <select
           value={selectedRegion}
           onChange={(e) => setSelectedRegion(e.target.value)}
-          className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
+          className="px-4 py-2 rounded-xl bg-zinc-900/60 border border-white/10 text-white"
         >
           {regions.map((region) => (
             <option key={region} value={region}>
@@ -99,7 +99,7 @@ export default function EventsPage() {
         <select
           value={selectedBrand}
           onChange={(e) => setSelectedBrand(e.target.value)}
-          className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
+          className="px-4 py-2 rounded-xl bg-zinc-900/60 border border-white/10 text-white"
         >
           {brands.map((brand) => (
             <option key={brand} value={brand}>
@@ -110,7 +110,7 @@ export default function EventsPage() {
         <select
           value={selectedLocation}
           onChange={(e) => setSelectedLocation(e.target.value)}
-          className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white"
+          className="px-4 py-2 rounded-xl bg-zinc-900/60 border border-white/10 text-white"
         >
           {locations.map((location) => (
             <option key={location} value={location}>
@@ -129,9 +129,9 @@ export default function EventsPage() {
             <Link
               key={event.id}
               href={`/events/${event.id}`}
-              className="group bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700 hover:border-sky-500 transition-all hover:scale-[1.02]"
+              className="group overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/40 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] transition-all hover:-translate-y-0.5 hover:border-white/20"
             >
-              <div className="aspect-[2/1] bg-zinc-700 flex items-center justify-center relative">
+              <div className="aspect-[2/1] bg-zinc-900/50 flex items-center justify-center relative">
                 <span className="text-zinc-500">Event-Banner</span>
                 {event.brandFilter && (
                   <div className="absolute top-3 left-3">
@@ -144,9 +144,9 @@ export default function EventsPage() {
               <div className="p-4 space-y-3">
                 <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <span>
-                    📅 {new Date(event.dateStart).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })}
+                    {new Date(event.dateStart).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })}
                   </span>
-                  <span>•</span>
+                  <span className="text-zinc-700">|</span>
                   <span>{event.locationRegion}</span>
                 </div>
                 <h3 className="font-semibold text-white group-hover:text-sky-400 transition-colors line-clamp-1">
@@ -157,7 +157,6 @@ export default function EventsPage() {
                 </p>
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-1 text-zinc-500 text-sm">
-                    <span>🏁</span>
                     <span>Offen</span>
                   </div>
                   <span className="text-sky-400 text-sm group-hover:underline">
@@ -170,7 +169,6 @@ export default function EventsPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <div className="text-4xl mb-4">🏁</div>
           <h3 className="text-xl font-semibold text-white mb-2">Keine Events gefunden</h3>
           <p className="text-zinc-400 mb-4">
             Passe deine Filter an oder erstelle dein eigenes Event.
@@ -185,35 +183,37 @@ export default function EventsPage() {
       )}
 
       {/* Calendar Preview */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-        <h2 className="text-xl font-bold text-white mb-4">Diesen Monat</h2>
-        <div className="grid grid-cols-7 gap-2 text-center">
-          {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((day) => (
-            <div key={day} className="p-2 text-zinc-500 text-sm font-medium">
-              {day}
-            </div>
-          ))}
-          {[...Array(31)].map((_, i) => {
-            const day = i + 1
-            const hasEvent = events.some((event) => new Date(event.dateStart).getDate() === day)
-            const isSelected = selectedDay === day
-            return (
-              <button
-                key={day}
-                type="button"
-                onClick={() => setSelectedDay(isSelected ? null : day)}
-                className={`p-2 text-sm rounded-lg transition-colors ${
-                  isSelected
-                    ? 'bg-sky-500 text-white font-semibold'
-                    : hasEvent
-                      ? 'bg-sky-500/20 text-sky-400 font-semibold hover:bg-sky-500/30'
-                      : 'text-zinc-400 hover:bg-zinc-700'
-                }`}
-              >
+      <div className="panel p-6">
+        <h2 className="text-xl font-semibold text-white mb-4">Diesen Monat</h2>
+        <div className="-mx-2 overflow-x-auto px-2">
+          <div className="grid min-w-[28rem] grid-cols-7 gap-2 text-center">
+            {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((day) => (
+              <div key={day} className="p-2 text-zinc-500 text-sm font-medium">
                 {day}
-              </button>
-            )
-          })}
+              </div>
+            ))}
+            {[...Array(31)].map((_, i) => {
+              const day = i + 1
+              const hasEvent = events.some((event) => new Date(event.dateStart).getDate() === day)
+              const isSelected = selectedDay === day
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => setSelectedDay(isSelected ? null : day)}
+                  className={`p-2 text-sm rounded-lg transition-colors ${
+                    isSelected
+                      ? 'bg-sky-500 text-white font-semibold'
+                      : hasEvent
+                        ? 'bg-sky-500/20 text-sky-400 font-semibold hover:bg-sky-500/30'
+                        : 'text-zinc-400 hover:bg-white/5'
+                  }`}
+                >
+                  {day}
+                </button>
+              )
+            })}
+          </div>
         </div>
         {selectedDay !== null && (
           <div className="mt-4 flex items-center justify-between text-sm text-zinc-400">

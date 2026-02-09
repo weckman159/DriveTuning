@@ -1,0 +1,153 @@
+{
+  "country": "DE",
+  "countryName": "Deutschland",
+  "states": [
+    {
+      "id": "BW",
+      "name": "Baden-Württemberg",
+      "nameEn": "Baden-Württemberg",
+      "capital": "Stuttgart",
+      "population": 11100000,
+      "areaKm2": 35751,
+      "region": "south"
+    },
+    {
+      "id": "BY",
+      "name": "Bayern",
+      "nameEn": "Bavaria",
+      "capital": "München",
+      "population": 13200000,
+      "areaKm2": 70550,
+      "region": "south"
+    },
+    {
+      "id": "BE",
+      "name": "Berlin",
+      "nameEn": "Berlin",
+      "capital": "Berlin",
+      "population": 3700000,
+      "areaKm2": 892,
+      "region": "east",
+      "isCityState": true
+    },
+    {
+      "id": "BB",
+      "name": "Brandenburg",
+      "nameEn": "Brandenburg",
+      "capital": "Potsdam",
+      "population": 2500000,
+      "areaKm2": 29654,
+      "region": "east"
+    },
+    {
+      "id": "HB",
+      "name": "Bremen",
+      "nameEn": "Bremen",
+      "capital": "Bremen",
+      "population": 680000,
+      "areaKm2": 420,
+      "region": "north",
+      "isCityState": true
+    },
+    {
+      "id": "HH",
+      "name": "Hamburg",
+      "nameEn": "Hamburg",
+      "capital": "Hamburg",
+      "population": 1800000,
+      "areaKm2": 755,
+      "region": "north",
+      "isCityState": true
+    },
+    {
+      "id": "HE",
+      "name": "Hessen",
+      "nameEn": "Hesse",
+      "capital": "Wiesbaden",
+      "population": 6300000,
+      "areaKm2": 21115,
+      "region": "west"
+    },
+    {
+      "id": "MV",
+      "name": "Mecklenburg-Vorpommern",
+      "nameEn": "Mecklenburg-Western Pomerania",
+      "capital": "Schwerin",
+      "population": 1600000,
+      "areaKm2": 23214,
+      "region": "north"
+    },
+    {
+      "id": "NI",
+      "name": "Niedersachsen",
+      "nameEn": "Lower Saxony",
+      "capital": "Hannover",
+      "population": 8000000,
+      "areaKm2": 47710,
+      "region": "north"
+    },
+    {
+      "id": "NW",
+      "name": "Nordrhein-Westfalen",
+      "nameEn": "North Rhine-Westphalia",
+      "capital": "Düsseldorf",
+      "population": 18000000,
+      "areaKm2": 34112,
+      "region": "west"
+    },
+    {
+      "id": "RP",
+      "name": "Rheinland-Pfalz",
+      "nameEn": "Rhineland-Palatinate",
+      "capital": "Mainz",
+      "population": 4100000,
+      "areaKm2": 19858,
+      "region": "west"
+    },
+    {
+      "id": "SL",
+      "name": "Saarland",
+      "nameEn": "Saarland",
+      "capital": "Saarbrücken",
+      "population": 980000,
+      "areaKm2": 2569,
+      "region": "west"
+    },
+    {
+      "id": "SN",
+      "name": "Sachsen",
+      "nameEn": "Saxony",
+      "capital": "Dresden",
+      "population": 4000000,
+      "areaKm2": 18416,
+      "region": "east"
+    },
+    {
+      "id": "ST",
+      "name": "Sachsen-Anhalt",
+      "nameEn": "Saxony-Anhalt",
+      "capital": "Magdeburg",
+      "population": 2100000,
+      "areaKm2": 20452,
+      "region": "east"
+    },
+    {
+      "id": "SH",
+      "name": "Schleswig-Holstein",
+      "nameEn": "Schleswig-Holstein",
+      "capital": "Kiel",
+      "population": 2900000,
+      "areaKm2": 15802,
+      "region": "north"
+    },
+    {
+      "id": "TH",
+      "name": "Thüringen",
+      "nameEn": "Thuringia",
+      "capital": "Erfurt",
+      "population": 2100000,
+      "areaKm2": 16172,
+      "region": "east"
+    }
+  ]
+}

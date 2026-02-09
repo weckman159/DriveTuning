@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { parseBuildStatus, parseCarVisibility } from '@/lib/vocab'
+import { computeTuvReadiness } from '@/lib/tuv-ready'
 import { NextResponse } from 'next/server'
 
 export async function GET(
@@ -22,7 +23,14 @@ export async function GET(
     },
     include: {
       logEntries: {
-        include: { modifications: true },
+        include: {
+          modifications: {
+            include: {
+              documents: { select: { id: true, type: true } },
+              approvalDocuments: { select: { id: true, approvalType: true } },
+            },
+          },
+        },
         orderBy: { date: 'desc' },
       },
     },
@@ -32,7 +40,10 @@ export async function GET(
     return NextResponse.json({ error: 'Auto nicht gefunden' }, { status: 404 })
   }
 
-  return NextResponse.json({ car })
+  const modifications = car.logEntries.flatMap((e) => e.modifications || [])
+  const tuvReadiness = computeTuvReadiness(modifications as any)
+
+  return NextResponse.json({ car, tuvReadiness })
 }
 
 export async function PATCH(

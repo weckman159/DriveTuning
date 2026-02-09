@@ -45,19 +45,13 @@ const settingsSections = [
     href: '/events',
     icon: '🏁',
   },
-  {
-    title: 'Verbundene Apps',
-    description: 'Verbundene Dienste verwalten',
-    href: '/settings/connected-apps',
-    icon: '🔗',
-  },
 ]
 
 export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-white">Einstellungen</h1>
+        <h1 className="text-3xl font-semibold text-white">Einstellungen</h1>
         <p className="text-zinc-400 mt-1">Konto und Praeferenzen verwalten</p>
       </div>
 
@@ -66,7 +60,7 @@ export default function SettingsPage() {
           <Link
             key={section.href}
             href={section.href}
-            className="group bg-zinc-800 rounded-xl p-6 border border-zinc-700 hover:border-sky-500 transition-all hover:scale-[1.02]"
+            className="group rounded-2xl border border-white/10 bg-zinc-950/40 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] transition-all hover:-translate-y-0.5 hover:border-white/20"
           >
             <div className="flex items-start gap-4">
               <div className="text-3xl">{section.icon}</div>
@@ -85,7 +79,7 @@ export default function SettingsPage() {
 
       {/* Danger Zone */}
       <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-red-400 mb-4">Gefahrenzone</h2>
+        <h2 className="text-lg font-semibold text-red-400 mb-4">Gefahrenzone</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>

@@ -49,8 +49,8 @@ function SignInContent() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <div className="w-full max-w-md">
-        <div className="bg-zinc-800 rounded-xl p-8 border border-zinc-700">
-          <h1 className="text-2xl font-bold text-white mb-2">Willkommen zurueck</h1>
+        <div className="panel p-8">
+          <h1 className="text-2xl font-semibold text-white mb-2">Willkommen zurueck</h1>
           <p className="text-zinc-400 mb-6">
             Melde dich bei deinem DRIVETUNING-Konto an
           </p>
@@ -83,7 +83,7 @@ function SignInContent() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
+                className="input-base"
                 placeholder="you@example.com"
               />
             </div>
@@ -97,8 +97,8 @@ function SignInContent() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500"
-                placeholder="••••••••"
+                className="input-base"
+                placeholder="********"
               />
             </div>
 

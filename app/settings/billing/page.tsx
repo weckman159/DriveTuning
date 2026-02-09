@@ -57,14 +57,14 @@ export default function BillingPage() {
       </nav>
 
       <div>
-        <h1 className="text-3xl font-bold text-white">Abrechnung</h1>
+        <h1 className="text-3xl font-semibold text-white">Abrechnung</h1>
         <p className="text-zinc-400 mt-1">Zahlungen und Auszahlungen verwalten</p>
       </div>
 
       {/* Seller Payouts */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+      <div className="panel p-6">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-          <h2 className="text-xl font-bold text-white">Auszahlungen</h2>
+          <h2 className="text-xl font-semibold text-white">Auszahlungen</h2>
           {connectAccount?.payoutsEnabled ? (
             <span className="px-3 py-1 bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-sm font-medium rounded-full">
               Bereit
@@ -89,7 +89,7 @@ export default function BillingPage() {
           <button
             onClick={loadPayoutStatus}
             disabled={payoutLoading}
-            className="px-6 py-2 bg-zinc-700 hover:bg-zinc-600 disabled:bg-zinc-700/60 text-white font-semibold rounded-lg transition-colors"
+            className="px-6 py-2 btn-secondary disabled:opacity-60"
           >
             Aktualisieren
           </button>
@@ -105,9 +105,9 @@ export default function BillingPage() {
       </div>
 
       {/* Current Plan */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+      <div className="panel p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Aktueller Plan</h2>
+          <h2 className="text-xl font-semibold text-white">Aktueller Plan</h2>
           <span className="px-3 py-1 bg-sky-500/20 text-sky-400 text-sm font-medium rounded-full">
             Kostenlos
           </span>
@@ -125,13 +125,13 @@ export default function BillingPage() {
       </div>
 
       {/* Payment Methods */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+      <div className="panel p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Zahlungsmethoden</h2>
+          <h2 className="text-xl font-semibold text-white">Zahlungsmethoden</h2>
           <button
             disabled
             title="Bald"
-            className="px-4 py-2 bg-zinc-700/60 text-zinc-300 text-sm font-medium rounded-lg transition-colors cursor-not-allowed"
+            className="px-4 py-2 btn-secondary text-sm font-medium opacity-60 cursor-not-allowed"
           >
             + Karte hinzufuegen
           </button>
@@ -143,8 +143,8 @@ export default function BillingPage() {
       </div>
 
       {/* Billing History */}
-      <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-        <h2 className="text-xl font-bold text-white mb-4">Abrechnungsverlauf</h2>
+      <div className="panel p-6">
+        <h2 className="text-xl font-semibold text-white mb-4">Abrechnungsverlauf</h2>
         <div className="text-center py-8">
           <div className="text-4xl mb-2">📋</div>
           <p className="text-zinc-400">Noch kein Abrechnungsverlauf</p>

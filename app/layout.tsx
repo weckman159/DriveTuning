@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import Providers from '@/components/Providers'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
+import AiWidget from '@/components/AiWidget'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -18,12 +20,14 @@ export default function RootLayout({
   return (
     <html lang="de" className="dark">
       <body className="text-zinc-100 min-h-screen font-sans antialiased">
+        <Script src="https://js.puter.com/v2/" strategy="afterInteractive" />
         <Providers>
           <NavBar />
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
           </main>
           <Footer />
+          <AiWidget />
         </Providers>
         <SpeedInsights />
       </body>

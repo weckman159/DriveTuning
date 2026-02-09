@@ -3,12 +3,12 @@ import { LEGAL } from '@/lib/legal'
 export default function ImpressumPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      <h1 className="text-3xl font-bold text-white">Impressum</h1>
+      <h1 className="text-3xl font-semibold text-white">Impressum</h1>
       <p className="text-zinc-400 text-sm">
         Hinweis: Dies ist ein Mustertext und ersetzt keine Rechtsberatung. Bitte pruefe und ergaenze die Angaben vor dem Livegang.
       </p>
 
-      <div className="rounded-xl border border-zinc-700 bg-zinc-800 p-5 text-zinc-300 space-y-3">
+      <div className="panel p-5 text-zinc-300 space-y-3">
         <h2 className="text-lg font-semibold text-white">Angaben gemaess § 5 TMG</h2>
         <div className="space-y-1 text-sm">
           <p><span className="text-zinc-400">Anbieter/Betreiber:</span> {LEGAL.operatorName}</p>

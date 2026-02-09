@@ -44,7 +44,7 @@ export default function PrivacySettingsForm({ initialSettings }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-800 p-6 rounded-xl border border-zinc-700">
+    <form onSubmit={handleSubmit} className="space-y-6 p-6 panel">
       {/* Hide Garage Location */}
       <div className="flex items-center justify-between">
         <div>
@@ -55,7 +55,7 @@ export default function PrivacySettingsForm({ initialSettings }: Props) {
           type="button"
           onClick={() => setSettings(s => ({ ...s, hideGarageLocation: !s.hideGarageLocation }))}
           className={`relative w-12 h-6 rounded-full transition-colors ${
-            settings.hideGarageLocation ? 'bg-sky-500' : 'bg-zinc-600'
+            settings.hideGarageLocation ? 'bg-sky-500' : 'bg-white/10 border border-white/10'
           }`}
         >
           <span
@@ -76,7 +76,7 @@ export default function PrivacySettingsForm({ initialSettings }: Props) {
           type="button"
           onClick={() => setSettings(s => ({ ...s, autoBlurPlates: !s.autoBlurPlates }))}
           className={`relative w-12 h-6 rounded-full transition-colors ${
-            settings.autoBlurPlates ? 'bg-sky-500' : 'bg-zinc-600'
+            settings.autoBlurPlates ? 'bg-sky-500' : 'bg-white/10 border border-white/10'
           }`}
         >
           <span
@@ -97,7 +97,7 @@ export default function PrivacySettingsForm({ initialSettings }: Props) {
           type="button"
           onClick={() => setSettings(s => ({ ...s, showRealName: !s.showRealName }))}
           className={`relative w-12 h-6 rounded-full transition-colors ${
-            settings.showRealName ? 'bg-sky-500' : 'bg-zinc-600'
+            settings.showRealName ? 'bg-sky-500' : 'bg-white/10 border border-white/10'
           }`}
         >
           <span
@@ -120,7 +120,7 @@ export default function PrivacySettingsForm({ initialSettings }: Props) {
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 settings.defaultCarVisibility === visibility
                   ? 'bg-sky-500 text-white'
-                  : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                  : 'btn-secondary text-zinc-200'
               }`}
             >
               {visibilityLabel[visibility]}

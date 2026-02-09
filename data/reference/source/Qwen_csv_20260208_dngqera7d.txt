@@ -1,0 +1,174 @@
+Марка,Модель,Годы выпуска,Объём двигателя (L),Вид топлива,Мощность (ps),Ёмкость батареи (kWh)
+Volkswagen,Golf VII,2012–2020,1.4 L,Бензин,125,
+Volkswagen,Golf VII,2012–2020,2.0 L,Дизель,150,
+Volkswagen,Golf VIII,2020–н.в.,1.5 L,Бензин,150,
+Volkswagen,Passat B8,2015–2023,2.0 L,Бензин,150,
+Volkswagen,Passat B8,2015–2023,2.0 L,Дизель,150,
+Volkswagen,Passat B9,2023–н.в.,1.5 L,Бензин,150,
+Volkswagen,Passat B9,2023–н.в.,0.0 L,Электро,286,85
+Volkswagen,Tiguan II,2016–2023,2.0 L,Бензин,190,
+Volkswagen,Tiguan II,2016–2023,2.0 L,Дизель,150,
+Volkswagen,Tiguan III,2023–н.в.,1.5 L,Бензин,150,
+Volkswagen,T-Roc,2017–н.в.,1.5 L,Бензин,150,
+Volkswagen,T-Cross,2019–н.в.,1.0 L,Бензин,110,
+Volkswagen,Touareg,2018–н.в.,3.0 L,Бензин,340,
+Volkswagen,Touareg,2018–н.в.,3.0 L,Дизель,286,
+Volkswagen,ID.3,2020–н.в.,0.0 L,Электро,204,58
+Volkswagen,ID.3 Pro S,2020–н.в.,0.0 L,Электро,204,77
+Volkswagen,ID.4,2021–н.в.,0.0 L,Электро,204,77
+Volkswagen,ID.5,2022–н.в.,0.0 L,Электро,299,82
+Volkswagen,ID.7,2024–н.в.,0.0 L,Электро,286,86
+Volkswagen,ID.Buzz,2022–н.в.,0.0 L,Электро,204,85
+Volkswagen,Arteon,2017–2023,2.0 L,Бензин,280,
+Volkswagen,Arteon,2017–2023,2.0 L,Дизель,190,
+Volkswagen,Arteon R,2020–2023,2.0 L,Бензин,320,
+Volkswagen,Scirocco,2008–2017,2.0 L,Бензин,210,
+Volkswagen,Beetle,2011–2019,2.0 L,Бензин,210,
+Mercedes-Benz,A-Class (W177),2018–н.в.,1.3 L,Бензин,163,
+Mercedes-Benz,A-Class (W177),2018–н.в.,2.0 L,Дизель,150,
+Mercedes-Benz,B-Class (W247),2019–н.в.,1.3 L,Бензин,163,
+Mercedes-Benz,C-Class (W205),2014–2021,2.0 L,Бензин,184,
+Mercedes-Benz,C-Class (W205),2014–2021,2.0 L,Дизель,194,
+Mercedes-Benz,C-Class (W206),2021–н.в.,2.0 L,Бензин,204,
+Mercedes-Benz,C-Class (W206),2021–н.в.,2.0 L,Дизель,200,
+Mercedes-Benz,E-Class (W213),2016–2023,2.0 L,Бензин,258,
+Mercedes-Benz,E-Class (W213),2016–2023,2.0 L,Дизель,194,
+Mercedes-Benz,E-Class (W214),2023–н.в.,2.0 L,Бензин,258,
+Mercedes-Benz,S-Class (W223),2020–н.в.,3.0 L,Бензин,435,
+Mercedes-Benz,S-Class (W223),2020–н.в.,3.0 L,Дизель,286,
+Mercedes-Benz,CLA,2019–н.в.,1.3 L,Бензин,163,
+Mercedes-Benz,CLS,2018–н.в.,3.0 L,Бензин,367,
+Mercedes-Benz,GLA,2020–н.в.,1.3 L,Бензин,163,
+Mercedes-Benz,GLB,2019–н.в.,1.3 L,Бензин,163,
+Mercedes-Benz,GLC,2015–2022,2.0 L,Бензин,258,
+Mercedes-Benz,GLC,2022–н.в.,2.0 L,Бензин,258,
+Mercedes-Benz,GLE,2018–н.в.,3.0 L,Бензин,367,
+Mercedes-Benz,GLE,2018–н.в.,3.0 L,Дизель,286,
+Mercedes-Benz,GLS,2019–н.в.,3.0 L,Бензин,367,
+Mercedes-Benz,G-Class (W463),2018–н.в.,4.0 L,Бензин,421,
+Mercedes-Benz,AMG GT 4-Door,2018–н.в.,4.0 L,Бензин,435,
+Mercedes-Benz,EQS,2021–н.в.,0.0 L,Электро,333,107.8
+Mercedes-Benz,EQE,2022–н.в.,0.0 L,Электро,292,90.6
+Mercedes-Benz,EQS SUV,2022–н.в.,0.0 L,Электро,360,107.8
+Mercedes-Benz,EQE SUV,2022–н.в.,0.0 L,Электро,292,90.6
+Mercedes-Benz,GLE 350de,2019–н.в.,2.0 L,Дизель-гибрид,320,31.2
+Porsche,911 (991),2011–2019,3.4 L,Бензин,350,
+Porsche,911 (992),2019–н.в.,3.0 L,Бензин,385,
+Porsche,911 Turbo S (992),2020–н.в.,3.8 L,Бензин,650,
+Porsche,Cayenne (E3),2017–н.в.,3.0 L,Бензин,340,
+Porsche,Cayenne (E3),2017–н.в.,2.9 L,Бензин,440,
+Porsche,Cayenne Coupe,2019–н.в.,4.0 L,Бензин,550,
+Porsche,Cayenne E-Hybrid,2018–н.в.,3.0 L,Гибрид,462,14.1
+Porsche,Cayenne Turbo S E-Hybrid,2020–н.в.,4.0 L,Гибрид,680,14.1
+Porsche,Macan,2014–2021,2.0 L,Бензин,252,
+Porsche,Macan,2021–н.в.,2.0 L,Бензин,265,
+Porsche,Macan Turbo,2019–2021,2.9 L,Бензин,440,
+Porsche,Macan Electric,2024–н.в.,0.0 L,Электро,408,100
+Porsche,Panamera,2016–н.в.,2.9 L,Бензин,330,
+Porsche,Panamera Turbo S,2020–н.в.,4.0 L,Бензин,630,
+Porsche,Panamera E-Hybrid,2016–н.в.,2.9 L,Гибрид,462,17.9
+Porsche,Taycan,2019–н.в.,0.0 L,Электро,408,79.2
+Porsche,Taycan Turbo S,2019–н.в.,0.0 L,Электро,761,93.4
+Porsche,Taycan Cross Turismo,2021–н.в.,0.0 L,Электро,476,93.4
+Porsche,718 Cayman,2016–н.в.,2.0 L,Бензин,300,
+Porsche,718 Boxster,2016–н.в.,2.0 L,Бензин,300,
+Porsche,918 Spyder,2013–2015,4.6 L,Гибрид,887,6.8
+Opel,Corsa F,2019–н.в.,1.2 L,Бензин,100,
+Opel,Corsa F Electric,2020–н.в.,0.0 L,Электро,136,50
+Opel,Astra L,2021–н.в.,1.2 L,Бензин,130,
+Opel,Astra L Electric,2022–н.в.,0.0 L,Электро,156,54
+Opel,Insignia B,2017–2022,2.0 L,Дизель,170,
+Opel,Mokka B,2020–н.в.,1.2 L,Бензин,130,
+Opel,Mokka-e,2020–н.в.,0.0 L,Электро,136,50
+Opel,Grandland X,2017–2021,1.6 L,Бензин,225,
+Opel,Grandland,2021–н.в.,1.2 L,Бензин,130,
+Opel,Grandland Electric,2024–н.в.,0.0 L,Электро,231,86
+Opel,Vivaro Life,2020–н.в.,2.0 L,Дизель,120,
+Peugeot,208 II,2019–н.в.,1.2 L,Бензин,130,
+Peugeot,e-208,2019–н.в.,0.0 L,Электро,136,50
+Peugeot,2008 II,2019–н.в.,1.2 L,Бензин,130,
+Peugeot,e-2008,2019–н.в.,0.0 L,Электро,136,50
+Peugeot,308 III,2021–н.в.,1.2 L,Бензин,130,
+Peugeot,308 III Hybrid,2021–н.в.,1.6 L,Гибрид,225,10.8
+Peugeot,e-308,2023–н.в.,0.0 L,Электро,156,54
+Peugeot,3008 II,2016–2023,1.6 L,Бензин,180,
+Peugeot,3008 III,2024–н.в.,1.2 L,Бензин,130,
+Peugeot,3008 III Hybrid,2024–н.в.,1.6 L,Гибрид,225,14.2
+Peugeot,e-3008,2024–н.в.,0.0 L,Электро,320,82
+Peugeot,508 II,2018–н.в.,1.6 L,Бензин,225,
+Peugeot,508 II Hybrid,2019–н.в.,1.6 L,Гибрид,225,11.5
+Peugeot,Rifter,2018–н.в.,1.5 L,Дизель,102,
+Peugeot,Traveller,2016–н.в.,2.0 L,Дизель,120,
+Renault,Clio V,2019–н.в.,1.0 L,Бензин,100,
+Renault,Clio V E-Tech Hybrid,2020–н.в.,1.6 L,Гибрид,145,1.2
+Renault,Megane IV,2016–2022,1.3 L,Бензин,140,
+Renault,Megane E-Tech Electric,2022–н.в.,0.0 L,Электро,220,60
+Renault,Captur II,2019–н.в.,1.3 L,Бензин,140,
+Renault,Captur II E-Tech Hybrid,2020–н.в.,1.6 L,Гибрид,160,1.2
+Renault,Zoe,2012–2022,0.0 L,Электро,136,52
+Renault,Arkana,2020–н.в.,1.3 L,Бензин,140,
+Renault,Arkana E-Tech Hybrid,2021–н.в.,1.6 L,Гибрид,145,1.2
+Renault,Talisman,2015–2022,1.6 L,Бензин,220,
+Renault,Kadjar,2015–2022,1.3 L,Бензин,140,
+Renault,Austral,2022–н.в.,1.2 L,Гибрид,200,1.9
+Renault,Scenic E-Tech,2024–н.в.,0.0 L,Электро,220,87
+Renault,Twingo III,2014–2023,1.0 L,Бензин,70,
+Alpine,A110,2017–н.в.,1.8 L,Бензин,252,
+Alpine,A110 E-ternité,2024–н.в.,0.0 L,Электро,380,61
+Škoda,Octavia III,2013–2020,1.4 L,Бензин,150,
+Škoda,Octavia IV,2020–н.в.,1.5 L,Бензин,150,
+Škoda,Octavia IV iV,2020–н.в.,1.4 L,Гибрид,204,13
+Škoda,Superb III,2015–2023,2.0 L,Бензин,190,
+Škoda,Superb IV,2023–н.в.,2.0 L,Бензин,265,
+Škoda,Superb iV,2019–2023,1.4 L,Гибрид,218,13
+Škoda,Fabia IV,2021–н.в.,1.0 L,Бензин,95,
+Škoda,Kamiq,2019–н.в.,1.0 L,Бензин,110,
+Škoda,Karoq,2017–н.в.,1.5 L,Бензин,150,
+Škoda,Kodiaq,2016–2023,2.0 L,Бензин,180,
+Škoda,Kodiaq II,2023–н.в.,2.0 L,Бензин,265,
+Škoda,Enyaq iV,2020–н.в.,0.0 L,Электро,286,82
+Škoda,Enyaq Coupé iV,2022–н.в.,0.0 L,Электро,286,82
+Škoda,Enyaq RS iV,2023–н.в.,0.0 L,Электро,435,82
+SEAT,Ibiza V,2017–н.в.,1.0 L,Бензин,110,
+SEAT,Leon IV,2020–н.в.,1.5 L,Бензин,150,
+SEAT,Leon IV e-Hybrid,2020–н.в.,1.4 L,Гибрид,204,13
+SEAT,Ateca,2016–н.в.,1.5 L,Бензин,150,
+SEAT,Arona,2017–н.в.,1.0 L,Бензин,110,
+SEAT,Tarraco,2018–2023,2.0 L,Бензин,190,
+Volvo,S60 II,2018–н.в.,2.0 L,Бензин,250,
+Volvo,S60 II Recharge,2019–н.в.,2.0 L,Гибрид,455,18.8
+Volvo,V60 II,2018–н.в.,2.0 L,Дизель,190,
+Volvo,V60 II Recharge,2019–н.в.,2.0 L,Гибрид,455,18.8
+Volvo,S90 II,2016–н.в.,2.0 L,Бензин,250,
+Volvo,S90 II Recharge,2017–н.в.,2.0 L,Гибрид,400,18.8
+Volvo,V90 II,2016–н.в.,2.0 L,Дизель,190,
+Volvo,XC40,2017–н.в.,2.0 L,Бензин,190,
+Volvo,XC40 Recharge,2020–н.в.,0.0 L,Электро,408,78
+Volvo,C40 Recharge,2021–н.в.,0.0 L,Электро,408,78
+Volvo,XC60 II,2017–н.в.,2.0 L,Бензин,250,
+Volvo,XC60 II Recharge,2017–н.в.,2.0 L,Гибрид,400,18.8
+Volvo,XC90 II,2015–н.в.,2.0 L,Бензин,250,
+Volvo,XC90 II Recharge,2017–н.в.,2.0 L,Гибрид,400,18.8
+Volvo,EX30,2023–н.в.,0.0 L,Электро,428,69
+Volvo,EX90,2024–н.в.,0.0 L,Электро,517,100
+Mini,Hardtop 3-door (F55),2014–2024,1.5 L,Бензин,136,
+Mini,Hardtop 5-door (F55),2014–2024,1.5 L,Бензин,136,
+Mini,Countryman (F60),2017–2023,2.0 L,Бензин,192,
+Mini,Countryman (U25),2023–н.в.,1.5 L,Бензин,150,
+Mini,Countryman Electric,2024–н.в.,0.0 L,Электро,313,66.5
+Mini,Cooper SE,2020–2023,0.0 L,Электро,184,32.6
+Mini,Convertible (F57),2015–2024,2.0 L,Бензин,192,
+Mini,Clubman (F54),2015–2024,2.0 L,Бензин,192,
+Rolls-Royce,Phantom VIII,2017–н.в.,6.75 L,Бензин,571,
+Rolls-Royce,Cullinan,2018–н.в.,6.75 L,Бензин,571,
+Rolls-Royce,Ghost II,2020–н.в.,6.75 L,Бензин,571,
+Rolls-Royce,Wraith,2013–2023,6.6 L,Бензин,632,
+Rolls-Royce,Dawn,2015–2023,6.6 L,Бензин,571,
+Rolls-Royce,Spectre,2023–н.в.,0.0 L,Электро,585,120
+Pagani,Huayra,2011–2023,6.0 L,Бензин,740,
+Pagani,Utopia,2023–н.в.,6.0 L,Бензин,864,
+Rimac,Nevera,2021–н.в.,0.0 L,Электро,1914,120
+Saab,9-3 (II),2003–2012,2.0 L,Бензин,210,
+Saab,9-5 (II),2010–2012,2.0 L,Бензин,220,
+Maybach,S 680,2021–н.в.,6.0 L,Бензин,630,
+Maybach,GLS 600,2020–н.в.,4.0 L,Бензин,558,
